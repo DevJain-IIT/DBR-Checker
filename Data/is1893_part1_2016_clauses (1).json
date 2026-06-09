@@ -1,0 +1,413 @@
+{
+  "_meta": {
+    "code": "IS 1893 (Part 1) : 2016",
+    "amendment": "AMD2, reaffirmed 2021",
+    "coverage": "Clauses 6.1 to 7.2.2 and Tables 1-6 (from supplied screenshots, pp. 6-20)",
+    "encoding_note": "Numeric values, formulas and tables are verbatim/exact (factual, checker-readable). Prose rules are stated concisely, not reproduced verbatim from the standard.",
+    "schema_note": "Field names should be aligned to file_for_DBR.json if that corpus uses different keys (e.g. 'text' vs 'statement'). Object shape kept flat for easy merge.",
+    "not_yet_supplied": [
+      "7.2.3 + Table 8 (Importance Factor I for buildings)",
+      "7.2.6 + Table 9 (Response Reduction Factor R)",
+      "Table 7 ((VB)min minimum design base shear)",
+      "7.3.1 + Table 10 + 7.3.2 (seismic weight, imposed-load %)",
+      "7.6 (fundamental period Ta) / 7.7 (dynamic analysis) / 7.8 (torsion, eccentricity) / 7.11 (drift limit)",
+      "Annex E (zone by town)"
+    ]
+  },
+  "clauses": [
+    {
+      "id": "IS1893-1-2016_6.1.5",
+      "clause": "6.1.5",
+      "title": "Soil-Structure Interaction",
+      "statement": "SSI accounts for flexibility of the supporting soil-foundation system on structural response. It may be neglected for structures founded on rock or rock-like material at shallow depth.",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.1.6",
+      "clause": "6.1.6",
+      "title": "Equipment and Supported Systems",
+      "statement": "Equipment/systems supported at various floor levels experience different motions at their support points; floor response spectra may be needed for their design. Reference IS 1893 (Part 4).",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.1.7",
+      "clause": "6.1.7",
+      "title": "Additions to Existing Structures",
+      "statement": "A structurally independent addition is designed as a new structure. A structurally connected addition must make the whole conform to new-structure seismic requirements, unless: (1) the addition complies with new-structure requirements; (2) it does not increase seismic forces in any existing element by more than 5 percent (unless that element still complies); and (3) it does not decrease the seismic resistance of any existing element (unless reduced resistance still meets new-structure requirement).",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.1.8",
+      "clause": "6.1.8",
+      "title": "Change in Occupancy",
+      "statement": "If a change of occupancy re-classifies a structure to a higher importance factor I, the structure shall conform to new-structure seismic requirements for the higher I.",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.2",
+      "clause": "6.2",
+      "title": "Assumptions",
+      "statement": "Earthquake-resistant design assumes: (a) ground motions are complex, irregular and short-duration so steady-state resonance is not normally expected (exceptions exist for long-distance waves on tall structures on deep soft soils); (b) earthquake is not concurrent with high wind, max flood or max sea waves; (c) elastic modulus of materials taken as for static analysis unless more definite dynamic values are available (see IS 456, IS 800, IS 1343, IS 1905, IS 2974).",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.3.1",
+      "clause": "6.3.1",
+      "title": "Load Combinations",
+      "statement": "Load combinations from respective standards apply; in addition the earthquake combinations of this standard apply. Per 6.3.1.1, where non-earthquake combinations give larger demands, the design/ductile-detailing provisions of this standard, IS 13920 and IS 800 still apply.",
+      "combinations_horizontal": [
+        "1.2 [DL + IL +- (EL_X +- 0.3 EL_Y)]  and  1.2 [DL + IL +- (EL_Y +- 0.3 EL_X)]",
+        "1.5 [DL +- (EL_X +- 0.3 EL_Y)]  and  1.5 [DL +- (EL_Y +- 0.3 EL_X)]",
+        "0.9 DL +- 1.5 (EL_X +- 0.3 EL_Y)  and  0.9 DL +- 1.5 (EL_Y +- 0.3 EL_X)"
+      ],
+      "combinations_with_vertical": [
+        "1.2 [DL + IL +- (EL_X +- 0.3 EL_Y +- 0.3 EL_Z)]  and  1.2 [DL + IL +- (EL_Y +- 0.3 EL_X +- 0.3 EL_Z)]",
+        "1.5 [DL +- (EL_X +- 0.3 EL_Y +- 0.3 EL_Z)]  and  1.5 [DL +- (EL_Y +- 0.3 EL_X +- 0.3 EL_Z)]",
+        "0.9 DL +- 1.5 (EL_X +- 0.3 EL_Y +- 0.3 EL_Z)  and  0.9 DL +- 1.5 (EL_Y +- 0.3 EL_X +- 0.3 EL_Z)"
+      ],
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.3.2.1",
+      "clause": "6.3.2.1",
+      "title": "Design Horizontal Earthquake Load - Orthogonal Systems",
+      "statement": "When lateral-load-resisting elements are oriented along two mutually orthogonal directions, the structure is designed for full design earthquake load in one horizontal direction at a time (not both simultaneously).",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.3.2.2",
+      "clause": "6.3.2.2",
+      "title": "Design Horizontal Earthquake Load - Non-Orthogonal Systems",
+      "statement": "When lateral elements are NOT orthogonal (per 7.1 and Table 5(e)), design for full EQ load in one direction plus 30 percent in the other: (a) +-EL_X +- 0.3 EL_Y, and (b) +-0.3 EL_X +- EL_Y.",
+      "page": 7
+    },
+    {
+      "id": "IS1893-1-2016_6.3.3.1",
+      "clause": "6.3.3.1",
+      "title": "Design Vertical Earthquake Effects - When Required",
+      "statement": "Vertical earthquake shaking effects shall be considered when any apply: (a) Seismic Zone IV or V; (b) vertical or plan irregularities; (c) rested on soft soil; (d) bridges; (e) long spans; (f) large horizontal overhangs of members/sub-systems.",
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.3.2",
+      "clause": "6.3.3.2",
+      "title": "Design Vertical Force",
+      "statement": "When vertical shaking is considered, the design vertical force is computed for vertical ground motion as per 6.4.6.",
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.4.1",
+      "clause": "6.3.4.1",
+      "title": "Three-Directional Combination - 30 Percent Rule",
+      "statement": "When responses from three components are considered, when max response from one component occurs the other two are 30 percent each of their maximum. All sign combinations of (EL_X, EL_Y, EL_Z) considered: (a) +-EL_X +-0.3 EL_Y +-0.3 EL_Z; (b) +-EL_Y +-0.3 EL_Z +-0.3 EL_X; (c) +-EL_Z +-0.3 EL_X +-0.3 EL_Y. X,Y orthogonal plan; Z vertical.",
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.4.2",
+      "clause": "6.3.4.2",
+      "title": "Three-Directional Combination - SRSS Alternative",
+      "statement": "Alternative to 6.3.4.1: net response EL = sqrt(EL_X^2 + EL_Y^2 + EL_Z^2). Caution: loses sign of axial/shear/moment; can be grossly uneconomical.",
+      "formula": "EL = sqrt((EL_X)^2 + (EL_Y)^2 + (EL_Z)^2)",
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.5.1",
+      "clause": "6.3.5.1",
+      "title": "Increase in Net Pressure on Soils - Unfactored Loads",
+      "statement": "In foundation design, unfactored loads shall be combined in line with IS 2974 while assessing bearing pressure in soils.",
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.5.2",
+      "clause": "6.3.5.2",
+      "title": "Permissible Increase in Net Bearing Pressure",
+      "statement": "When earthquake forces are included, net bearing pressure may be increased per Table 1 by foundation type and soil type (Table 2). In soft soils no increase is permitted because settlements cannot be restricted by raising bearing pressure.",
+      "tables": ["IS1893-1-2016_Table1", "IS1893-1-2016_Table2"],
+      "page": 8
+    },
+    {
+      "id": "IS1893-1-2016_6.3.5.3",
+      "clause": "6.3.5.3",
+      "title": "Liquefaction Screening",
+      "statement": "For submerged loose sands and SP soils with corrected SPT N less than 15 in Zones III/IV/V (and less than 10 in Zone II), earthquake shaking may cause liquefaction or excessive total/differential settlement. Such sites should be avoided for important projects; otherwise investigate settlements and adopt compaction/stabilization to reach Note-4 N values, or use deep piles anchored below liquefiable layers. Marine/sensitive clays also need special treatment. Annex F gives a simplified liquefaction-potential method.",
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_Table1",
+      "clause": "Table 1",
+      "title": "Percentage Increase in Net Bearing Pressure and Skin Friction of Soils",
+      "ref_clause": "6.3.5.2",
+      "data": {
+        "Type A - Rock or hard soils": 50,
+        "Type B - Medium or stiff soils": 25,
+        "Type C - Soft soils": 0
+      },
+      "notes": {
+        "1": "Net bearing pressure determined per IS 6403 or IS 1888.",
+        "2": "Only corrected values of N shall be used.",
+        "3": "Total increase (seismic + any prior non-seismic increase) shall not exceed limits above.",
+        "4_min_corrected_N": {
+          "Zone III/IV/V": {"depth_le_5m": 15, "depth_ge_10m": 25, "remark": "linear interpolation for 5-10 m"},
+          "Zone II": {"depth_le_5m": 10, "depth_ge_10m": 20, "remark": "linear interpolation for 5-10 m"}
+        }
+      },
+      "page": 12
+    },
+    {
+      "id": "IS1893-1-2016_Table2",
+      "clause": "Table 2",
+      "title": "Classification of Soils for Net Bearing Pressure / Skin Friction Increase",
+      "ref_clause": "6.3.5.2",
+      "data": {
+        "Type A (Rock/hard)": "GW/SW with <5% fines; GW-SW mixtures; SP or SC with N>30; stiff-to-hard clays N>30 (corrected SPT).",
+        "Type B (Medium/stiff)": "SP poorly graded sands/with gravel, little/no fines, N 10-30; ML or low-compressibility CL clays, N 10-30.",
+        "Type C (Soft)": "All soft soils other than SP with N<10 (MI, MH, CI, CH, MI-MH/CI-CH, MI-CI, MH-CH).",
+        "Type D (Unstable)": "Unstable, collapsible, liquefiable soils - require site-specific study and special treatment (see 6.3.5.3)."
+      },
+      "page": 12
+    },
+    {
+      "id": "IS1893-1-2016_6.4.1",
+      "clause": "6.4.1",
+      "title": "Seismic Zones",
+      "statement": "For determining design seismic force the country is classified into four seismic zones (II, III, IV, V) as shown in Fig. 1.",
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_6.4.2",
+      "clause": "6.4.2",
+      "title": "Design Horizontal Seismic Coefficient (Ah)",
+      "formula": "A_h = ( (Z/2) * (Sa/g) ) / (R/I)",
+      "variables": {
+        "Z": "Seismic zone factor (Table 3)",
+        "I": "Importance factor (IS 1893 Parts 1-5); minimum if unspecified: 1.5 critical/lifeline, 1.2 business-continuity, 1.0 rest",
+        "R": "Response reduction factor (IS 1893 Parts 1-5)",
+        "Sa/g": "Design acceleration coefficient by soil type vs natural period T (Fig. 2 / branches below); default 5 percent damping"
+      },
+      "tables": ["IS1893-1-2016_Table3"],
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_Table3",
+      "clause": "Table 3",
+      "title": "Seismic Zone Factor Z",
+      "ref_clause": "6.4.2",
+      "data": {"II": 0.10, "III": 0.16, "IV": 0.24, "V": 0.36},
+      "page": 12
+    },
+    {
+      "id": "IS1893-1-2016_6.4.2_Sa_equivalent_static",
+      "clause": "6.4.2(a)",
+      "title": "Sa/g - Equivalent Static Method (Fig. 2a, 5% damping)",
+      "branches": {
+        "rocky_or_hard_soil": [
+          {"range": "0 < T < 0.40", "Sa/g": "2.5"},
+          {"range": "0.40 <= T < 4.00", "Sa/g": "1/T"},
+          {"range": "T > 4.00", "Sa/g": "0.25"}
+        ],
+        "medium_stiff_soil": [
+          {"range": "0 < T < 0.55", "Sa/g": "2.5"},
+          {"range": "0.55 <= T < 4.00", "Sa/g": "1.36/T"},
+          {"range": "T > 4.00", "Sa/g": "0.34"}
+        ],
+        "soft_soil": [
+          {"range": "0 < T < 0.67", "Sa/g": "2.5"},
+          {"range": "0.67 <= T < 4.00", "Sa/g": "1.67/T"},
+          {"range": "T > 4.00", "Sa/g": "0.42"}
+        ]
+      },
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_6.4.2_Sa_response_spectrum",
+      "clause": "6.4.2(b)",
+      "title": "Sa/g - Response Spectrum Method (Fig. 2b, 5% damping)",
+      "branches": {
+        "rocky_or_hard_soil": [
+          {"range": "T < 0.10", "Sa/g": "1 + 15T"},
+          {"range": "0.10 <= T < 0.40", "Sa/g": "2.5"},
+          {"range": "0.40 <= T < 4.00", "Sa/g": "1/T"},
+          {"range": "T > 4.00", "Sa/g": "0.25"}
+        ],
+        "medium_stiff_soil": [
+          {"range": "T < 0.10", "Sa/g": "1 + 15T"},
+          {"range": "0.10 <= T < 0.55", "Sa/g": "2.5"},
+          {"range": "0.55 <= T < 4.00", "Sa/g": "1.36/T"},
+          {"range": "T > 4.00", "Sa/g": "0.34"}
+        ],
+        "soft_soil": [
+          {"range": "T < 0.10", "Sa/g": "1 + 15T"},
+          {"range": "0.10 <= T < 0.67", "Sa/g": "2.5"},
+          {"range": "0.67 <= T < 4.00", "Sa/g": "1.67/T"},
+          {"range": "T > 4.00", "Sa/g": "0.42"}
+        ]
+      },
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_6.4.2.1",
+      "clause": "6.4.2.1",
+      "title": "Soil Type for Selecting Sa/g Spectrum",
+      "statement": "Soil type for (Sa/g) per Table 4: I Rock/hard, II Medium/stiff, III Soft. N taken as weighted average of corrected N over soil layers from existing ground level to 30 m below.",
+      "tables": ["IS1893-1-2016_Table4"],
+      "page": 11
+    },
+    {
+      "id": "IS1893-1-2016_Table4",
+      "clause": "Table 4",
+      "title": "Classification of Soils for the Design Earthquake Spectrum",
+      "ref_clause": "6.4.2.1",
+      "data": {
+        "I - Rock or Hard": "GW or SW with <5% fines; GW-SW with/without fines; SP or SC all with N>30; stiff-to-hard clays N>30.",
+        "II - Medium or Stiff": "SP poorly graded sands / with gravel, little/no fines, N 10-30; ML stiff-to-medium-stiff fine soils or low-compressibility CL clays N 10-30.",
+        "III - Soft": "All soft soils other than SP with N<10 (MI, MH, CI, CH, MI-MH/CI-CH, MI-CI, MH-CH)."
+      },
+      "page": 13
+    },
+    {
+      "id": "IS1893-1-2016_6.4.3",
+      "clause": "6.4.3",
+      "title": "Analysis Methods",
+      "statement": "Design earthquake load effects considered via (a) Equivalent Static Method, or (b) Dynamic Analysis Method (Response Spectrum / Modal Time History / Time History). Equivalent static may be used for regular structures with approximate natural period Ta less than 0.4 s.",
+      "page": 10
+    },
+    {
+      "id": "IS1893-1-2016_6.4.3.1",
+      "clause": "6.4.3.1",
+      "title": "Cracked Section / Moment of Inertia for Analysis",
+      "statement": "For structural analysis the moment of inertia shall be taken as: (a) RC and masonry structures - 70 percent of Igross for columns and 35 percent of Igross for beams; (b) steel structures - Igross of both beams and columns.",
+      "values": {"RC_columns": "0.70 Igross", "RC_beams": "0.35 Igross", "steel": "1.0 Igross"},
+      "page": 16
+    },
+    {
+      "id": "IS1893-1-2016_6.4.4",
+      "clause": "6.4.4",
+      "title": "Ah per Mode (Response Spectrum)",
+      "statement": "Where multiple modes are considered, Ah per 6.4.2 for each mode k is determined using that mode's natural period Tk.",
+      "page": 16
+    },
+    {
+      "id": "IS1893-1-2016_6.4.5",
+      "clause": "6.4.5",
+      "title": "Underground / Deep Structures",
+      "statement": "For underground structures and buildings whose base is at depth 30 m or more, Ah at base = half the 6.4.2 value (for inertia of masses at corresponding below-ground levels); above-ground portion uses unreduced Ah. Between ground level and 30 m depth, interpolate linearly between Ah and 0.5 Ah.",
+      "page": 16
+    },
+    {
+      "id": "IS1893-1-2016_6.4.6",
+      "clause": "6.4.6",
+      "title": "Design Vertical Seismic Acceleration (Av)",
+      "statement": "Design vertical acceleration spectral value Av. Sa/g based on natural period T of the first vertical mode, using 6.4.2.",
+      "formula_buildings": "A_v = ( (2/3) * (Z/2) * 2.5 ) / (R/I)   [IS 1893 Part 1]",
+      "formula_tanks": "A_v = ( (2/3) * (Z/2) * 2.5 ) / (R/I)   [liquid-retaining, Part 2]",
+      "formula_bridges": "A_v = ( (2/3) * (Z/2) * (Sa/g) ) / (R/I)   [Part 3]",
+      "formula_industrial": "A_v = ( (2/3) * (Z/2) * (Sa/g) ) / (R/I)   [Part 4]",
+      "page": 14
+    },
+    {
+      "id": "IS1893-1-2016_7",
+      "clause": "7",
+      "title": "Buildings - Desirable Attributes",
+      "statement": "Four desirable attributes of an earthquake-resistant building: (a) robust structural configuration; (b) at least a minimum elastic lateral stiffness; (c) at least a minimum lateral strength; (d) adequate ductility.",
+      "page": 16
+    },
+    {
+      "id": "IS1893-1-2016_7.1",
+      "clause": "7.1",
+      "title": "Regular and Irregular Configurations",
+      "statement": "Buildings with simple regular geometry and uniformly distributed mass/stiffness suffer less damage. A building is irregular if any condition in Tables 5 or 6 applies. Limits on irregularities for Zones III/IV/V are in Tables 5 and 6.",
+      "tables": ["IS1893-1-2016_Table5", "IS1893-1-2016_Table6"],
+      "page": 16
+    },
+    {
+      "id": "IS1893-1-2016_Table5",
+      "clause": "Table 5",
+      "title": "Definitions of Irregular Buildings - Plan Irregularities",
+      "ref_clause": "7.1",
+      "see_fig": "Fig. 3",
+      "items": {
+        "i_torsional": {
+          "definition": "Torsionally irregular when max horizontal displacement at one end of a floor > 1.5 x min horizontal displacement at the far end (same floor, same direction); OR fundamental torsional mode period exceeds those of the first two translational modes along each principal direction.",
+          "ratio_threshold": 1.5,
+          "limits": "Ratio 1.5-2.0: (a) revise config so torsional mode period < first two translational mode periods, then (b) 3D dynamic analysis. Ratio > 2.0: configuration shall be revised."
+        },
+        "ii_reentrant_corners": {
+          "definition": "Re-entrant corner when a plan projection > 15 percent of overall plan dimension in that direction.",
+          "projection_threshold": "> 15% of plan dimension",
+          "action": "3D dynamic analysis shall be adopted."
+        },
+        "iii_floor_slab_cutouts": {
+          "definition": "Discontinuity in in-plane stiffness when floor-slab cut-outs/openings > 50 percent of full floor-slab area.",
+          "opening_threshold": "> 50% of slab area",
+          "action": "Cut-out <=50%: slab rigid or flexible per location/size of openings. Cut-out >50%: slab taken as flexible."
+        },
+        "iv_out_of_plane_offsets": {
+          "definition": "Out-of-plane offset when structural walls/frames are moved out of plane in any storey along the height.",
+          "action": "Zone II: refer specialist literature. Zones III/IV/V: (1) lateral drift < 0.2 percent in storey with offset and storeys below; and (2) refer specialist literature to remove the irregularity."
+        },
+        "v_non_parallel_system": {
+          "definition": "Non-parallel system when vertical lateral-force-resisting systems are not oriented along the two principal orthogonal plan axes.",
+          "action": "Analyze for load combinations of 6.3.2.2 or 6.3.4.1."
+        }
+      },
+      "page": 14
+    },
+    {
+      "id": "IS1893-1-2016_Table6",
+      "clause": "Table 6",
+      "title": "Definitions of Irregular Buildings - Vertical Irregularities",
+      "ref_clause": "7.1",
+      "see_fig": "Fig. 4",
+      "items": {
+        "i_stiffness_soft_storey": {
+          "definition": "Soft storey: a storey whose lateral stiffness is less than that of the storey above.",
+          "action": "Estimate structural plan density (SPD) when URM infills used. If SPD of masonry infills > 20 percent, model infills as equivalent diagonal struts (per 7.9); design RC members for the larger of bare-frame and URM-infill (3D) analysis. If designed considering URM infills, inter-storey drift limited to 0.2 percent in the stiffening storey and all storeys below."
+        },
+        "ii_mass_irregularity": {
+          "definition": "Mass irregularity when seismic weight (per 7.7) of any floor > 150 percent of that of floors below.",
+          "threshold": "> 150% of adjacent floor seismic weight",
+          "action": "Zones III/IV/V: estimate earthquake effects by Dynamic Analysis Method (per 7.7)."
+        },
+        "iii_vertical_geometric": {
+          "definition": "Vertical geometric irregularity when horizontal dimension of the lateral-force-resisting system in any storey > 125 percent of the storey below.",
+          "threshold": "> 125% of storey-below horizontal dimension",
+          "action": "Zones III/IV/V: Dynamic Analysis Method (per 7.7)."
+        },
+        "iv_in_plane_discontinuity": {
+          "definition": "In-plane discontinuity when in-plane offset of lateral elements > 20 percent of the plan length of those elements.",
+          "threshold": "> 20% of element plan length",
+          "action": "Zone II: lateral drift limited to 0.2 percent of building height. Zones III/IV/V: buildings with in-plane discontinuity NOT permitted."
+        },
+        "v_strength_weak_storey": {
+          "definition": "Weak storey: a storey whose lateral strength is less than that of the storey above.",
+          "action": "Zones III/IV/V: design so building safety is not jeopardized; provisions of 7.10 shall be followed."
+        },
+        "vi_floating_stub_columns": {
+          "definition": "Floating/stub columns likely cause concentrated damage.",
+          "action": "Undesirable; prohibited if part of or supporting the primary lateral load resisting system."
+        },
+        "vii_irregular_modes": {
+          "definition": "Irregular modes of oscillation in a principal plan direction when: (a) first three modes contribute < 65 percent mass participation in each principal direction, AND (b) fundamental lateral periods in the two principal directions are within 10 percent of the larger.",
+          "action": "Zones II/III: ensure first three modes together contribute >= 65 percent mass in each direction. Zones IV/V: ensure (1) first three modes >= 65 percent mass each direction, and (2) the two fundamental periods differ by at least 10 percent of the larger value."
+        }
+      },
+      "page": 18
+    },
+    {
+      "id": "IS1893-1-2016_7.2.1",
+      "clause": "7.2.1",
+      "title": "Design Lateral Force (Base Shear)",
+      "formula": "V_B = A_h * W",
+      "statement": "Buildings designed for design lateral force VB = Ah W, with Ah per 6.4.2 and W (seismic weight) per 7.4.",
+      "page": 19
+    },
+    {
+      "id": "IS1893-1-2016_7.2.2",
+      "clause": "7.2.2",
+      "title": "Minimum Design Lateral Force",
+      "statement": "Regardless of design earthquake force per 7.3.1, buildings shall have lateral-load-resisting systems capable of resisting a horizontal force not less than (VB)min given in Table 7.",
+      "tables_pending": ["Table 7 ((VB)min) - not yet supplied"],
+      "page": 19
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "purpose": "Powers D2 (code-list currency). For each code a DBR cites, D2 checks the edition is current and not superseded/withdrawn. Editions confirmed from this session's uploads/searches and the user's open-file tabs (e.g. 456 Amd 5, 269 reaff/Amd 2023, 1904:2021, 875-5 reaff 2023).",
+    "usage": "Match the DBR's cited code+year against 'current_edition'. If it matches a 'superseded' or 'withdrawn' key, FLAW and emit the redirect. verify_against_pdf flags a couple of editions worth re-confirming before locking.",
+    "as_of": "2026-06"
+  },
+  "current_editions": {
+    "IS 456": {"title": "Plain and Reinforced Concrete - Code of Practice", "edition": "2000", "amendments": "up to Amd 5", "feeds": ["D3","D4","D11","D14","D20","D23","D24"]},
+    "IS 13920": {"title": "Ductile Design and Detailing of RC Structures subjected to Seismic Forces", "edition": "2016", "amendments": "Amd 1, Amd 2", "feeds": ["D5","D17","D23"]},
+    "IS 1893 (Part 1)": {"title": "Criteria for Earthquake Resistant Design of Structures - General Provisions and Buildings", "edition": "2016", "amendments": "Amd 1:2017, Amd 2:2020", "feeds": ["D7","D8","D10","D11","D12","D17","D18","D19"]},
+    "IS 875 (Part 1)": {"title": "Design Loads (other than earthquake) - Dead Loads", "edition": "1987", "amendments": "reaffirmed", "feeds": ["D14"]},
+    "IS 875 (Part 2)": {"title": "Design Loads - Imposed Loads", "edition": "1987", "amendments": "reaffirmed", "feeds": ["D10","D14"]},
+    "IS 875 (Part 3)": {"title": "Design Loads - Wind Loads", "edition": "2015", "amendments": "with Amd", "feeds": ["D13","D19","D21"]},
+    "IS 875 (Part 4)": {"title": "Design Loads - Snow Loads", "edition": "1987", "amendments": "reaffirmed", "feeds": ["D14"]},
+    "IS 875 (Part 5)": {"title": "Design Loads - Special Loads and Load Combinations", "edition": "1987", "amendments": "reaffirmed 2023", "feeds": ["D14","D20"]},
+    "IS 16700": {"title": "Criteria for Structural Safety of Tall Concrete Buildings", "edition": "2023", "amendments": "First Revision (supersedes 2017)", "feeds": ["D4","D8","D9","D11","D15","D16","D17","D18","D20","D21","D22"]},
+    "IS 269": {"title": "Ordinary Portland Cement - Specification", "edition": "2015", "amendments": "6th Revision, Amd 1:2023", "feeds": ["D6"]},
+    "IS 1489 (Part 1)": {"title": "Portland Pozzolana Cement - Fly Ash Based - Specification", "edition": "2015", "amendments": "4th Revision, Amd 1:2018", "feeds": ["D6"], "verify_against_pdf": true, "verify_note": "Some indexes list a 2023 revision; confirm current edition."},
+    "IS 455": {"title": "Portland Slag Cement - Specification", "edition": "2015", "feeds": ["D6"]},
+    "IS 12330": {"title": "Sulphate Resisting Portland Cement - Specification", "edition": "1988", "feeds": ["D6"]},
+    "IS 1786": {"title": "High Strength Deformed Steel Bars and Wires for Concrete Reinforcement", "edition": "2008", "amendments": "reaffirmed, with amendments", "feeds": ["D5"]},
+    "IS 3812 (Part 1)": {"title": "Pulverized Fuel Ash (Fly Ash) for Use as Pozzolana", "edition": "2003", "feeds": ["D6"]},
+    "IS 1904": {"title": "Design and Construction of Foundations in Soils - General Requirements", "edition": "2021", "feeds": ["D15"]},
+    "IS 1892": {"title": "Code of Practice for Site Investigations for Foundations", "edition": "2021", "feeds": ["D15"], "verify_against_pdf": true, "verify_note": "Confirm 1979 vs recent revision."},
+    "IS 2911": {"title": "Design and Construction of Pile Foundations (Parts 1-4)", "edition": "2010 (various parts)", "feeds": ["D15"]},
+    "IS 2950 (Part 1)": {"title": "Design and Construction of Raft Foundations", "edition": "1981", "feeds": ["D15"]},
+    "IS 12070": {"title": "Design and Construction of Shallow Foundations on Rocks", "edition": "1987", "feeds": ["D15"]},
+    "IS 10262": {"title": "Concrete Mix Proportioning - Guidelines", "edition": "2019", "feeds": ["D4"]},
+    "NBC 2016": {"title": "National Building Code of India, Part 4 Fire and Life Safety", "edition": "2016", "feeds": ["D23","D25"]}
+  },
+  "superseded": {
+    "IS 16700:2017": {"redirect": "IS 16700:2023", "reason": "superseded by First Revision"},
+    "IS 1893:2002": {"redirect": "IS 1893 (Part 1):2016", "reason": "superseded"},
+    "IS 1893:1984": {"redirect": "IS 1893 (Part 1):2016", "reason": "superseded (note: IS 875-5:1987 still references IS 1893-1984 in its own text)"},
+    "IS 875:1964": {"redirect": "IS 875 (Parts 1-5):1987/2015", "reason": "superseded"}
+  },
+  "withdrawn": {
+    "IS 8112": {"was": "OPC 43 grade specification", "redirect": "IS 269:2015", "reason": "merged into IS 269:2015, withdrawn"},
+    "IS 12269": {"was": "OPC 53 grade specification", "redirect": "IS 269:2015", "reason": "merged into IS 269:2015, withdrawn"}
+  }
+}

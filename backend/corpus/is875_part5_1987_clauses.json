@@ -1,0 +1,195 @@
+{
+  "_meta": {
+    "source": "IS 875 (Part 5):1987 - Code of practice for design loads (other than earthquake) for buildings and structures, Part 5 Special loads and load combinations. Pages supplied: 5-9 (Scope, Temperature Effects, Hydrostatic & Soil Pressure, Fatigue).",
+    "purpose": "Closes the temperature side of D20. Supplies Clause 2 (Temperature Effects) and a city -> design max/min temperature lookup derived from Fig 1 (highest maximum) and Fig 2 (lowest minimum).",
+    "extraction_note": "The supplied pages are scanned and OCR is heavily garbled, but the clause structure and figure legends are legible. Clause prose below is transcribed/reconstructed and the map-derived temperatures are READ-OFF APPROXIMATIONS of the isopleths, all flagged verify_against_pdf: true. Fig 1 and Fig 2 legends state the maps are 'based on data up to 1958 supplied by India Meteorological Department' - i.e. frozen at that vintage by design; the compliance value is the map reading, not a modern temperature.",
+    "delta_T_source_decision": "BMTPC Vulnerability Atlas does NOT contain temperature data (it covers earthquake/wind/flood/landslide/thunderstorm only), so it cannot supply delta_T. The cited authority remains IS 875-5 Fig 1/Fig 2. An optional advisory field (imd_modern) is left for a future IMD/ICRISAT district-level cross-check, but it must NOT replace the map value for compliance.",
+    "open_gaps": [
+      "RESOLVED: load-combinations clause now captured (Cl 8.1, cases a-n incl. temperature cases e/h/j/k/m/n).",
+      "Coefficient of thermal expansion alpha still from IS 456 (11e-6/degC); joint spacing >45 m from IS 456 Cl 27."
+    ],
+    "schema_keys": [
+      "id",
+      "clause",
+      "title",
+      "statement",
+      "tables (opt)",
+      "page",
+      "verify_against_pdf (opt)"
+    ]
+  },
+  "clauses": [
+    {
+      "id": "IS875-5-1987_2.1",
+      "clause": "2.1",
+      "title": "Temperature Effects - General",
+      "statement": "Expansion and contraction due to changes in temperature of the materials of a structure shall be considered in design. Provision shall be made either to relieve the stress by provision of expansion/contraction joints in accordance with IS 3414-1968, or to design the structure to carry the additional stresses due to temperature effects as appropriate to the problem.",
+      "page": 5
+    },
+    {
+      "id": "IS875-5-1987_2.1.1",
+      "clause": "2.1.1",
+      "title": "Temperature range",
+      "statement": "The temperature range varies for different regions and under different diurnal and seasonal conditions. The absolute maximum and minimum temperatures which may be expected in different localities are indicated in Fig. 1 and Fig. 2 respectively. These figures may be used for guidance in assessing the maximum variations of temperature.",
+      "tables": [
+        "IS875-5_temp_map_lookup"
+      ],
+      "page": 5
+    },
+    {
+      "id": "IS875-5-1987_2.1.2",
+      "clause": "2.1.2",
+      "title": "Air temperature vs material temperature",
+      "statement": "The temperatures indicated in Fig. 1 and Fig. 2 are the air temperatures in the shade. The range of variation in temperature of the building materials may be appreciably greater or less than the variation of air temperature, and is influenced by the condition of exposure and the rate at which the materials absorb or radiate heat. This difference between material and air temperature variation should be given due consideration.",
+      "page": 5
+    },
+    {
+      "id": "IS875-5-1987_2.1.3",
+      "clause": "2.1.3",
+      "title": "Structural analysis inputs",
+      "statement": "The structural analysis must take into account: (a) change of the mean (through-the-section) temperature in relation to the initial temperature (t_s), and (b) the temperature gradient through the section. For single-leaf structural elements the distribution of temperature through the section may be assumed linear (2.1.3.1). Changes of mean temperature relative to the initial value are liable to differ between elements (e.g. external walls vs internal elements). For portions below ground level the temperature variation is generally insignificant (Note 1 to 2.1.3.2).",
+      "page": 5
+    },
+    {
+      "id": "IS875-5_temp_map_lookup",
+      "clause": "Fig. 1 and Fig. 2",
+      "title": "City -> design maximum / minimum air temperature (read off isopleth maps)",
+      "ref_clause": "2.1.1",
+      "units": "degC (air temperature in shade)",
+      "verify_against_pdf": true,
+      "verify_note": "ALL values are approximate isopleth readings of the scanned Fig 1 (highest maximum) and Fig 2 (lowest minimum) maps and MUST be confirmed against clean renders before use in PASS/FLAW logic. For any city not listed, read the bracketing isopleths directly. delta_T_design is NOT a code-given number: per Cl 2.1.3 design uses mean-temperature change relative to construction temperature plus a gradient, so a checker should compare the DBR's stated max/min (and the delta it adopts) against these map bounds rather than enforce a single delta.",
+      "cities": {
+        "Delhi": {
+          "max": 43.5,
+          "min": 4.0
+        },
+        "Ghaziabad": {
+          "max": 43.5,
+          "min": 4.0,
+          "note": "Sample-DBR location; taken as Delhi NCR isopleth"
+        },
+        "Mumbai": {
+          "max": 40.0,
+          "min": 16.0
+        },
+        "Chennai": {
+          "max": 45.0,
+          "min": 17.5
+        },
+        "Kolkata": {
+          "max": 45.0,
+          "min": 7.5
+        },
+        "Bengaluru": {
+          "max": 37.5,
+          "min": 12.5
+        },
+        "Hyderabad": {
+          "max": 45.0,
+          "min": 10.0
+        },
+        "Ahmedabad": {
+          "max": 47.5,
+          "min": 7.5
+        },
+        "Jaipur": {
+          "max": 47.5,
+          "min": 5.0
+        },
+        "Lucknow": {
+          "max": 45.0,
+          "min": 5.0
+        },
+        "Nagpur": {
+          "max": 47.5,
+          "min": 7.5
+        },
+        "Bhopal": {
+          "max": 45.0,
+          "min": 7.5
+        },
+        "Pune": {
+          "max": 40.0,
+          "min": 7.5
+        },
+        "Srinagar": {
+          "max": 35.0,
+          "min": -7.5
+        },
+        "Amritsar": {
+          "max": 47.5,
+          "min": -2.5
+        },
+        "Patna": {
+          "max": 45.0,
+          "min": 5.0
+        }
+      },
+      "imd_modern": {
+        "_note": "Reserved for an optional future IMD/ICRISAT district-level cross-check (advisory only, never the compliance value). Empty by design."
+      },
+      "page": "6-7"
+    },
+    {
+      "id": "IS875-5-1987_3",
+      "clause": "3",
+      "title": "Hydrostatic and Soil Pressure",
+      "statement": "3.1 For structures/parts below ground (retaining walls, basement walls), pressure from soil and/or water shall be accounted for on established theories, with allowance for surcharge from stationary/moving loads; where soil is below the free water surface, lateral earth pressure uses buoyancy-reduced soil weight plus full hydrostatic pressure. 3.1.1 All foundation slabs/footings subject to water pressure shall be designed to resist a uniformly distributed uplift equal to the full hydrostatic pressure; overturning checks under submerged condition use the buoyant weight of the foundation. 3.2 For lateral soil pressure on column-like members (pillars) in sloping soils, effective width = 3.0x actual (width < 0.5 m), 3.0 to 2.0x (0.5-1 m), 2.0x (> 1 m); relieving pressure in front of the member generally not taken into account.",
+      "feeds_check": "D15 (uplift/buoyancy)",
+      "page": 8
+    },
+    {
+      "id": "IS875-5-1987_8",
+      "clause": "8",
+      "title": "Load Combinations",
+      "statement": "8.0 A judicious combination of loads (Parts 1 to 4 and earthquake) shall consider their probability of acting together and severity of stresses/deformations. 8.1 Loads should be combined per the relevant design codes; in the absence of such recommendations, the following combinations (whichever produces the most unfavourable effect) may be adopted as general guidance. Simultaneous occurrence of maximum wind, earthquake, imposed and snow loads is not likely.",
+      "tables": [
+        "IS875-5_load_combinations_list"
+      ],
+      "feeds_check": "D14",
+      "page": 16
+    },
+    {
+      "id": "IS875-5_load_combinations_list",
+      "clause": "8.1 (lettered list a-n; NO table)",
+      "title": "Load Combination Cases",
+      "ref_clause": "8.1",
+      "where": "DL = dead load, IL = imposed load, WL = wind load, EL = earthquake load, TL = temperature load",
+      "combinations": {
+        "a": "DL",
+        "b": "DL + IL",
+        "c": "DL + WL",
+        "d": "DL + EL",
+        "e": "DL + TL",
+        "f": "DL + IL + WL",
+        "g": "DL + IL + EL",
+        "h": "DL + IL + TL",
+        "j": "DL + WL + TL",
+        "k": "DL + EL + TL",
+        "m": "DL + IL + WL + TL",
+        "n": "DL + IL + EL + TL"
+      },
+      "temperature_cases": [
+        "e",
+        "h",
+        "j",
+        "k",
+        "m",
+        "n"
+      ],
+      "notes": [
+        "Note 1 - When snow load is present on roofs, replace imposed load (IL) by snow load.",
+        "Note 2 - Follow relevant design codes for permissible stresses (working stress) and partial safety factors (limit state) for each combination.",
+        "Note 3 - When IL is combined with EL, use the appropriate part of imposed load per IS 1893 for both evaluating earthquake effect and the combined effect.",
+        "Note 4 - Stability against overturning: restoring moment >= 1.2x max overturning moment due to DL + 1.4x due to IL; where DL provides restoring moment use only 0.9 DL; restoring moments due to IL ignored.",
+        "Note 5 - Factor against sliding >= 1.4 under the most adverse combination; only 0.9 DL taken into account.",
+        "Note 6 - Where bearing pressure on soil due to wind alone < 25% of that due to DL+IL it may be neglected; where it exceeds 25%, proportion foundation so combined DL+IL+WL pressure does not exceed allowable by more than 25%; with earthquake, increase per IS 1893.",
+        "Note 7 - Other loads and accidental load combinations not listed are dealt with appropriately.",
+        "Note 8 - Crane load combinations are covered under Part 2 (see 6.4 of Part 2)."
+      ],
+      "note_on_format": "This is a lettered list within Clause 8.1, NOT a numbered table. Cite as 'IS 875 (Part 5):1987, Cl 8.1'.",
+      "feeds_check": "D14",
+      "page": 16
+    }
+  ]
+}

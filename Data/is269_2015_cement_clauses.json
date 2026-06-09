@@ -1,0 +1,106 @@
+{
+  "_meta": {
+    "source": "IS 269:2015 Ordinary Portland Cement - Specification (Sixth Revision), Amd 1:2023. Pages supplied as scrambled-font PDF; the TABLES rendered cleanly and are transcribed verbatim. Plus a cement-family registry for D6/D2.",
+    "feeds_check": "D6 (cement spec) and D2 (editions / withdrawn codes).",
+    "extraction_note": "IS 269 prose was BIS-scrambled, but Table 1 (performance improvers), Table 2 (chemical), and Table 3 (physical) came through readable and are transcribed without verify flags. IS 1489 Part 1 entries are from web search (no clean upload yet) and are flagged verify_against_pdf:true.",
+    "key_finding_withdrawn_codes": "IS 269:2015 absorbed and SUPERSEDED IS 8112:2013 (OPC 43) and IS 12269:2013 (OPC 53), both now WITHDRAWN. A DBR citing IS 8112 or IS 12269 for 43/53-grade OPC is citing a dead code -> D6/D2 FLAW, redirect to IS 269:2015.",
+    "schema_keys": ["id","clause","title","statement","tables (opt)","feeds_check","page","verify_against_pdf (opt)"]
+  },
+  "clauses": [
+    {
+      "id": "IS269-2015_4", "clause": "4", "title": "Classification of OPC",
+      "statement": "Ordinary Portland Cement is classified and designated as: OPC 33, OPC 43, OPC 43-S (sleeper grade), OPC 53, OPC 53-S (sleeper grade). The numeral is the minimum 28-day compressive strength in MPa. (Grades 43 and 53 were previously in IS 8112 and IS 12269, now withdrawn and merged here.)",
+      "feeds_check": "D6", "page": 3
+    },
+    {
+      "id": "IS269-2015_5", "clause": "5", "title": "Manufacture / Performance Improvers",
+      "statement": "Performance improvers may be added at the grinding stage; per Cl 5.1.1 each is limited per Table 1 and the total addition (inclusive of up to 1.0 percent grinding additives) shall not exceed 5 percent.",
+      "tables": ["IS269_Table1_performance_improvers"],
+      "feeds_check": "D6", "page": 2
+    },
+    {
+      "id": "IS269-2015_6", "clause": "6", "title": "Chemical Requirements",
+      "statement": "When tested per IS 4032, OPC shall comply with the chemical requirements of Table 2.",
+      "tables": ["IS269_Table2_chemical"],
+      "feeds_check": "D6", "page": 3
+    },
+    {
+      "id": "IS269-2015_7", "clause": "7", "title": "Physical Requirements",
+      "statement": "OPC shall comply with the physical requirements of Table 3 (fineness, soundness, setting time, compressive strength), tested per the IS 4031 parts indicated.",
+      "tables": ["IS269_Table3_physical"],
+      "feeds_check": "D6", "page": 4
+    },
+    {
+      "id": "IS269_Table1_performance_improvers", "clause": "Table 1", "title": "Performance Improvers (max % addition by mass)", "ref_clause": "5",
+      "note": "Each improver max 5 percent; total addition (incl. <=1% grinding additive) <= 5 percent.",
+      "rows": {
+        "fly_ash": {"max_pct": 5, "conform": "IS 3812 (Part 1)"},
+        "granulated_slag": {"max_pct": 5, "conform": "IS 12089"},
+        "silica_fume": {"max_pct": 5, "conform": "IS 15388"},
+        "limestone": {"max_pct": 5, "conform": "CaCO3 >= 75% (CaO basis) per IS 1760 (Part 3)"},
+        "rice_husk_ash": {"max_pct": 5, "conform": "reactive silica >= 80%, pozzolanic activity index >= 90%, LOI <= 5.0%"},
+        "metakaolin": {"max_pct": 5, "conform": "IS 16354"},
+        "copper_slag": {"max_pct": 5, "conform": "SiO2 20-40%, Fe2O3 40-70%, SO3 <=1%, glass >=25%"},
+        "steel_slag": {"max_pct": 5, "conform": "CaO 40-55%, SiO2 10-20%, MgO 1-5%, glass >=25%"},
+        "lead_zinc_slag": {"max_pct": 5, "conform": "ZnO 5-15%, PbO 0.5-2%, Fe2O3 30-40%, glass >=25%"},
+        "spent_FCC_catalyst": {"max_pct": 5, "conform": "IS 1344"}
+      },
+      "page": 2
+    },
+    {
+      "id": "IS269_Table2_chemical", "clause": "Table 2", "title": "Chemical Requirements", "ref_clause": "6",
+      "columns": ["OPC 33", "OPC 43", "OPC 43-S", "OPC 53", "OPC 53-S"],
+      "rows": {
+        "lime_saturation_factor_LSF": ["0.66-1.02", "0.66-1.02", "0.80-1.02", "0.80-1.02", "0.80-1.02"],
+        "alumina_to_iron_oxide_ratio_min": [0.66, 0.66, 0.66, 0.66, 0.66],
+        "insoluble_residue_pct_max": [5.0, 5.0, 2.0, 5.0, 2.0],
+        "magnesia_pct_max": [6.0, 6.0, 5.0, 6.0, 5.0],
+        "total_SO3_pct_max": [3.5, 3.5, 3.5, 3.5, 3.5],
+        "loss_on_ignition_pct_max": [5.0, 5.0, 4.0, 4.0, 4.0],
+        "chloride_pct_max": ["0.1 (0.05 prestressed)", "0.1 (0.05 prestressed)", "0.1 (0.05 prestressed)", "0.1 (0.05 prestressed)", "0.1 (0.05 prestressed)"],
+        "alkali_content": ["see Note", "see Note", "see Note", "see Note", "see Note"]
+      },
+      "page": 3
+    },
+    {
+      "id": "IS269_Table3_physical", "clause": "Table 3", "title": "Physical Requirements", "ref_clause": "7",
+      "columns": ["OPC 33", "OPC 43", "OPC 43-S", "OPC 53", "OPC 53-S"],
+      "rows": {
+        "fineness_m2_per_kg_min": [225, 225, 370, 225, 370],
+        "soundness_le_chatelier_mm_max": [10, 10, 5, 10, 5],
+        "soundness_autoclave_pct_max": [0.8, 0.8, 0.8, 0.8, 0.8],
+        "setting_time_initial_min_min": [30, 30, 60, 30, 60],
+        "setting_time_final_min_max": [600, 600, 600, 600, 600],
+        "comp_strength_72h_MPa_min": [16, 23, 23, 27, 27],
+        "comp_strength_168h_MPa_min": [22, 33, 37.5, 37, 37.5],
+        "comp_strength_672h_28d_MPa_min": [33, 43, 43, 53, 53],
+        "comp_strength_672h_28d_MPa_max": [48, 58, "-", "-", "-"]
+      },
+      "test_methods": {"fineness": "IS 4031 (Part 2)", "soundness": "IS 4031 (Part 3)", "setting_time": "IS 4031 (Part 5)", "compressive_strength": "IS 4031 (Part 6)", "transverse_strength_optional": "IS 4031 (Part 8)"},
+      "page": 4
+    },
+    {
+      "id": "IS1489-1_2015_chemical", "clause": "IS 1489 (Part 1) Cl 6 / Table 1", "title": "Portland Pozzolana Cement (fly-ash) - Chemical Requirements",
+      "verify_against_pdf": true,
+      "statement": "PPC fly-ash based (IS 1489 Part 1:2015, Amd 1:2018). Chemical requirements (Table 1, Clause 6): insoluble residue per fly-ash-content formula; magnesia <= 6%; total SO3 <= 3%; LOI <= 5%; chloride <= 0.1% (0.05% prestressed); alkali per Note. Physical requirements in Table 2 (Clause 7) - fineness/soundness/setting time/compressive strength behave to a 33-grade-equivalent minimum (28-day >= 33 MPa). Values from web search; confirm against a clean IS 1489 Part 1 upload.",
+      "feeds_check": "D6", "page": null
+    },
+    {
+      "id": "cement_family_registry", "clause": "registry (derived)", "title": "Valid Cement Types and Withdrawn Codes",
+      "statement": "Reference registry for D6 (valid cement types a DBR may specify) and D2 (currency / withdrawn codes).",
+      "valid_types": {
+        "OPC": {"standard": "IS 269:2015", "grades": ["33", "43", "43-S", "53", "53-S"]},
+        "PPC_fly_ash": {"standard": "IS 1489 (Part 1):2015"},
+        "PPC_calcined_clay": {"standard": "IS 1489 (Part 2)"},
+        "PSC_portland_slag": {"standard": "IS 455"},
+        "SRPC_sulphate_resisting": {"standard": "IS 12330", "use": "aggressive/sulphate soils (with IS 456 Table 4 exposure)"}
+      },
+      "input_material_specs": {"fly_ash": "IS 3812 (Part 1)", "ggbs_slag": "IS 12089 / IS 16714", "silica_fume": "IS 15388", "test_methods": "IS 4031 (physical), IS 4032 (chemical)"},
+      "withdrawn_redirect": {
+        "IS 8112": "OPC 43 grade - WITHDRAWN, now IS 269:2015",
+        "IS 12269": "OPC 53 grade - WITHDRAWN, now IS 269:2015"
+      },
+      "feeds_check": "D6, D2", "page": null
+    }
+  ]
+}

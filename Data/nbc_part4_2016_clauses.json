@@ -1,0 +1,240 @@
+{
+  "_meta": {
+    "source": "National Building Code of India 2016, Part 4 Fire and Life Safety (pages 12-53 of Part 4).",
+    "purpose": "Closes D25 (construction-type classification) and supplies the NBC half of D23 (required fire-resistance rating by structural element and construction type, plus occupancy applicability gates). Pairs with IS 456 Fig 1 / Table 16A (member dimension + cover for a given rating) already in file_for_DBR.json, which supply the *achieved* rating that NBC Table 1 sets the *required* target for.",
+    "extraction_note": "This NBC PDF was supplied as clean, machine-readable text (NOT the scrambled-BIS-font case). Occupancy groups, construction types, and Table 1 are transcribed directly and need no verify flag. The only assembled (not single-table) item is the occupancy -> construction-type linkage, which NBC builds indirectly via Fire Zone; that derivation is documented in NBC_3.2_zone_to_type.",
+    "edition_anchor_correction": "The prior methodology cited 'Table 2, with Clauses 3 & 4' for construction-type. In THIS edition the construction-type-defining table is Table 1 (Fire Resistance Ratings of Structural and Non-Structural Elements) under Clauses 3.3.1/3.3.2; Table 2 is the FAR table. Citations updated accordingly.",
+    "open_gaps": [
+      "NBC gives required rating by construction TYPE (Table 1), not directly by occupancy group. Occupancy -> minimum required Type is assembled via Fire Zone (3.2.2.2 + 3.2.6).",
+      "Occupancy -> max permissible height limits live in the NOTES to Table 7 (firefighting installations), captured here as NBC_height_limits_by_occupancy."
+    ],
+    "schema_keys": ["id", "clause", "title", "statement", "tables (opt)", "page", "verify_against_pdf (opt)"]
+  },
+  "clauses": [
+    {
+      "id": "NBC-4-2016_3.1.1",
+      "clause": "3.1.1",
+      "title": "Classification of Buildings Based on Occupancy - General",
+      "statement": "All buildings, existing or hereafter erected, shall be classified by use/character of occupancy into one of nine groups: A Residential, B Educational, C Institutional, D Assembly, E Business, F Mercantile, G Industrial, H Storage, J Hazardous. A minor occupancy incidental to a main occupancy is classified under the main occupancy (3.1.1.1). Where two or more occupancies intermingle in one building it is treated as mixed occupancy (3.1.1.2 / 3.1.11) and governed by the most restrictive provisions applicable.",
+      "page": 13
+    },
+    {
+      "id": "NBC-4-2016_3.1_occupancy_groups",
+      "clause": "3.1.2-3.1.10",
+      "title": "Occupancy Groups and Subdivisions (A-J)",
+      "statement": "Full occupancy classification used as the input key for D25 and for the applicability gates of D23.",
+      "tables": ["NBC_occupancy_groups"],
+      "page": 13
+    },
+    {
+      "id": "NBC_occupancy_groups",
+      "clause": "Table (derived from 3.1.2-3.1.10)",
+      "title": "Occupancy Group / Subdivision Reference",
+      "items": {
+        "A": {
+          "name": "Residential",
+          "subdivisions": {
+            "A-1": "Lodging and rooming houses (inns, clubs, motels, guest houses)",
+            "A-2": "One or two family private dwellings (sleeping accommodation up to 20 persons)",
+            "A-3": "Dormitories (group sleeping, hostels, barracks)",
+            "A-4": "Apartment houses (three or more families, independent cooking; apartments, mansions, chawls)",
+            "A-5": "Hotels up to Four Star category",
+            "A-6": "Starred hotels (Five Star and above)"
+          }
+        },
+        "B": {
+          "name": "Educational",
+          "subdivisions": {
+            "B-1": "Schools up to senior secondary level (>=20 students)",
+            "B-2": "All others / training institutions (>=100 students)"
+          }
+        },
+        "C": {
+          "name": "Institutional",
+          "subdivisions": {
+            "C-1": "Hospitals and sanatoria (incapable of self-preservation)",
+            "C-2": "Custodial institutions (homes for aged/infirm, convalescent, orphanages)",
+            "C-3": "Penal and mental institutions (jails, prisons, mental hospitals, reformatories)"
+          }
+        },
+        "D": {
+          "name": "Assembly",
+          "subdivisions": {
+            "D-1": "Stage + fixed seats for over 1000 persons",
+            "D-2": "Stage + fixed seats up to 1000 persons",
+            "D-3": "No permanent stage, accommodation for 300 or more, no permanent seating",
+            "D-4": "No permanent stage, accommodation for less than 300, no permanent seating",
+            "D-5": "All other (incl. temporary) at ground level: grandstands, stadia, amusement parks, tents",
+            "D-6": "Mixed assembly + mercantile (shopping malls with cinema/multiplex/food courts)",
+            "D-7": "Underground and elevated mass rapid transit system"
+          }
+        },
+        "E": {
+          "name": "Business",
+          "subdivisions": {
+            "E-1": "Offices, banks, professional establishments, post offices, police stations",
+            "E-2": "Laboratories, outpatient clinics, research establishments, libraries, test houses",
+            "E-3": "EDP centres, computer installations, IT parks, call centres",
+            "E-4": "Telephone exchanges",
+            "E-5": "Broadcasting/TV stations, air traffic control towers"
+          }
+        },
+        "F": {
+          "name": "Mercantile",
+          "subdivisions": {
+            "F-1": "Shops/stores/markets, covered area up to 500 m2",
+            "F-2": "Shops/stores/markets, covered area more than 500 m2",
+            "F-3": "Underground shopping centres"
+          }
+        },
+        "G": {
+          "name": "Industrial",
+          "subdivisions": {
+            "G-1": "Low hazard industries",
+            "G-2": "Moderate hazard industries",
+            "G-3": "High hazard industries"
+          }
+        },
+        "H": {
+          "name": "Storage",
+          "subdivisions": {
+            "H": "Storage/sheltering of goods, vehicles, animals (warehouses, cold storage, depots, garages, hangars, grain elevators)"
+          }
+        },
+        "J": {
+          "name": "Hazardous",
+          "subdivisions": {
+            "J": "Storage/handling/manufacture/processing of highly combustible or explosive materials, toxic/corrosive chemicals, explosive dusts"
+          }
+        }
+      },
+      "page": 13
+    },
+    {
+      "id": "NBC-4-2016_3.3.1",
+      "clause": "3.3.1",
+      "title": "Types of Construction (Type 1 to Type 4)",
+      "statement": "Fire resistance of a building/element is expressed in minutes against a specified fire load (kcal/m2) and fire intensity. For the Code, types of construction by fire resistance are classified into four categories: Type 1, Type 2, Type 3 and Type 4. The minimum fire-resistance ratings of structural and non-structural members for each type are given in Table 1. Non-combustible materials should be used; internal walls of staircase enclosures should be brickwork/RC/other with minimum 120 min rating.",
+      "tables": ["NBC_Table1_fire_resistance_ratings"],
+      "page": 18
+    },
+    {
+      "id": "NBC-4-2016_3.3.2",
+      "clause": "3.3.2",
+      "title": "Fire Resistance Rating Requirement",
+      "statement": "Each structural and/or non-structural element shall have the requisite fire-resistance rating per Table 1, validated and certified. In the absence of a validated/certified rating, guidance may be taken from Annex C. Load-bearing steel beams/columns of buildings with total covered area 500 m2 and above shall be protected against failure/collapse in fire (Annex C Tables 25/26).",
+      "page": 18
+    },
+    {
+      "id": "NBC_Table1_fire_resistance_ratings",
+      "clause": "Table 1",
+      "title": "Fire Resistance Ratings of Structural and Non-Structural Elements (minutes)",
+      "ref_clauses": ["3.3.1", "3.3.2"],
+      "units": "minutes",
+      "columns": ["Type 1", "Type 2", "Type 3", "Type 4"],
+      "rows": {
+        "exterior_walls_fire_sep_lt_3.7m": {
+          "bearing": [240, 120, 120, 60],
+          "non_bearing": [120, 90, 60, 60]
+        },
+        "exterior_walls_fire_sep_3.7m_to_lt_9m": {
+          "bearing": [240, 120, 120, 60],
+          "non_bearing": [90, 60, 60, 60]
+        },
+        "exterior_walls_fire_sep_ge_9m": {
+          "bearing": [240, 120, 120, 60],
+          "non_bearing": [60, 60, 60, 60]
+        },
+        "fire_separation_assemblies_fire_check_doors": [120, 120, 120, 120],
+        "fire_enclosures_of_exits": [120, 120, 120, 120],
+        "shafts_services_lift_hoistway_refuse_chutes": [120, 120, 120, 120],
+        "vertical_separation_adjacent_tenant_spaces": [60, 60, 60, 60],
+        "dwelling_unit_separation": {
+          "load_bearing": [120, 120, 60, 60],
+          "non_load_bearing": [60, 60, 30, 30]
+        },
+        "interior_bearing_walls_columns_beams_girders_trusses_framing": {
+          "supporting_more_than_one_floor": [240, 120, 120, 120],
+          "supporting_one_floor_only": [180, 90, 60, 60],
+          "supporting_a_roof_only": [180, 90, 60, 60]
+        },
+        "walls_supporting_structural_members": [180, 90, 60, 60],
+        "floor_construction": [120, 90, 60, 60],
+        "roof_construction": {
+          "le_5m_to_lowest_member": [120, 90, 60, 60],
+          "gt_5m_lt_6.7m_to_lowest_member": [60, 60, 60, 60],
+          "ge_6.7m_to_lowest_member": [0, 0, 0, 0]
+        }
+      },
+      "notes": [
+        "1 The ratings are required to achieve the respective type of construction unless otherwise specified in the respective clauses for different applications/use.",
+        "2 In case of lift bank, the partition wall (if any) need not be of the fire rating specified in this table."
+      ],
+      "page": 19
+    },
+    {
+      "id": "NBC-4-2016_3.2_zone_to_type",
+      "clause": "3.2.2.2 + 3.2.6",
+      "title": "Occupancy -> Fire Zone -> Permitted Construction Type (assembled linkage)",
+      "statement": "NBC does not give a single occupancy->construction-type table. It is assembled: occupancy maps to a Fire Zone (3.2.2.2), and each Fire Zone permits certain construction types for new buildings (3.2.6).",
+      "tables": ["NBC_zone_occupancy", "NBC_zone_permitted_types"],
+      "page": 17
+    },
+    {
+      "id": "NBC_zone_occupancy",
+      "clause": "3.2.2.2",
+      "title": "Fire Zone composition by occupancy",
+      "items": {
+        "Fire_Zone_1": "Group A (residential), B (educational), C (institutional), D (assembly), small business E-1, and F (mercantile)",
+        "Fire_Zone_2": "Business E-2 to E-5, and industrial G-1 and G-2 (except high-hazard G-3)",
+        "Fire_Zone_3": "High-hazard industrial G-3, storage H, and hazardous J"
+      },
+      "page": 17
+    },
+    {
+      "id": "NBC_zone_permitted_types",
+      "clause": "3.2.6",
+      "title": "Permitted construction types by Fire Zone (new buildings)",
+      "items": {
+        "Fire_Zone_1": ["Type 1", "Type 2", "Type 3", "Type 4"],
+        "Fire_Zone_2": ["Type 1", "Type 2", "Type 3"],
+        "Fire_Zone_3": ["Type 1", "Type 2"]
+      },
+      "page": 18
+    },
+    {
+      "id": "NBC_height_limits_by_occupancy",
+      "clause": "Table 7 Notes 3, 16, 18, 19, 20",
+      "title": "Maximum permissible building height by occupancy (applicability gate)",
+      "statement": "Occupancy-wise height ceilings drawn from the Notes to Table 7. Useful as a D23/D25 applicability gate and a sanity check on the DBR's stated occupancy vs height.",
+      "items": {
+        "A-1_A-2": "Not permitted above 15 m (Note 3)",
+        "B_C_D_F": "Not permitted above 30 m (Note 16)",
+        "G-1_G-2": "Not permitted above 18 m (Note 18)",
+        "G-3": "Not permitted above 15 m (Note 19)",
+        "H_J": "Not permitted above 15 m; MLCP not permitted above 45 m (Note 20)"
+      },
+      "page": 51
+    },
+    {
+      "id": "NBC_Table2_FAR",
+      "clause": "Table 2",
+      "title": "Comparative Floor Area Ratios for Occupancies (One public street >= 9 m wide)",
+      "ref_clause": "3.4.4.2",
+      "note": "Included for disambiguation only (the methodology's 'Table 2' reference). This is the FAR table, NOT the fire-resistance table. UL = Unlimited, NP = Not Permitted.",
+      "columns": ["Type 1", "Type 2", "Type 3", "Type 4"],
+      "rows": {
+        "Residential": ["UL", 2.0, 1.4, 1.0],
+        "Educational": ["UL", 2.0, 1.4, 1.0],
+        "Institutional": ["UL", 1.5, 1.0, 0.8],
+        "Assembly": ["UL", 1.0, 0.7, 0.5],
+        "Business": ["UL", 2.9, 2.3, 1.6],
+        "Mercantile": [8.0, 1.8, 1.4, 1.0],
+        "Industrial": [7.5, 1.9, 1.6, 1.3],
+        "Storage": [6.0, 1.5, 1.3, 1.0],
+        "Hazardous": [2.8, 1.1, 0.9, "NP"]
+      },
+      "page": 20
+    }
+  ]
+}

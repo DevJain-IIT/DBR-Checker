@@ -1,0 +1,1421 @@
+{
+  "_meta": {
+    "source": "IS 875 (Part 3) : 2015 (Wind Loads), Amendment 2, Reaffirmed 2020",
+    "purpose": "Wind clause corpus for DBR checks D13 (wind parameters) and D21 (dynamic/wind-tunnel). Encoded from clean screenshots supplied 2026-06-08.",
+    "covers": "Cl 6.3 design wind speed chain (k1-k4 + Tables 1-3), Cl 6.4-6.6, Cl 7.1-7.3 design wind pressure (pz, pd, Kd, Ka, Kc + Table 4), internal/external pressure-coefficient framing. Added: Cl 10 dynamic wind response (along/across, gust factor, peak accel), Table 36 damping, Cl 8 interference, force-coefficient tables for towers/frames/members.",
+    "still_missing": "OPTIONAL only: Annex A (basic wind speed Vb city/town list) - redundant given BMTPC Atlas is the location source. Pressure-coefficient Tables 5/6/7 now encoded (verify flags set). Core D13/D21 wind chain complete.",
+    "schema_keys": [
+      "id",
+      "clause",
+      "title",
+      "statement",
+      "formula (opt)",
+      "tables (opt)",
+      "values (opt)",
+      "page"
+    ]
+  },
+  "clauses": [
+    {
+      "id": "IS875-3-2015_6.3",
+      "clause": "6.3",
+      "title": "Design Wind Speed (Vz)",
+      "statement": "The basic wind speed Vb (from Fig. 1 / Annex A) is modified for risk level, terrain-roughness and height, local topography, and cyclonic importance to obtain the design wind speed Vz at height z.",
+      "formula": "Vz = Vb * k1 * k2 * k3 * k4",
+      "where": "Vz = design wind speed at height z (m/s); k1 = risk/probability coefficient (6.3.1); k2 = terrain-roughness & height factor (6.3.2); k3 = topography factor (6.3.3); k4 = importance factor for cyclonic region (6.3.4).",
+      "note": "Wind speed may be taken as constant up to 10 m height; for buildings <10 m, pressures may be reduced 20% for stability/framing design.",
+      "page": 7
+    },
+    {
+      "id": "IS875-3-2015_6.3.1",
+      "clause": "6.3.1",
+      "title": "Risk Coefficient (k1 Factor)",
+      "statement": "Fig. 1 gives basic wind speed for terrain Category 2 at 10 m, based on 50-year mean return period. k1 adjusts for design life / class of structure. For ordinary buildings a 50-year return period (k1 = 1.0) is used.",
+      "tables": [
+        "IS875-3-2015_Table1"
+      ],
+      "page": 7
+    },
+    {
+      "id": "IS875-3-2015_Table1",
+      "clause": "Table 1",
+      "title": "Risk Coefficients (k1) for Different Classes of Structures in Different Wind Speed Zones",
+      "ref_clause": "6.3.1",
+      "wind_speed_columns_ms": [
+        33,
+        39,
+        44,
+        47,
+        50,
+        55
+      ],
+      "rows": {
+        "i_general": {
+          "class": "All general buildings and structures",
+          "design_life_yr": 50,
+          "k1": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ii_temporary": {
+          "class": "Temporary sheds, formwork/falsework, structures during construction, boundary walls",
+          "design_life_yr": 5,
+          "k1": [
+            0.82,
+            0.76,
+            0.73,
+            0.71,
+            0.7,
+            0.67
+          ]
+        },
+        "iii_low_hazard": {
+          "class": "Low-hazard (isolated towers in wooded areas, farm buildings other than residential)",
+          "design_life_yr": 25,
+          "k1": [
+            0.94,
+            0.92,
+            0.91,
+            0.9,
+            0.9,
+            0.89
+          ]
+        },
+        "iv_important": {
+          "class": "Important (hospitals, communication buildings/towers, power-plant structures)",
+          "design_life_yr": 100,
+          "k1": [
+            1.05,
+            1.06,
+            1.07,
+            1.07,
+            1.08,
+            1.08
+          ]
+        }
+      },
+      "page": 7
+    },
+    {
+      "id": "IS875-3-2015_6.3.2",
+      "clause": "6.3.2",
+      "title": "Terrain, Height Factor (k2)",
+      "statement": "Terrain category (1-4) is selected by ground-surface roughness. Category 1 = exposed open terrain (z0=0.002 m); Category 2 = open terrain, scattered obstructions 1.5-10 m (z0=0.02 m); Category 3 = numerous closely spaced obstructions, building-size, up to 10 m (z0=0.2 m); Category 4 = numerous large high closely spaced obstructions, large city centres, obstructions >25 m (z0=2.0 m). k2 multiplies Vb to give wind speed at height z per Table 2.",
+      "tables": [
+        "IS875-3-2015_Table2",
+        "IS875-3-2015_Table3"
+      ],
+      "page": 8
+    },
+    {
+      "id": "IS875-3-2015_Table2",
+      "clause": "Table 2",
+      "title": "Factors to Obtain Design Wind Speed Variation with Height in Different Terrains (k2)",
+      "ref_clause": "6.3.2.2",
+      "note": "Linear interpolation for intermediate heights.",
+      "rows_height_m_to_k2_by_terrain": {
+        "10": {
+          "TC1": 1.05,
+          "TC2": 1.0,
+          "TC3": 0.91,
+          "TC4": 0.8
+        },
+        "15": {
+          "TC1": 1.09,
+          "TC2": 1.05,
+          "TC3": 0.97,
+          "TC4": 0.8
+        },
+        "20": {
+          "TC1": 1.12,
+          "TC2": 1.07,
+          "TC3": 1.01,
+          "TC4": 0.8
+        },
+        "30": {
+          "TC1": 1.15,
+          "TC2": 1.12,
+          "TC3": 1.06,
+          "TC4": 0.97
+        },
+        "50": {
+          "TC1": 1.2,
+          "TC2": 1.17,
+          "TC3": 1.12,
+          "TC4": 1.1
+        },
+        "100": {
+          "TC1": 1.26,
+          "TC2": 1.24,
+          "TC3": 1.2,
+          "TC4": 1.2
+        },
+        "150": {
+          "TC1": 1.3,
+          "TC2": 1.28,
+          "TC3": 1.24,
+          "TC4": 1.24
+        },
+        "200": {
+          "TC1": 1.32,
+          "TC2": 1.3,
+          "TC3": 1.27,
+          "TC4": 1.27
+        },
+        "250": {
+          "TC1": 1.34,
+          "TC2": 1.32,
+          "TC3": 1.29,
+          "TC4": 1.28
+        },
+        "300": {
+          "TC1": 1.35,
+          "TC2": 1.34,
+          "TC3": 1.31,
+          "TC4": 1.3
+        },
+        "350": {
+          "TC1": 1.35,
+          "TC2": 1.35,
+          "TC3": 1.32,
+          "TC4": 1.31
+        },
+        "400": {
+          "TC1": 1.35,
+          "TC2": 1.35,
+          "TC3": 1.34,
+          "TC4": 1.32
+        },
+        "450": {
+          "TC1": 1.35,
+          "TC2": 1.35,
+          "TC3": 1.35,
+          "TC4": 1.33
+        },
+        "500": {
+          "TC1": 1.35,
+          "TC2": 1.35,
+          "TC3": 1.35,
+          "TC4": 1.34
+        }
+      },
+      "page": 8
+    },
+    {
+      "id": "IS875-3-2015_Table3",
+      "clause": "Table 3",
+      "title": "Fetch and Developed Height Relationship",
+      "ref_clause": "6.3.2.4",
+      "rows_fetch_km_to_developed_height_m_by_terrain": {
+        "0.2": {
+          "TC1": 12,
+          "TC2": 20,
+          "TC3": 35,
+          "TC4": 60
+        },
+        "0.5": {
+          "TC1": 20,
+          "TC2": 30,
+          "TC3": 35,
+          "TC4": 95
+        },
+        "1": {
+          "TC1": 25,
+          "TC2": 45,
+          "TC3": 80,
+          "TC4": 130
+        },
+        "2": {
+          "TC1": 35,
+          "TC2": 65,
+          "TC3": 110,
+          "TC4": 190
+        },
+        "5": {
+          "TC1": 60,
+          "TC2": 100,
+          "TC3": 170,
+          "TC4": 300
+        },
+        "10": {
+          "TC1": 80,
+          "TC2": 140,
+          "TC3": 250,
+          "TC4": 450
+        },
+        "20": {
+          "TC1": 120,
+          "TC2": 200,
+          "TC3": 350,
+          "TC4": 500
+        },
+        "50": {
+          "TC1": 180,
+          "TC2": 300,
+          "TC3": 400,
+          "TC4": 500
+        }
+      },
+      "page": 8
+    },
+    {
+      "id": "IS875-3-2015_6.3.3",
+      "clause": "6.3.3",
+      "title": "Topography (k3 Factor)",
+      "statement": "k3 accounts for local topographic features (hills, valleys, cliffs, escarpments, ridges) not captured by Vb. k3 = 1.0 when the upwind slope theta <= 3 degrees; for slopes > 3 degrees, k3 is in the range 1.0 to 1.36 (method in Annex C). k3 is maximum near the ground and reduces to 1.0 at higher levels.",
+      "range": "1.0 to 1.36",
+      "trigger_slope_deg": 3,
+      "page": 8
+    },
+    {
+      "id": "IS875-3-2015_6.3.4",
+      "clause": "6.3.4",
+      "title": "Importance Factor for Cyclonic Region (k4)",
+      "statement": "For the east coast of India and Gujarat coast (cyclone-prone, ~60 km belt), k4 is applied per importance of structure.",
+      "values": {
+        "post_cyclone_emergency_services": 1.3,
+        "industrial_structures": 1.15,
+        "all_other_structures": 1.0
+      },
+      "note": "Outside cyclone-affected regions, k4 = 1.0.",
+      "page": 8
+    },
+    {
+      "id": "IS875-3-2015_7.2",
+      "clause": "7.2",
+      "title": "Design Wind Pressure",
+      "statement": "Wind pressure at height z is derived from design wind speed; the design wind pressure pd applies directionality, area-averaging and combination factors, with a floor of 0.70*pz.",
+      "formula": "pz = 0.6 * Vz^2  (N/m^2, Vz in m/s);   pd = Kd * Ka * Kc * pz;   pd shall not be less than 0.70 * pz",
+      "where": "Kd = wind directionality factor (7.2.1); Ka = area averaging factor (7.2.2); Kc = combination factor (see 7.3.3.13).",
+      "note": "Coefficient 0.6 (SI) reflects average Indian atmospheric conditions.",
+      "page": 9
+    },
+    {
+      "id": "IS875-3-2015_7.2.1",
+      "clause": "7.2.1",
+      "title": "Wind Directionality Factor (Kd)",
+      "statement": "Accounts for randomness in wind direction relative to direction-specific pressure/force coefficients.",
+      "values": {
+        "buildings_solid_signs_open_signs_lattice_trussed_towers": 0.9,
+        "circular_or_near_circular_forms": 1.0,
+        "cyclone_affected_regions": 1.0,
+        "when_considering_local_pressure_coefficients": 1.0
+      },
+      "page": 9
+    },
+    {
+      "id": "IS875-3-2015_7.2.2",
+      "clause": "7.2.2",
+      "title": "Area Averaging Factor (Ka)",
+      "statement": "Pressure coefficients in 7.3 are area-averaged; larger tributary areas give lower correlated pressure, reduced via Ka (Table 4).",
+      "tables": [
+        "IS875-3-2015_Table4"
+      ],
+      "page": 10
+    },
+    {
+      "id": "IS875-3-2015_Table4",
+      "clause": "Table 4",
+      "title": "Area Averaging Factor (Ka)",
+      "ref_clause": "7.2.2",
+      "note": "Linear interpolation for intermediate tributary areas.",
+      "rows_tributary_area_m2_to_Ka": {
+        "<=10": 1.0,
+        "25": 0.9,
+        ">=100": 0.8
+      },
+      "page": 10
+    },
+    {
+      "id": "IS875-3-2015_7.3.1",
+      "clause": "7.3.1",
+      "title": "Wind Load on Individual Members",
+      "statement": "Wind load normal to an individual structural element or cladding unit accounts for the pressure difference between opposite faces (external minus internal).",
+      "formula": "F = (Cpe - Cpi) * A * pd",
+      "where": "Cpe = external pressure coefficient; Cpi = internal pressure coefficient; A = surface area of element/cladding unit; pd = design wind pressure.",
+      "sign_convention": "Positive wind load = force toward the element; negative = away.",
+      "page": 10
+    },
+    {
+      "id": "IS875-3-2015_7.3.2",
+      "clause": "7.3.2",
+      "title": "Internal Pressure Coefficients (Cpi)",
+      "statement": "Cpi depends on the permeability/openings of the cladding. The internal coefficient is added algebraically to the external; the case producing greater distress governs.",
+      "values": {
+        "openings_up_to_about_5_percent_of_wall_area": "+/- 0.2",
+        "medium_openings_about_5_to_20_percent": "+/- 0.5",
+        "large_openings_greater_than_20_percent": "+/- 0.7"
+      },
+      "page": 11
+    },
+    {
+      "id": "IS875-3-2015_7.3.3",
+      "clause": "7.3.3",
+      "title": "External Pressure Coefficients (Cpe)",
+      "statement": "7.3.3.1 walls of rectangular clad buildings per Table 5 (+ local concentration coefficients); 7.3.3.2 pitched/hipped/mono-slope roofs per Table 6 (Table 7 for mono-slope); 7.3.3.3 canopy roofs per Tables 8 and 9.",
+      "note": "Pressure-coefficient route. For overall wind force on a clad tower the force-coefficient method (Fig.4 / Table 25) is normally used instead.",
+      "page": 11,
+      "tables": [
+        "IS875-3-2015_Table5",
+        "IS875-3-2015_Table6",
+        "IS875-3-2015_Table7"
+      ]
+    },
+    {
+      "id": "IS875-3-2015_10.1",
+      "clause": "10.1",
+      "title": "Dynamic Wind Response - General",
+      "statement": "Tall buildings that are wind-sensitive shall be designed for dynamic wind loads using hourly mean wind speed as reference. Along-wind load effects (bending moments, shear forces, tip deflections) use the Gust Factor (GF) method per 10.2. Across-wind design peak base overturning moment and tip deflection are calculated per 10.3.",
+      "page": 49
+    },
+    {
+      "id": "IS875-3-2015_10.2",
+      "clause": "10.2",
+      "title": "Along Wind Response (Gust Factor Method)",
+      "statement": "Design hourly mean wind pressure at height z is multiplied by the Gust Factor G (dependent on overall height h and level s; for base bending moment and top deflection take s = 0). Design peak along-wind base bending moment Ma is summed from peak along-wind loads Fz over height.",
+      "formula": "Ma = SUM (Fz * Z);  Fz = Cf,z * Az * pd_mean * G;  G = 1 + r*sqrt[ gv^2*Bs*(1+g)^2 + (Hs*gR^2*S*E)/beta ]",
+      "where": "Cf,z = drag force coefficient of building for area Az; pd_mean = design hourly mean wind pressure = 0.6*Vz,d^2 (N/m2); r = roughness factor = 2x longitudinal turbulence intensity Ih,i (6.5); gv = peak factor for upwind velocity fluctuation = 3.0 (terrain cat 1 & 2), 4.0 (cat 3 & 4); Bs = background factor; gR = peak factor for resonant response = sqrt[2 ln(3600 fa)]; Hs = height factor for resonance = 1+(s/h)^2; S = size reduction factor; E = spectrum of turbulence; beta = damping coefficient (Table 36); fa = first-mode along-wind natural frequency (Hz).",
+      "tables": [
+        "IS875-3-2015_Table36"
+      ],
+      "page": 49
+    },
+    {
+      "id": "IS875-3-2015_10.2.1",
+      "clause": "10.2.1",
+      "title": "Peak Acceleration in Along Wind Direction",
+      "statement": "Peak along-wind acceleration at the top (x_hat, m/s2) for serviceability. Use a mean wind speed Vh for a 5-year mean return period; a reduced damping beta = 0.011 is suggested for RCC structures.",
+      "formula": "x_hat = (2*pi*fa)^2 * x_mean * gR * sqrt(S*E/beta)",
+      "where": "x_mean = mean deflection at the position where acceleration is required.",
+      "page": 50
+    },
+    {
+      "id": "IS875-3-2015_10.3",
+      "clause": "10.3",
+      "title": "Across Wind Response",
+      "statement": "Gives equivalent static across-wind load and base overturning moment for tall enclosed buildings and towers of rectangular cross-section. Not required for lattice towers. The across-wind design peak base bending moment Mc:",
+      "formula": "Mc = 0.5 * gh * ph_mean * b * h^2 * (1.06 - 0.06*k) * sqrt(pi*Cfs/beta)",
+      "where": "gh = peak factor = sqrt[2 ln(3600 fc)] in cross-wind direction; ph_mean = hourly mean wind pressure at height h (Pa); b = breadth normal to wind (m); h = height (m); k = mode-shape power exponent; Cfs = across-wind force spectrum coefficient (Fig.10 square section, Fig.11 rectangular 2:1 and 1:2); beta = damping (Table 36); fc = first-mode across-wind natural frequency (Hz).",
+      "mode_shape_exponent_k": {
+        "uniform_cantilever": 1.5,
+        "slender_framed_moment_resisting": 0.5,
+        "building_central_core_with_moment_resisting_facade": 1.0,
+        "lattice_tower_decreasing_stiffness_or_large_top_mass": 2.3
+      },
+      "note": "Cfs read from Fig.10 (square) / Fig.11 (rectangular 2:1, 1:2) vs ratio Vh,d/(fc*b); curves given for turbulence intensity 0.12 and 0.20 at 2/3 h. These are charts (not encoded numerically) - read off the figure for the building aspect ratio.",
+      "page": 50
+    },
+    {
+      "id": "IS875-3-2015_10.3.1",
+      "clause": "10.3.1",
+      "title": "Peak Acceleration in Across Wind Direction",
+      "statement": "Peak across-wind acceleration at the top (y_hat, m/s2) for structures of approximately constant mass per unit height. Across-wind load distribution Fz,c per unit height obtained from Mc by linear distribution.",
+      "formula": "y_hat = 1.5 * (gh * ph_mean * b / m0) * (0.76 + 0.24*k) * sqrt(pi*Cfs/beta);   Fz,c = (3*Mc/h^2)*(z/h)",
+      "where": "m0 = average mass per unit height (kg/m); Fz,c = across-wind load per unit height at height z.",
+      "page": 51
+    },
+    {
+      "id": "IS875-3-2015_10.4",
+      "clause": "10.4",
+      "title": "Combination of Along Wind and Across Wind Load Effects",
+      "statement": "The along-wind and across-wind loads have to be applied simultaneously on the building/structure during design.",
+      "page": 51
+    },
+    {
+      "id": "IS875-3-2015_Table36",
+      "clause": "Table 36",
+      "title": "Suggested Values of Structural Damping Coefficients (beta)",
+      "ref_clause": "10.2",
+      "values": {
+        "welded_steel_structures": 0.01,
+        "bolted_steel_or_RCC_structures": 0.02,
+        "prestressed_concrete_structures": 0.016
+      },
+      "note": "For along-wind peak acceleration (10.2.1) a reduced beta = 0.011 is suggested for RCC structures.",
+      "page": 50
+    },
+    {
+      "id": "IS875-3-2015_8",
+      "clause": "8",
+      "title": "Interference Effects",
+      "statement": "Wind interference from neighbouring structures is captured by a wind interference factor (IF), a multiplier on design wind pressure/force. 8.2 low-rise flat-roof buildings: increase up to 25 percent for c/c spacing x = 5b, negligible beyond 20b, linear interpolation between. 8.3 tall buildings: IF zones per Fig.8; given IF are median values for preliminary design only - for final design of tall buildings consult specialist literature or carry out a wind-tunnel study.",
+      "page": 46
+    },
+    {
+      "id": "IS875-3-2015_7.4.2",
+      "clause": "7.4.2",
+      "title": "Force Coefficients for Clad Buildings",
+      "statement": "7.4.2.1 Clad buildings of uniform section: overall force coefficients for RECTANGULAR clad buildings with flat roofs in uniform flow are given in Fig. 4; for OTHER clad buildings of uniform section (without projections, except where shown) use Table 25. 7.4.2.2 Buildings of circular cross-section use Table 25 (Fig. 5 for circular shapes of infinite length). Overall wind force F = Cf * pd * b * h, where b = breadth normal to wind, h = height.",
+      "formula": "F = Cf * pd * b * h",
+      "page": 35
+    },
+    {
+      "id": "IS875-3-2015_Fig4",
+      "clause": "Fig. 4",
+      "title": "Force Coefficient (Cf) for Rectangular Clad Building in Uniform Flow",
+      "ref_clause": "7.4.2.1",
+      "type": "chart",
+      "statement": "Cf for a sharp-edged RECTANGULAR clad building, read from the chart as a function of plan ratio a/b and height ratio h/b. This is the governing source for the overall along-wind drag coefficient Cf,z of a rectangular RC tower (plug into Gust Factor eqn 10.2).",
+      "axes": {
+        "x": "a/b (plan ratio, a = along-wind plan dimension, b = across-wind breadth)",
+        "y": "Cf"
+      },
+      "curves_h_over_b": {
+        "part_a (h/b >= 1)": [
+          1,
+          2,
+          3,
+          5,
+          10,
+          20,
+          "inf"
+        ],
+        "part_b (h/b < 1)": [
+          "1/4",
+          "1/2"
+        ]
+      },
+      "behaviour": "Cf rises to a peak near a/b ~ 0.6-0.7 then declines as a/b increases; higher h/b gives higher peak (h/b=inf peaks ~2.5-2.7; h/b=1 peaks ~1.3). For h/b<1, Cf ~1.0-1.2.",
+      "note": "CHART - exact Cf must be read off the curve for the building a/b and h/b; values above are approximate anchors only, do not hard-code. Used as Cf,z in Fz = Cf,z*Az*pd*G.",
+      "page": 35
+    },
+    {
+      "id": "IS875-3-2015_Table25",
+      "clause": "Table 25",
+      "title": "Force Coefficients (Cf) for Clad Buildings of Uniform Section (Acting in the Direction of Wind)",
+      "ref_clause": "7.4.2.2",
+      "note": "Cf for non-rectangular plan shapes. Columns = Cf for height/breadth ratio h/b: ['upto_1/2', '1', '2', '5', '10', '20', 'inf']. Vd*b (m2/s) sets the flow regime per row. For sharp rectangular plans use Fig. 4 instead.",
+      "hb_columns": [
+        "upto_1/2",
+        "1",
+        "2",
+        "5",
+        "10",
+        "20",
+        "inf"
+      ],
+      "rows": [
+        {
+          "plan": "Circle (see also Appendix D)",
+          "Vd_b": "all surfaces <6 OR rough/with projection >=6",
+          "Cf": [
+            0.7,
+            0.7,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.2
+          ]
+        },
+        {
+          "plan": "Circle",
+          "Vd_b": "smooth >=6",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6
+          ]
+        },
+        {
+          "plan": "Ellipse b/d=1/2",
+          "Vd_b": "<10",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6,
+            0.7
+          ]
+        },
+        {
+          "plan": "Ellipse b/d=1/2",
+          "Vd_b": ">=10",
+          "Cf": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "plan": "Ellipse b/d=2",
+          "Vd_b": "<8",
+          "Cf": [
+            0.8,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.3,
+            1.7
+          ]
+        },
+        {
+          "plan": "Ellipse b/d=2",
+          "Vd_b": ">=8",
+          "Cf": [
+            0.8,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.3,
+            1.5
+          ]
+        },
+        {
+          "plan": "Rounded square b/d=1, r/b=1/3",
+          "Vd_b": "<4",
+          "Cf": [
+            0.6,
+            0.6,
+            0.6,
+            0.7,
+            0.8,
+            0.8,
+            1.0
+          ]
+        },
+        {
+          "plan": "Rounded square b/d=1, r/b=1/3",
+          "Vd_b": ">=4",
+          "Cf": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "plan": "Rounded square b/d=1, r/b=1/6",
+          "Vd_b": "<10",
+          "Cf": [
+            0.7,
+            0.8,
+            0.8,
+            0.9,
+            1.0,
+            1.0,
+            1.3
+          ]
+        },
+        {
+          "plan": "Rounded square b/d=1, r/b=1/6",
+          "Vd_b": ">=10",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6,
+            0.6
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=1/2, r/b=1/2",
+          "Vd_b": "<3",
+          "Cf": [
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.3,
+            0.4
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=1/2, r/b=1/2",
+          "Vd_b": ">=3",
+          "Cf": [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.3,
+            0.3,
+            0.3
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=1/2, r/b=1/6",
+          "Vd_b": "all values",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6,
+            0.7
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=2, r/b=1/12",
+          "Vd_b": "all values",
+          "Cf": [
+            0.9,
+            0.9,
+            1.0,
+            1.1,
+            1.2,
+            1.5,
+            1.9
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=2, r/b=1/4",
+          "Vd_b": "<6",
+          "Cf": [
+            0.7,
+            0.8,
+            0.8,
+            0.9,
+            1.0,
+            1.2,
+            1.6
+          ]
+        },
+        {
+          "plan": "Rounded rect b/d=2, r/b=1/4",
+          "Vd_b": ">=6",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6
+          ]
+        },
+        {
+          "plan": "Diamond r/a=1/3",
+          "Vd_b": "<10",
+          "Cf": [
+            0.8,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.3,
+            1.5
+          ]
+        },
+        {
+          "plan": "Diamond r/a=1/3",
+          "Vd_b": ">=10",
+          "Cf": [
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.6,
+            0.6
+          ]
+        },
+        {
+          "plan": "Diamond r/a=1/12",
+          "Vd_b": "all values",
+          "Cf": [
+            0.9,
+            0.9,
+            0.9,
+            1.1,
+            1.2,
+            1.3,
+            1.6
+          ]
+        },
+        {
+          "plan": "Diamond 45deg r/a=1/48",
+          "Vd_b": "all values",
+          "Cf": [
+            0.9,
+            0.9,
+            0.9,
+            1.1,
+            1.2,
+            1.3,
+            1.6
+          ]
+        },
+        {
+          "plan": "Triangular (apex to wind) r/b=1/4",
+          "Vd_b": "<11",
+          "Cf": [
+            0.7,
+            0.7,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.2
+          ]
+        },
+        {
+          "plan": "Triangular (apex to wind) r/b=1/4",
+          "Vd_b": ">=11",
+          "Cf": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "plan": "Triangular r/b=1/12",
+          "Vd_b": "all values",
+          "Cf": [
+            0.8,
+            0.8,
+            "0.6?",
+            1.0,
+            1.1,
+            1.2,
+            1.4
+          ],
+          "_note": "3rd value (h/b=2) read as 0.6 but possibly 0.9 - verify"
+        },
+        {
+          "plan": "Triangular r/b=1/48",
+          "Vd_b": "all values",
+          "Cf": [
+            0.7,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.3
+          ]
+        },
+        {
+          "plan": "Triangular (flat to wind) r/b=1/4",
+          "Vd_b": "<8",
+          "Cf": [
+            0.7,
+            0.7,
+            0.8,
+            0.9,
+            1.0,
+            1.1,
+            1.3
+          ]
+        },
+        {
+          "plan": "Triangular (flat to wind) r/b=1/4",
+          "Vd_b": "<=8",
+          "Cf": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      ],
+      "page": 38
+    },
+    {
+      "id": "IS875-3-2015_Table5",
+      "clause": "Table 5",
+      "title": "External Pressure Coefficients (Cpe) for Walls of Rectangular Clad Buildings",
+      "ref_clause": "7.3.3.1",
+      "verify_against_pdf": true,
+      "verify_note": "Transcribed from screenshots p.15. Surfaces A/B/C/D per plan diagram (theta measured from wind to wall A). h/w>=6 block uncertain (B-cell read as -1.85, looks anomalous) - confirm against PDF before using.",
+      "columns": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "local_cpe_label": "Local Cpe (edge zone)",
+      "blocks": [
+        {
+          "h_over_w": "<=1/2",
+          "rows": [
+            {
+              "l_over_w": "1<l/w<=3/2",
+              "theta0": {
+                "A": 0.7,
+                "B": -0.2,
+                "C": -0.5,
+                "D": -0.5
+              },
+              "theta90": {
+                "A": -0.5,
+                "B": -0.5,
+                "C": 0.7,
+                "D": -0.2
+              },
+              "local": -0.8
+            },
+            {
+              "l_over_w": "3/2<l/w<4",
+              "theta0": {
+                "A": 0.7,
+                "B": -0.25,
+                "C": -0.6,
+                "D": -0.6
+              },
+              "theta90": {
+                "A": -0.5,
+                "B": -0.5,
+                "C": 0.7,
+                "D": -0.1
+              },
+              "local": -1.0
+            }
+          ]
+        },
+        {
+          "h_over_w": "1/2<h/w<=3/2",
+          "rows": [
+            {
+              "l_over_w": "1<=l/w<=3/2",
+              "theta0": {
+                "A": 0.7,
+                "B": -0.25,
+                "C": -0.6,
+                "D": -0.6
+              },
+              "theta90": {
+                "A": -0.6,
+                "B": -0.6,
+                "C": 0.7,
+                "D": -0.25
+              },
+              "local": -1.1
+            },
+            {
+              "l_over_w": "3/2<=l/w<4",
+              "theta0": {
+                "A": 0.7,
+                "B": -0.3,
+                "C": -0.7,
+                "D": -0.7
+              },
+              "theta90": {
+                "A": -0.5,
+                "B": -0.5,
+                "C": 0.7,
+                "D": -0.1
+              },
+              "local": -1.1
+            }
+          ]
+        },
+        {
+          "h_over_w": "3/2<h/w<6",
+          "rows": [
+            {
+              "l_over_w": "1<l/w<=3/2",
+              "theta0": {
+                "A": 0.8,
+                "B": -0.25,
+                "C": -0.8,
+                "D": -0.8
+              },
+              "theta90": {
+                "A": -0.8,
+                "B": -0.8,
+                "C": 0.8,
+                "D": -0.25
+              },
+              "local": -1.2
+            },
+            {
+              "l_over_w": "3/2<=l/w<4",
+              "theta0": {
+                "A": 0.7,
+                "B": -0.4,
+                "C": -0.7,
+                "D": -0.7
+              },
+              "theta90": {
+                "A": -0.5,
+                "B": -0.5,
+                "C": 0.8,
+                "D": -0.1
+              },
+              "local": -1.2
+            }
+          ]
+        },
+        {
+          "h_over_w": ">=6",
+          "_uncertain": true,
+          "rows": [
+            {
+              "l_over_w": "3/2",
+              "theta0": {
+                "A": 0.95,
+                "B": "-1.85?",
+                "C": -0.9,
+                "D": -0.9
+              },
+              "theta90": {
+                "A": -0.8,
+                "B": -0.8,
+                "C": 0.9,
+                "D": -0.85
+              },
+              "local": -1.25
+            },
+            {
+              "l_over_w": "1.0",
+              "theta0": {
+                "A": 0.95,
+                "B": -1.25,
+                "C": -0.7,
+                "D": -0.7
+              },
+              "theta90": {
+                "A": -0.7,
+                "B": -0.7,
+                "C": 0.95,
+                "D": -1.25
+              },
+              "local": -1.25
+            },
+            {
+              "l_over_w": "2",
+              "theta0": {
+                "A": 0.85,
+                "B": -0.75,
+                "C": -0.75,
+                "D": -0.75
+              },
+              "theta90": {
+                "A": -0.75,
+                "B": -0.75,
+                "C": 0.85,
+                "D": -0.75
+              },
+              "local": -1.25
+            }
+          ]
+        }
+      ],
+      "page": 15
+    },
+    {
+      "id": "IS875-3-2015_Table6",
+      "clause": "Table 6",
+      "title": "External Pressure Coefficients (Cpe) for Pitched Roofs of Rectangular Clad Buildings",
+      "ref_clause": "7.3.3.2",
+      "verify_against_pdf": true,
+      "verify_note": "Transcribed from screenshot p.16. Main roof-zone grid (EF,GH at wind 0deg; EG,FH at wind 90deg). Local-coefficient edge-zone columns are dense - verify separately if needed. Applies only to PITCHED roofs (not the flat-roof tower).",
+      "columns": [
+        "EF (0deg)",
+        "GH (0deg)",
+        "EG (90deg)",
+        "FH (90deg)"
+      ],
+      "roof_angle_deg": "alpha",
+      "blocks": [
+        {
+          "h_over_w": "<=1/2",
+          "rows": {
+            "0": [
+              -0.8,
+              -0.4,
+              -0.8,
+              -0.4
+            ],
+            "5": [
+              -0.9,
+              -0.4,
+              -0.8,
+              -0.4
+            ],
+            "10": [
+              -1.2,
+              -0.4,
+              -0.8,
+              -0.6
+            ],
+            "20": [
+              -0.4,
+              -0.4,
+              -0.7,
+              -0.6
+            ],
+            "30": [
+              0.0,
+              -0.4,
+              -0.7,
+              -0.6
+            ],
+            "45": [
+              0.3,
+              -0.5,
+              -0.7,
+              -0.6
+            ],
+            "60": [
+              0.7,
+              -0.6,
+              -0.7,
+              -0.6
+            ]
+          }
+        },
+        {
+          "h_over_w": "1/2<h/w<=3/2",
+          "rows": {
+            "0": [
+              -0.8,
+              -0.6,
+              -1.0,
+              -0.6
+            ],
+            "5": [
+              -0.9,
+              -0.6,
+              -0.9,
+              -0.6
+            ],
+            "10": [
+              -1.1,
+              -0.6,
+              -0.8,
+              -0.6
+            ],
+            "20": [
+              -0.7,
+              -0.5,
+              -0.8,
+              -0.6
+            ],
+            "30": [
+              -0.2,
+              -0.5,
+              -0.8,
+              -0.8
+            ],
+            "45": [
+              0.2,
+              -0.5,
+              -0.8,
+              -0.8
+            ],
+            "60": [
+              0.6,
+              -0.5,
+              -0.8,
+              -0.6
+            ]
+          }
+        },
+        {
+          "h_over_w": "3/2<h/w<6",
+          "rows": {
+            "0": [
+              -0.7,
+              -0.6,
+              -0.9,
+              -0.7
+            ],
+            "5": [
+              -0.7,
+              -0.6,
+              -0.8,
+              -0.8
+            ],
+            "10": [
+              -0.7,
+              -0.6,
+              -0.8,
+              -0.8
+            ],
+            "20": [
+              -0.8,
+              -0.6,
+              -0.8,
+              -0.8
+            ],
+            "30": [
+              -1.0,
+              -0.5,
+              -0.8,
+              -0.7
+            ],
+            "40": [
+              -0.2,
+              -0.5,
+              -0.8,
+              -0.7
+            ],
+            "50": [
+              0.2,
+              -0.5,
+              -0.8,
+              -0.7
+            ],
+            "60": [
+              0.5,
+              -0.5,
+              -0.8,
+              -0.7
+            ]
+          }
+        }
+      ],
+      "page": 16
+    },
+    {
+      "id": "IS875-3-2015_Table7",
+      "clause": "Table 7",
+      "title": "External Pressure Coefficients (Cpe) for Monoslope Roofs of Rectangular Clad Buildings (h/w < 2)",
+      "ref_clause": "7.3.3.2",
+      "verify_against_pdf": true,
+      "verify_note": "Transcribed from screenshot p.17. Columns: wind 0,45,90(*=windward w/2),90(**=remainder),135,180 giving H and L. Local coeffs H1,H2,L1,L2,He,Le. Applies only to MONOSLOPE roofs (not the flat-roof tower).",
+      "col_layout": {
+        "0deg": [
+          "H",
+          "L"
+        ],
+        "45deg": [
+          "H",
+          "L"
+        ],
+        "90deg": [
+          "H&L*",
+          "H&L**"
+        ],
+        "135deg": [
+          "H",
+          "L"
+        ],
+        "180deg": [
+          "H",
+          "L"
+        ],
+        "local": [
+          "H1",
+          "H2",
+          "L1",
+          "L2",
+          "He",
+          "Le"
+        ]
+      },
+      "rows_by_roof_angle_deg": {
+        "5": {
+          "0": [
+            -1.0,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.9
+          ],
+          "90": [
+            -1.0,
+            -0.5
+          ],
+          "135": [
+            -0.9,
+            -1.0
+          ],
+          "180": [
+            -0.5,
+            -1.0
+          ],
+          "local": [
+            -2.0,
+            -1.5,
+            -2.0,
+            -1.5,
+            -2.0,
+            -2.0
+          ]
+        },
+        "10": {
+          "0": [
+            -1.0,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.8
+          ],
+          "90": [
+            -1.0,
+            -0.5
+          ],
+          "135": [
+            -0.8,
+            -1.0
+          ],
+          "180": [
+            -0.4,
+            -1.0
+          ],
+          "local": [
+            -2.0,
+            -1.5,
+            -2.0,
+            -1.5,
+            -2.0,
+            -2.0
+          ]
+        },
+        "15": {
+          "0": [
+            -0.9,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.7
+          ],
+          "90": [
+            -1.0,
+            -0.5
+          ],
+          "135": [
+            -0.6,
+            -1.0
+          ],
+          "180": [
+            -0.3,
+            -1.0
+          ],
+          "local": [
+            -1.8,
+            -0.9,
+            -1.8,
+            -1.4,
+            -2.0,
+            -2.0
+          ]
+        },
+        "20": {
+          "0": [
+            -0.8,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.6
+          ],
+          "90": [
+            -0.9,
+            -0.5
+          ],
+          "135": [
+            -0.5,
+            -1.0
+          ],
+          "180": [
+            -0.2,
+            -1.0
+          ],
+          "local": [
+            -1.8,
+            -0.8,
+            -1.8,
+            -1.4,
+            -2.0,
+            -2.0
+          ]
+        },
+        "25": {
+          "0": [
+            -0.7,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.6
+          ],
+          "90": [
+            -0.8,
+            -0.5
+          ],
+          "135": [
+            -0.3,
+            -0.9
+          ],
+          "180": [
+            -0.1,
+            -0.9
+          ],
+          "local": [
+            -1.8,
+            -0.7,
+            -0.9,
+            -0.9,
+            -2.0,
+            -2.0
+          ]
+        },
+        "30": {
+          "0": [
+            -0.5,
+            -0.5
+          ],
+          "45": [
+            -1.0,
+            -0.6
+          ],
+          "90": [
+            -0.8,
+            -0.5
+          ],
+          "135": [
+            -0.1,
+            -0.6
+          ],
+          "180": [
+            0.0,
+            -0.6
+          ],
+          "local": [
+            -1.8,
+            -0.5,
+            -0.5,
+            -0.5,
+            -2.0,
+            -2.0
+          ]
+        }
+      },
+      "notes": {
+        "*": "Applied to length w/2 from windward end",
+        "**": "Applies to remainder",
+        "1": "h = height of eaves at lower side; l = greater horizontal dimension; w = lesser horizontal dimension",
+        "2": "l and w are overall length and width including overhangs"
+      },
+      "page": 17
+    }
+  ]
+}

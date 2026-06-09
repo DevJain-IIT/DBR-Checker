@@ -1,0 +1,245 @@
+{
+  "_meta": {
+    "code": "National Building Code of India, Part 4 — Fire and Life Safety",
+    "source_edition": "NBC 2005 (this is the edition of the uploaded PDF). NOT NBC 2016.",
+    "target_edition": "Project target is NBC 2016 — see edition_warning before using numeric ratings.",
+    "covers_checks": [
+      "D25 — construction-type classification (occupancy group + Type 1/2/3/4 by fire resistance)",
+      "D23 — fire-resistance closure (required rating per element vs IS 456 Fig 1 / Table 16A supply)"
+    ],
+    "encoding_note": "Numeric tables transcribed verbatim from the uploaded 2005 PDF (facts the checker reads). Prose rules stated concisely, not reproduced verbatim. Same style as file_for_DBR.json / is1893_part1_2016_clauses.json / is875_part3_2015_clauses.json.",
+    "edition_warning": "The uploaded PDF is NBC 2005, not 2016. NBC 2016 Part 4 differs materially for these checks: (1) Table 1 fire-resistance ratings are in MINUTES in 2016 vs HOURS here; (2) several Table 1 rows are restructured/renumbered in 2016 (e.g. 2016 merges 'shafts for services, lift hoistway and refuse chutes' into one row and has no separate 'fire resisting walls' row); (3) some numeric values differ; (4) NBC 2016 expanded occupancy sub-divisions. The Type 1–4 concept and the Groups A–J scheme are otherwise unchanged. Treat the Table 1 values in this file as a LABELLED STOPGAP / cross-reference for the 2005 edition. For an authoritative 2016 corpus, supply the NBC 2016 Part 4 PDF (or readable renders of its Table 1 + Clause 3).",
+    "edition_differences_2016_INDICATIVE_ONLY": {
+      "confidence": "low — from secondary OCR sources, NOT the BIS PDF. Do not wire into the checker; for awareness only.",
+      "nbc2016_table1_title": "Table 1 Fire Resistance Ratings of Structural and Non-Structural Elements (MINUTES), cited under Cl 3.3.1 and 3.3.2",
+      "nbc2016_exterior_walls_minutes": {
+        "fire_sep_lt_3p7m": {"bearing": [240, 120, 120, 60], "non_bearing": [120, 90, 60, 60]},
+        "fire_sep_3p7_to_9m": {"bearing": [240, 120, 120, 60], "non_bearing": [90, 60, 60, 60]},
+        "fire_sep_ge_9m": {"bearing": [240, 120, 120, 60], "non_bearing": [60, 60, 60, 60]},
+        "fire_separation_assemblies": [120, 120, 120, 120],
+        "fire_enclosures_of_exits": [120, 120, 120, 120],
+        "shafts_services_lift_hoistway_refuse_chutes": [120, 120, 120, 120],
+        "vertical_separation_adjacent_tenant_spaces": [60, 60, 60, 60]
+      },
+      "nbc2016_rc_critical_rows_status": "NOT VERIFIED — interior bearing walls/columns/girders, floor construction and roof construction rows (the ones D23 actually uses for an RC tower) were not legible in the secondary source. MUST come from the 2016 PDF."
+    },
+    "numbering_map": {
+      "this_2005_edition": {
+        "occupancy_classification": "Clause 3.1 (3.1.1 groups; 3.1.2–3.1.10 sub-divisions)",
+        "types_of_construction": "Clause 3.3 (3.3.1 general/definition, 3.3.2 requirement)",
+        "fire_resistance_ratings_table": "Table 1 (Clause 3.3.1) — in HOURS",
+        "far_by_occupancy_and_type": "Table 19 (Clauses 2.6 and 3.4.5)",
+        "fire_zone_construction_restrictions": "Clause 3.2.6"
+      },
+      "nbc2016_per_BIS": "Fire-resistance ratings = Table 1 under Cl 3.3.1/3.3.2 (Table 1, NOT 'Table 2'); occupancy = Cl 3.1.",
+      "methodology_anchor_discrepancy": "Methodology cited 'Table 2 / Cl 3 & 4'. The actual NBC (both editions) puts these in Table 1 / Cl 3.1 + 3.3. Re-check the methodology label against your 2016 copy."
+    },
+    "not_in_this_upload": [
+      "IS 875 (Part 5) temperature — D20 (Cl 3 Temperature Effects + Fig 1 max-temp isopleths + Fig 2 min-temp isopleths) and D14 (load-combination clause, cl. 8). No IS 875-5 file was attached."
+    ]
+  },
+  "clauses": [
+    {
+      "id": "NBC2005-P4_2.25",
+      "code": "NBC 2005 Part 4",
+      "clause": "2.25",
+      "content_type": "definition",
+      "title": "High Rise Building",
+      "statement": "Any building 15 m or above in height is a high rise building. (Triggers high-rise fire-protection requirements in Annex C and pushes construction towards Type 1/Type 2.)"
+    },
+    {
+      "id": "NBC2005-P4_3.1_occupancy_groups",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.1.1–3.1.10",
+      "content_type": "reference_table",
+      "title": "Classification of Buildings by Occupancy (Groups A–J) and Sub-divisions",
+      "statement": "Every building is classified by use into one of nine occupancy groups; each group is further sub-divided. Sub-division drives the fire-protection and exit requirements. For D25, the building's occupancy group + sub-division is the first input; construction Type (1–4) is the second.",
+      "data": {
+        "A": {
+          "label": "Residential",
+          "subdivisions": [
+            {"code": "A-1", "label": "Lodging or rooming houses", "threshold": "sleeping accommodation total not more than 40 persons (beds); inns, clubs, motels, guest houses"},
+            {"code": "A-2", "label": "One or two family private dwellings", "threshold": "≤ 20 persons; rented rooms ≤ 3 persons/room"},
+            {"code": "A-3", "label": "Dormitories", "threshold": "group sleeping, non-family; school/college hostels, barracks"},
+            {"code": "A-4", "label": "Apartment houses (flats)", "threshold": "≥ 3 families, independent cooking"},
+            {"code": "A-5", "label": "Hotels", "threshold": "up to 4-star category"},
+            {"code": "A-6", "label": "Hotels (Starred)", "threshold": "5-star and above"}
+          ]
+        },
+        "B": {
+          "label": "Educational",
+          "subdivisions": [
+            {"code": "B-1", "label": "Schools up to senior secondary level", "threshold": "≥ 20 students"},
+            {"code": "B-2", "label": "All others / training institutions", "threshold": "≥ 100 students"}
+          ]
+        },
+        "C": {
+          "label": "Institutional",
+          "subdivisions": [
+            {"code": "C-1", "label": "Hospitals and sanatoria"},
+            {"code": "C-2", "label": "Custodial institutions"},
+            {"code": "C-3", "label": "Penal and mental institutions"}
+          ]
+        },
+        "D": {
+          "label": "Assembly",
+          "subdivisions": [
+            {"code": "D-1", "label": "Theatrical/motion picture/stage, fixed seats > 1 000 persons"},
+            {"code": "D-2", "label": "Theatrical/motion picture/stage, fixed seats up to 1 000 persons"},
+            {"code": "D-3", "label": "No permanent stage, ≥ 300 persons, no permanent seating"},
+            {"code": "D-4", "label": "No permanent stage, < 300 persons, no permanent seating"},
+            {"code": "D-5", "label": "All other (incl. temporary) assembly not in D-1..D-4, at ground level"},
+            {"code": "D-6", "label": "Mixed occupancies (shopping + cinema + restaurants); multiplexes"},
+            {"code": "D-7", "label": "Other elevated/underground assembly not in D-1..D-6 (e.g. underground/elevated railways)"}
+          ]
+        },
+        "E": {
+          "label": "Business",
+          "subdivisions": [
+            {"code": "E-1", "label": "Offices, banks, professional establishments"},
+            {"code": "E-2", "label": "Laboratories, research establishments, libraries, test houses"},
+            {"code": "E-3", "label": "Computer installations"},
+            {"code": "E-4", "label": "Telephone exchanges"},
+            {"code": "E-5", "label": "Broadcasting stations and TV stations"}
+          ]
+        },
+        "F": {
+          "label": "Mercantile",
+          "subdivisions": [
+            {"code": "F-1", "label": "Shops/stores/markets, area up to 500 m²"},
+            {"code": "F-2", "label": "Shops/stores/markets, area more than 500 m²"},
+            {"code": "F-3", "label": "Underground shopping centres"}
+          ]
+        },
+        "G": {
+          "label": "Industrial",
+          "subdivisions": [
+            {"code": "G-1", "label": "Low hazard industries"},
+            {"code": "G-2", "label": "Moderate hazard industries"},
+            {"code": "G-3", "label": "High hazard industries"}
+          ]
+        },
+        "H": {
+          "label": "Storage",
+          "subdivisions": [
+            {"code": "H", "label": "Storage / sheltering of goods, ware, merchandise (warehouses, cold storage, depots, garages, hangars, grain elevators, stables, etc.)"}
+          ]
+        },
+        "J": {
+          "label": "Hazardous",
+          "subdivisions": [
+            {"code": "J", "label": "Storage/handling/manufacture/processing of highly combustible or explosive materials, or those producing poisonous fumes/explosions"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "NBC2005-P4_max_height_ceilings",
+      "code": "NBC 2005 Part 4",
+      "clause": "Table 23 Notes 1, 12, 15, 16, 17",
+      "content_type": "reference_table",
+      "title": "Maximum height ceilings by occupancy (applicability bounds)",
+      "statement": "These occupancies are not permitted above the stated height. Relevant to D25 applicability (a claimed occupancy+height combination may be disallowed outright).",
+      "data": {
+        "A-1_and_A-2": "not permitted above 15 m",
+        "B_C_D_F": "not permitted above 30 m",
+        "G-1_and_G-2": "not permitted above 18 m",
+        "G-3": "not permitted above 15 m",
+        "H_and_J": "not permitted above 15 m"
+      }
+    },
+    {
+      "id": "NBC2005-P4_3.2.6",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.2.6",
+      "content_type": "reference_table",
+      "title": "Restrictions on Type of Construction for New Buildings (by Fire Zone)",
+      "statement": "Permitted construction types depend on the fire zone in which the building sits. Use with the occupancy→fire-zone mapping (Cl 3.2.2.2) to bound the allowed construction Type for D25.",
+      "data": {
+        "fire_zone_1": {"permitted_types": [1, 2, 3, 4], "ref": "3.2.6.1"},
+        "fire_zone_2": {"permitted_types": [1, 2, 3], "ref": "3.2.6.2"},
+        "fire_zone_3": {"permitted_types": [1, 2], "ref": "3.2.6.3"}
+      }
+    },
+    {
+      "id": "NBC2005-P4_3.3.1",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.3.1",
+      "content_type": "clause",
+      "title": "Types of Construction — General (Type 1 / 2 / 3 / 4)",
+      "statement": "Construction is classified by fire resistance into four categories: Type 1, Type 2, Type 3, Type 4. Required fire-resistance ratings for structural and non-structural members are given in Table 1 (broadly Type 1 ≈ 4 h, Type 2 ≈ 2 h, Type 3 ≈ 1–2 h, Type 4 ≈ 1 h for primary structural rows). For buildings 15 m in height or above, non-combustible materials should be used and the internal walls of staircase enclosures should be brick/RCC or other material with a minimum 2 h rating; chimney walls shall be Type 1/Type 2 depending on whether flue-gas temperature is above 200°C or not. NOTE: ratings here are in HOURS (2005 edition); NBC 2016 expresses them in minutes."
+    },
+    {
+      "id": "NBC2005-P4_3.3.2",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.3.2",
+      "content_type": "clause",
+      "title": "Requirement — element must have requisite fire-resistance rating",
+      "statement": "Each structural/non-structural element/component shall have the fire-resistance rating required by Table 1 when tested per the accepted standard. Fire-damage and post-fire structural-safety assessment may also use Tables 2–18. This is the demand side of D23: required rating (Table 1) ≤ achievable rating from member size + cover (IS 456 Fig 1 / Table 16A)."
+    },
+    {
+      "id": "NBC2005-P4_3.3.3",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.3.3",
+      "content_type": "clause",
+      "title": "Steel construction — protection against collapse",
+      "statement": "Load-bearing steel beams and columns of buildings with total covered area 500 m² and above shall be protected against failure/collapse in fire, using suitable fire-resistance-rated materials with a suppression system (see Tables 14, 15 and accepted standard). Applies to steel members; for RC the Table 1 ratings + IS 456 cover govern."
+    },
+    {
+      "id": "NBC2005-P4_Table1",
+      "code": "NBC 2005 Part 4",
+      "clause": "3.3.1",
+      "content_type": "table",
+      "title": "Table 1 — Fire Resistance Ratings of Structural and Non-Structural Elements (HOURS)",
+      "statement": "Required fire-resistance rating (hours) of each element for each construction Type. 0 = no rating required. 'At least 1/2 h' = 0.5 h minimum. This is the core D23 demand table and the D25 Type-classification basis. NOTE: 2005 edition, HOURS — NBC 2016 uses minutes and a restructured row list.",
+      "units": "hours",
+      "columns": ["element", "Type_1", "Type_2", "Type_3", "Type_4"],
+      "rows": [
+        {"si": "i.a.bearing", "element": "Exterior walls — fire separation < 3.7 m — Bearing", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 1},
+        {"si": "i.a.nonbearing", "element": "Exterior walls — fire separation < 3.7 m — Non-bearing", "Type_1": 2, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "i.b.bearing", "element": "Exterior walls — fire separation 3.7 m to < 9 m — Bearing", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 1},
+        {"si": "i.b.nonbearing", "element": "Exterior walls — fire separation 3.7 m to < 9 m — Non-bearing", "Type_1": 1.5, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "i.c.bearing", "element": "Exterior walls — fire separation ≥ 9 m — Bearing", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 1},
+        {"si": "i.c.nonbearing", "element": "Exterior walls — fire separation ≥ 9 m — Non-bearing", "Type_1": 1, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "ii", "element": "Fire resisting walls", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 2},
+        {"si": "iii", "element": "Fire separation assemblies (like fire check doors)", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 2},
+        {"si": "iv", "element": "Fire enclosures of exitways, hallways and stairways", "Type_1": 2, "Type_2": 2, "Type_3": 2, "Type_4": 2},
+        {"si": "v", "element": "Shaft other than exitways, elevator and hoistways", "Type_1": 2, "Type_2": 2, "Type_3": 2, "Type_4": 2},
+        {"si": "vi", "element": "Exitway access corridors", "Type_1": 1, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "vii", "element": "Vertical separation of tenant spaces", "Type_1": 1, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "viii.dwelling", "element": "Dwelling unit separation", "Type_1": 1, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "viii.partitions", "element": "Non-load bearing partitions", "Type_1": 0.5, "Type_2": 0.5, "Type_3": 0.5, "Type_4": 0.5, "note": "table states 'At least half an hour' for all types"},
+        {"si": "ix.a", "element": "Interior bearing walls, bearing partitions, columns, girders, trusses (other than roof trusses) and framing — Supporting more than one floor", "Type_1": 4, "Type_2": 2, "Type_3": 2, "Type_4": 2},
+        {"si": "ix.b", "element": "Interior bearing walls, columns, girders, trusses and framing — Supporting one floor only", "Type_1": 3, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "ix.c", "element": "Interior bearing walls, columns, girders, trusses and framing — Supporting a roof only", "Type_1": 3, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "x", "element": "Structural members supporting walls", "Type_1": 3, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "xi", "element": "Floor construction including walls", "Type_1": 3, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "xii.a", "element": "Roof construction — 5 m or less in height to lowest member", "Type_1": 2, "Type_2": 1.5, "Type_3": 1, "Type_4": 1},
+        {"si": "xii.b", "element": "Roof construction — more than 5 m but less than 6.7 m to lowest member", "Type_1": 1, "Type_2": 1, "Type_3": 1, "Type_4": 1},
+        {"si": "xii.c", "element": "Roof construction — 6.7 m or more in height to lowest member", "Type_1": 0, "Type_2": 0, "Type_3": 0, "Type_4": 0}
+      ],
+      "d23_key_rows_for_rc_tower": ["ix.a (columns/girders supporting >1 floor)", "ix.b/ix.c (supporting one floor / roof)", "x (members supporting walls)", "xi (floor construction)", "xii (roof construction)"]
+    },
+    {
+      "id": "NBC2005-P4_Table19",
+      "code": "NBC 2005 Part 4",
+      "clause": "2.6, 3.4.5",
+      "content_type": "table",
+      "title": "Table 19 — Comparative Floor Area Ratios by Occupancy and Construction Type (street ≥ 9 m wide)",
+      "statement": "Primarily a FAR-limit table, but the entries also indicate which construction Types are permitted for each occupancy: a number/UL = permitted, NP = that Type is not permitted for that occupancy. Secondary context for D25 (e.g. Hazardous cannot be Type 4). Individual municipal corporations may alter the values but must keep the ratios between occupancies/types.",
+      "legend": {"UL": "Unlimited", "NP": "Not permitted"},
+      "columns": ["occupancy", "Type_1", "Type_2", "Type_3", "Type_4"],
+      "rows": [
+        {"occupancy": "Residential", "Type_1": "UL", "Type_2": 2.0, "Type_3": 1.4, "Type_4": 1.0},
+        {"occupancy": "Educational", "Type_1": "UL", "Type_2": 2.0, "Type_3": 1.4, "Type_4": 1.0},
+        {"occupancy": "Institutional", "Type_1": "UL", "Type_2": 1.5, "Type_3": 1.0, "Type_4": 0.8},
+        {"occupancy": "Assembly", "Type_1": "UL", "Type_2": 1.0, "Type_3": 0.7, "Type_4": 0.5},
+        {"occupancy": "Business", "Type_1": "UL", "Type_2": 2.9, "Type_3": 2.3, "Type_4": 1.6},
+        {"occupancy": "Mercantile", "Type_1": 8.0, "Type_2": 1.8, "Type_3": 1.4, "Type_4": 1.0},
+        {"occupancy": "Industrial", "Type_1": 7.5, "Type_2": 1.9, "Type_3": 1.6, "Type_4": 1.3},
+        {"occupancy": "Storage", "Type_1": 6.0, "Type_2": 1.5, "Type_3": 1.3, "Type_4": 1.0},
+        {"occupancy": "Hazardous", "Type_1": 2.8, "Type_2": 1.1, "Type_3": 0.9, "Type_4": "NP"}
+      ]
+    }
+  ]
+}

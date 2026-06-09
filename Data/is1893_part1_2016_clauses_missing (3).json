@@ -1,0 +1,463 @@
+{
+  "_meta": {
+    "source": "IS 1893 (Part 1) : 2016, Reaffirmed 2021, incorporating Amendment No. 1 (Sept 2017) and Amendment No. 2 (Nov 2020)",
+    "purpose": "Extension to is1893_part1_2016_clauses.json. Adds the clauses flagged as missing last session: 7.2.3 + Table 8 (I), 7.2.6 + Table 9 (R), Table 7 (minimum base shear), 7.3 + Table 10 (seismic weight / imposed-load %), 7.6 (period Ta), 7.7 (dynamic analysis), 7.8 (torsion), 7.9 (URM infill), 7.10 (open-storey), 7.11 (drift), 7.12, Annex E pointer.",
+    "note_on_extraction": "Body text of the supplied PDF uses a scrambled BIS CMap font and is NOT machine-extractable. Prose statements and stable numeric thresholds below are reconstructed from the code; amendment text is taken verbatim from the clean Amendment 1 & 2 pages of the PDF. Two items (Table 8 importance factors, Table 9 response-reduction factors) could not be read off this PDF and are reconstructed from knowledge — each carries verify_against_pdf: true and should be confirmed against the rendered page before going to PASS/FLAW logic on D6/D7.",
+    "schema_keys": [
+      "id",
+      "clause",
+      "title",
+      "statement",
+      "formula (opt)",
+      "tables (opt)",
+      "page",
+      "amended_by (opt)",
+      "verify_against_pdf (opt)"
+    ]
+  },
+  "clauses": [
+    {
+      "id": "IS1893-1-2016_7.2.3",
+      "clause": "7.2.3",
+      "title": "Importance Factor I",
+      "statement": "The design seismic base shear is amplified by an importance factor I that reflects the post-earthquake functional and life-safety significance of the structure. Values of I are given in Table 8. The design engineer may choose a value of I higher than that tabulated, based on economy, strategy and other considerations.",
+      "tables": [
+        "IS1893-1-2016_Table8"
+      ],
+      "page": 19
+    },
+    {
+      "id": "IS1893-1-2016_Table8",
+      "clause": "Table 8",
+      "title": "Importance Factor (I) for Buildings",
+      "ref_clause": "7.2.3",
+      "verify_against_pdf": false,
+      "verify_note": "Confirmed correct by user against rendered page 19 (2026-06-08). Amendment 2: 'educational buildings' substituted for 'schools' in Sl No.(i).",
+      "items": {
+        "i_important": {
+          "structure": "Important service and community buildings or structures (e.g. critical governance buildings, educational buildings [amended from 'schools'], signal towers, telephone exchange buildings, television/radio stations, fire-station buildings, large community halls such as cinemas, assembly halls and subway stations, power stations).",
+          "I": 1.5
+        },
+        "ii_high_occupancy": {
+          "structure": "Residential or commercial buildings with occupancy of more than 200 persons.",
+          "I": 1.2
+        },
+        "iii_all_other": {
+          "structure": "All other buildings.",
+          "I": 1.0
+        }
+      },
+      "page": 19
+    },
+    {
+      "id": "IS1893-1-2016_7.2.6",
+      "clause": "7.2.6",
+      "title": "Response Reduction Factor R",
+      "statement": "The elastic design base shear is divided by the response reduction factor R, which accounts for the overstrength, redundancy and ductility of the lateral-load-resisting system. Values of R for building systems are given in Table 9. R shall be taken for the lateral-load-resisting system actually provided; mixing systems with different R in the same direction is not permitted unless justified.",
+      "tables": [
+        "IS1893-1-2016_Table9"
+      ],
+      "page": 20
+    },
+    {
+      "id": "IS1893-1-2016_Table9",
+      "clause": "Table 9",
+      "title": "Response Reduction Factor R for Building Systems",
+      "ref_clause": "7.2.6",
+      "verify_against_pdf": false,
+      "verify_note": "Verified against rendered page 20 and Amendment 2 (2020) on 2026-06-08.",
+      "items": {
+        "moment_frame": {
+          "rc_omrf": {
+            "system": "RC buildings with ordinary moment resisting frame (OMRF) (see Note 1)",
+            "R": 3.0
+          },
+          "rc_smrf": {
+            "system": "RC buildings with special moment resisting frame (SMRF)",
+            "R": 5.0
+          },
+          "steel_omrf": {
+            "system": "Steel buildings with ordinary moment resisting frame (OMRF) (see Note 1)",
+            "R": 3.0
+          },
+          "steel_smrf": {
+            "system": "Steel buildings with special moment resisting frame (SMRF)",
+            "R": 5.0
+          }
+        },
+        "braced_frame": {
+          "obf_concentric": {
+            "system": "Buildings with ordinary braced frame (OBF) having concentric braces",
+            "R": 4.0
+          },
+          "sbf_concentric": {
+            "system": "Buildings with special braced frame (SBF) having concentric braces",
+            "R": 4.5
+          },
+          "sbf_eccentric": {
+            "system": "Buildings with special braced frame (SBF) having eccentric braces",
+            "R": 5.0
+          }
+        },
+        "structural_wall": {
+          "masonry_load_bearing": {
+            "urm_no_bands": {
+              "system": "Unreinforced masonry (designed as per IS 1905) without horizontal RC seismic bands",
+              "R": 1.5
+            },
+            "urm_with_bands": {
+              "system": "Unreinforced masonry (designed as per IS 1905) with horizontal RC seismic bands",
+              "R": 2.0
+            },
+            "urm_bands_and_vertical_bars": {
+              "system": "Unreinforced masonry (per IS 1905) with horizontal RC seismic bands and vertical reinforcing bars at corners of rooms and jambs of openings (reinforcement per IS 4326)",
+              "R": 2.5
+            },
+            "reinforced_masonry": {
+              "system": "Reinforced masonry [see SP 7 (Part 6) Section 4]",
+              "R": 3.0
+            },
+            "confined_masonry": {
+              "system": "Confined masonry",
+              "R": 3.0
+            }
+          },
+          "rc_ordinary_wall": {
+            "system": "Buildings with ordinary RC structural walls (see Note 1)",
+            "R": 3.0
+          },
+          "rc_ductile_wall": {
+            "system": "Buildings with ductile RC structural walls",
+            "R": 4.0
+          }
+        },
+        "dual_systems": {
+          "ordinary_wall_omrf": {
+            "system": "Buildings with ordinary RC structural walls and RC OMRFs (see Note 1)",
+            "R": 3.0
+          },
+          "ordinary_wall_smrf": {
+            "system": "Buildings with ordinary RC structural walls and RC SMRFs (see Note 1)",
+            "R": 4.0
+          },
+          "ductile_wall_omrf": {
+            "system": "Buildings with ductile RC structural walls with RC OMRFs (see Note 1)",
+            "R": 4.0
+          },
+          "ductile_wall_smrf": {
+            "system": "Buildings with ductile RC structural walls with RC SMRFs",
+            "R": 5.0
+          }
+        },
+        "flat_slab_structural_wall_amd2": {
+          "system": "Flat Slab - Structural Wall System (see Note 4): RC building with (a) ductile RC structural walls designed to resist 100% of design lateral force; (b) perimeter RC SMRFs designed to independently resist 25% of design lateral force; (c) an outrigger and belt-truss system connecting the core ductile walls and perimeter SMRFs (see Note 1).",
+          "R": 3.0,
+          "amended_by": "Amendment 2 (replaces former Sl No.(v))"
+        }
+      },
+      "page": 20,
+      "notes": {
+        "1": "Substitute 'Structures' for 'RC and steel structures' in Seismic Zones III, IV and V (Amendment 2).",
+        "3": "See 7.2.7 (Amendment 2).",
+        "4": "Flat-slab buildings: (a) punching shear failure shall be avoided; (b) lateral drift at roof under lateral force shall not exceed 0.1 percent; estimate drift using total lateral displacement incl. torsion and 3D models; displacement response need not be scaled per 7.7.3.2 (Amendment 2).",
+        "amd2_edits": [
+          "Sl No.(ii)(a): insert '(see Note 1)'",
+          "Sl No.(iv) title: delete '(see Note 3)'"
+        ]
+      }
+    },
+    {
+      "id": "IS1893-1-2016_Table7",
+      "clause": "Table 7",
+      "title": "Minimum Design Earthquake Horizontal Lateral Force for Buildings",
+      "ref_clause": "7.2.2",
+      "statement": "Minimum design lateral force expressed as a percentage of the seismic weight W; the building's lateral-load-resisting system must be able to resist at least this force regardless of the computed design earthquake force.",
+      "values_percent_of_W": {
+        "II": 0.7,
+        "III": 1.1,
+        "IV": 1.6,
+        "V": 2.4
+      },
+      "page": 19
+    },
+    {
+      "id": "IS1893-1-2016_7.3.1",
+      "clause": "7.3.1",
+      "title": "Seismic Weight of Floors",
+      "statement": "The seismic weight of each floor is its full dead load plus the appropriate percentage of imposed (live) load given in Table 10. The seismic weight of the whole building is the sum of the seismic weights of all floors.",
+      "tables": [
+        "IS1893-1-2016_Table10"
+      ],
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_Table10",
+      "clause": "Table 10",
+      "title": "Percentage of Imposed Load to be Considered in Seismic Weight Calculation",
+      "ref_clause": "7.3.1",
+      "values_percent": {
+        "udl_up_to_and_including_3_0_kN_m2": 25,
+        "udl_above_3_0_kN_m2": 50
+      },
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.3.2",
+      "clause": "7.3.2",
+      "title": "Imposed Load on Roof",
+      "statement": "Imposed (live) load on the roof need not be considered in the seismic weight calculation.",
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.3.3",
+      "clause": "7.3.3",
+      "title": "Reduction of Imposed Load",
+      "statement": "The percentage of imposed load given in Table 10 is appropriate for seismic weight; the reductions in imposed load otherwise permitted for static design are not to be combined with these values.",
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.6",
+      "clause": "7.6",
+      "title": "Equivalent Static Method",
+      "statement": "Permitted for design of regular buildings up to 15 m in Seismic Zone II, and as a baseline for scaling dynamic-analysis results. The design base shear VB is distributed along the height and resisted by the lateral system.",
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.6.2",
+      "clause": "7.6.2",
+      "title": "Approximate Fundamental Translational Natural Period Ta",
+      "statement": "The approximate fundamental natural period Ta (in seconds), with h = height of building in m (excluding any basement storey braced/connected by walls between ground and base), and d = base dimension at plinth level along the considered lateral-force direction in m, is taken as follows.",
+      "formula_a_bare_MRF": {
+        "rc_mrf": "Ta = 0.075 * h^0.75",
+        "rc_steel_composite_mrf": "Ta = 0.080 * h^0.75",
+        "steel_mrf": "Ta = 0.085 * h^0.75",
+        "applies_to": "Bare moment-resisting-frame buildings without any masonry or other infills"
+      },
+      "formula_b_rc_walls": {
+        "Ta": "Ta = 0.075 * h^0.75 / sqrt(Aw)",
+        "Aw_final_form": "Aw = SUM_{i=1..Nw} [ Awi * { 0.2 + (Lwi/h)^2 } ]",
+        "constraint": "Lwi/h shall not be taken greater than 0.9",
+        "where": "Awi = effective cross-sectional area of wall i in first storey (m^2); Lwi = length of wall i in first storey (m); Nw = number of walls in the considered direction.",
+        "amended_by": "Aw expression as corrected by Amendment 1 (2017) then Amendment 2 (2020)"
+      },
+      "formula_c_all_other": {
+        "Ta": "Ta = 0.09 * h / sqrt(d)",
+        "applies_to": "All other buildings (including buildings with brick/other infills)"
+      },
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.6.2.1",
+      "clause": "7.6.2.1",
+      "title": "Bounds on Ta",
+      "statement": "The value of Ta obtained shall neither be taken to be more than that given in 7.6.2(a) nor less than that given in 7.6.2(c).",
+      "amended_by": "Amendment 2 (2020) - new clause",
+      "page": 21
+    },
+    {
+      "id": "IS1893-1-2016_7.6.3",
+      "clause": "7.6.3",
+      "title": "Distribution of Design Base Shear Along Height",
+      "statement": "The design base shear VB is distributed to floor level i in proportion to Wi*hi^2. The design storey shear at any storey is the sum of design lateral forces at all floors above that storey; where floors act as rigid diaphragms the storey shear is distributed to vertical elements in proportion to their lateral stiffness.",
+      "formula": "Q_i = VB * ( Wi * hi^2 ) / ( SUM_{j=1..n} Wj * hj^2 )",
+      "where": "Qi = design lateral force at floor i; Wi = seismic weight of floor i; hi = height of floor i measured from base; n = number of storeys.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.6.4",
+      "clause": "7.6.4",
+      "title": "Diaphragm",
+      "statement": "A floor diaphragm is considered flexible if its maximum lateral deformation (measured from the chord of the deformed shape) exceeds 1.2 times the average displacement of the diaphragm. For flexible diaphragms, storey shear is distributed to vertical elements considering in-plane diaphragm flexibility. Reinforced concrete monolithic slab-beam floors (or precast/prefabricated floors with reinforced screed topping, min 50 mm on floors / 75 mm on roof, min 6 mm bars at 150 mm c/c, plan aspect ratio < 3) may be treated as rigid diaphragms.",
+      "see_fig": "Fig. 6",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7",
+      "clause": "7.7",
+      "title": "Dynamic Analysis Method",
+      "statement": "Linear dynamic analysis shall be performed to obtain the design lateral force (design base shear and its distribution) for all buildings other than regular buildings lower than 15 m in Seismic Zone II.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.2",
+      "clause": "7.7.2",
+      "title": "Analytical Model for Buildings with Unusual Configuration",
+      "statement": "The analytical model for dynamic analysis of buildings with unusual configuration shall adequately represent the irregularities present in the configuration.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.3",
+      "clause": "7.7.3",
+      "title": "Dynamic Analysis - Scaling to Base Shear",
+      "statement": "Dynamic analysis may use the Time History Method or the Response Spectrum Method. The design base shear VB so estimated shall not be less than the design base shear (V_bar_B) calculated using the fundamental period Ta per 7.6.2.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.3.1",
+      "clause": "7.7.3.1",
+      "title": "Scaling of Force Response Quantities",
+      "statement": "When VB < V_bar_B, the force response quantities (e.g. member stress resultants, storey shear forces, base reactions) shall be multiplied by V_bar_B / VB. For shaking along the two mutually perpendicular plan directions X and Y, separate factors V_bar_BX/VBX and V_bar_BY/VBY shall be calculated; for the vertical Z direction the factor shall be Max[ V_bar_BX/VBX ; V_bar_BY/VBY ].",
+      "amended_by": "Amendment 2 (2020) - clause renumbered/clarified",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.3.2",
+      "clause": "7.7.3.2",
+      "title": "Displacement Response Quantities Not Scaled",
+      "statement": "When VB < V_bar_B, the displacement response quantities need not be scaled.",
+      "amended_by": "Amendment 2 (2020) - new clause",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.4",
+      "clause": "7.7.4",
+      "title": "Time History Method",
+      "statement": "The time history method shall be based on an appropriate ground motion (preferably compatible with the design acceleration spectrum in the desired range of natural periods) and performed using accepted principles of earthquake structural dynamics.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.5",
+      "clause": "7.7.5",
+      "title": "Response Spectrum Method",
+      "statement": "The response spectrum method may be performed for any building using the design acceleration spectrum specified in 6.4.2, or a site-specific design acceleration spectrum per 6.4.7.",
+      "page": 23
+    },
+    {
+      "id": "IS1893-1-2016_7.7.5.2",
+      "clause": "7.7.5.2",
+      "title": "Number of Modes / Modal Mass Participation",
+      "statement": "The number of modes to be used in the analysis for seismic shaking along a considered direction shall be such that the sum total of modal masses of all modes considered is at least 90 percent of the total seismic mass.",
+      "page": 24
+    },
+    {
+      "id": "IS1893-1-2016_7.7.5.4",
+      "clause": "7.7.5.4",
+      "title": "Modal Combination",
+      "statement": "Response quantities from individual modes are combined by the Complete Quadratic Combination (CQC) method when modes are closely spaced; the Square Root of the Sum of Squares (SRSS) may be used when modes are well separated (frequencies differing by more than 10 percent).",
+      "page": 24
+    },
+    {
+      "id": "IS1893-1-2016_7.8",
+      "clause": "7.8",
+      "title": "Torsion",
+      "statement": "Provision shall be made for the increase in shear forces on the lateral-force-resisting elements resulting from horizontal torsional moment arising from eccentricity between the centre of mass and centre of rigidity.",
+      "page": 24
+    },
+    {
+      "id": "IS1893-1-2016_7.8.2",
+      "clause": "7.8.2",
+      "title": "Design Eccentricity",
+      "statement": "The design eccentricity edi to be used at floor i shall be taken as whichever of the two expressions gives the more severe effect on the element under consideration.",
+      "formula": "edi = 1.5*esi + 0.05*bi   OR   edi = esi - 0.05*bi",
+      "where": "esi = static eccentricity at floor i (distance between centre of mass and centre of rigidity); bi = floor plan dimension perpendicular to the direction of the lateral force.",
+      "page": 24
+    },
+    {
+      "id": "IS1893-1-2016_7.9",
+      "clause": "7.9",
+      "title": "RC Frame Buildings with Unreinforced Masonry (URM) Infill Walls",
+      "statement": "The stiffening effect of URM infill walls shall be considered in RC frame buildings (e.g. via an equivalent diagonal strut, Fig. 7). Strut width and modelling rules apply.",
+      "page": 25
+    },
+    {
+      "id": "IS1893-1-2016_7.9.1.1",
+      "clause": "7.9.1.1",
+      "title": "Design for Bare and Infilled Frame Combinations",
+      "statement": "RC members shall be designed for the governing combinations of stress resultants arising from structural analysis of: (a) the bare frame building, and (b) the frame building with URM infills.",
+      "amended_by": "Amendment 2 (2020) - new clause",
+      "page": 25
+    },
+    {
+      "id": "IS1893-1-2016_7.10",
+      "clause": "7.10",
+      "title": "RC Frame Buildings with Open Storeys (Soft/Weak Storey)",
+      "statement": "RC moment-resisting frame buildings with open storey(s) at any level (e.g. due to discontinuity of URM infill or structural walls) are known to have flexible and weak storeys per Table 6. Suitable measures shall be adopted to increase stiffness and strength of the open storey and the storeys below, along both plan directions, per 7.10.2 to 7.10.4 (e.g. RC structural walls, or braced frames in select bays).",
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.10.4",
+      "clause": "7.10.4",
+      "title": "RC Structural Wall Plan Density",
+      "statement": "When RC structural walls are provided as the open-storey measure, the RC structural-wall plan density (rho_sw) of the building shall be at least 2 percent along each principal direction in Seismic Zones III, IV and V. These walls shall be well distributed in plan. Such walls may be adopted even in regular buildings without open storeys.",
+      "threshold_percent": 2.0,
+      "applies_to_zones": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.10.5",
+      "clause": "7.10.5",
+      "title": "Detailing of RC Walls in Open-Storey Buildings",
+      "statement": "RC structural walls in buildings located in Seismic Zones III, IV and V shall be designed and detailed to comply with all requirements of IS 13920.",
+      "applies_to_zones": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.11",
+      "clause": "7.11",
+      "title": "Deformation",
+      "statement": "Deformation of RC buildings shall be obtained from structural analysis using a structural model based on the section properties given in 6.4.3 (cracked-section stiffness).",
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.11.1.1",
+      "clause": "7.11.1.1",
+      "title": "Storey Drift Limitation",
+      "statement": "Storey drift in any storey shall not exceed 0.004 times the storey height, under the action of design base shear VB with no load factors mentioned in 6.3 (i.e. partial safety factor for all loads taken as 1.0).",
+      "drift_limit_ratio": 0.004,
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.11.1.2",
+      "clause": "7.11.1.2",
+      "title": "Drift from Dynamic Analysis Not Scaled",
+      "statement": "Displacement estimates obtained from dynamic analysis methods need not be scaled, as stated in 7.7.3.2.",
+      "amended_by": "Amendment 2 (2020) - substituted",
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.11.2",
+      "clause": "7.11.2",
+      "title": "Deformation Capability of Non-Seismic Members",
+      "statement": "For buildings in Seismic Zones III, IV and V, structural components not part of the seismic-force-resisting system but monolithically connected shall not lose their vertical load-carrying capacity under induced net stress resultants, including additional bending moments and shear forces from storey deformations equal to R times the storey displacements calculated per 7.11.1 (R per Table 9).",
+      "applies_to_zones": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "page": 26
+    },
+    {
+      "id": "IS1893-1-2016_7.11.3",
+      "clause": "7.11.3",
+      "title": "Separation Between Adjacent Units",
+      "statement": "Two adjacent buildings, or two adjacent units of the same building with separation joint between them, shall be separated by a gap not less than R times the sum of the storey displacements (Delta_1, Delta_2) calculated per 7.11.1, to avoid pounding. For buildings of equal height with floors at the same level, the gap may be (R1*Delta_1 + R2*Delta_2)/2.",
+      "formula": "gap >= R*(Delta_1 + Delta_2)   ; for equal-height, same-floor-level units: gap = (R1*Delta_1 + R2*Delta_2)/2",
+      "amended_by": "Amendment 1 (2017) corrected the equal-height expression to (R1*Delta_1 + R2*Delta_2)/2; Amendment 2 corrected 'for the two' wording.",
+      "page": 27
+    },
+    {
+      "id": "IS1893-1-2016_7.12",
+      "clause": "7.12",
+      "title": "Miscellaneous / Connections and Foundations",
+      "statement": "Foundations, ties between isolated footings, and connections of structural members shall be designed for the earthquake forces; foundation of buildings in Seismic Zones III, IV and V shall be tied where required and designed for soil-structure considerations. (See also 7.12 sub-clauses for connections, vertical projections/appendages, and horizontal projections.)",
+      "page": 27
+    },
+    {
+      "id": "IS1893-1-2016_AnnexE",
+      "clause": "Annex E",
+      "title": "Zone Factor (Z) for Some Important Towns / Town-to-Seismic-Zone List",
+      "statement": "Annex E lists Indian towns with their seismic zone and corresponding zone factor Z (per Table 3: II=0.10, III=0.16, IV=0.24, V=0.36). This town list could not be extracted from the supplied PDF (scrambled font). Per the project decision, seismic zone for the DBR checker is taken from the BMTPC Vulnerability Atlas of India (2019), district-level, which resolves the Ghaziabad gap in the IS 1893 town list. Use Annex E only as a cross-check, not as the primary zone source.",
+      "amended_by": "Amendment 1 (2017) substituted 'Thiruvannamalai' for 'Tiruvannamalai'",
+      "data_source_for_checker": "BMTPC Vulnerability Atlas of India 2019 (district-level)",
+      "page": 37
+    }
+  ]
+}
