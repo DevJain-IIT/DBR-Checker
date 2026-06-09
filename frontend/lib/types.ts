@@ -86,15 +86,24 @@ export interface AdminStats {
     reports_with_flaws: number;
     clean_reports: number;
     avg_flaws_per_report: number;
+    unique_users: number;
   };
   verdict_totals: Partial<Record<Verdict, number>>;
   status_totals: Partial<Record<Verdict, number>>;
   top_flagged_checks: { check_id: string; count: number }[];
+  top_users: { email: string; count: number }[];
   recent_reports: {
-    id: string; filename: string | null; created_at: string | null;
+    id: string; filename: string | null; user_email: string | null; created_at: string | null;
     overall_status: Verdict | null; flaw_count: number; check_count: number;
   }[];
   extraction_model: string;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  created_at: string | null;
+  last_login_at: string | null;
 }
 
 export type Summary = Partial<Record<Verdict, number>>;
@@ -106,6 +115,7 @@ export interface AnalyzeResponse {
   summary: Summary;
   overall_status: Verdict;
   extraction_model?: string | null;
+  user_email?: string | null;
 }
 
 export interface CheckResponse {
@@ -119,6 +129,7 @@ export interface CheckResponse {
 export interface ReportListItem {
   id: string;
   filename: string | null;
+  user_email?: string | null;
   created_at: string | null;
   updated_at: string | null;
   summary: Summary;

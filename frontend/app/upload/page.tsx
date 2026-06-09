@@ -14,7 +14,16 @@ export default function UploadPage() {
   const [file, setFile] = React.useState<File | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [analysisDone, setAnalysisDone] = React.useState(false);
+  const [email, setEmail] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  // Prefill the email from a previous session so repeat users don't retype it.
+  React.useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("dbr-user-email") : null;
+    if (saved) setEmail(saved);
+  }, []);
+
+  const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
 
   const pick = (f: File | null) => {
     if (!f) return;
@@ -26,10 +35,12 @@ export default function UploadPage() {
 
   const run = async () => {
     if (!file) return;
+    if (!emailValid) { setError("Please enter a valid email to continue."); return; }
+    localStorage.setItem("dbr-user-email", email.trim().toLowerCase());
     setAnalysisDone(false);
     setStage("processing");
     try {
-      const res = await analyzePdf(file);
+      const res = await analyzePdf(file, email.trim().toLowerCase());
       // hand off via sessionStorage so the report page can render instantly,
       // then it also persists server-side and is reachable by id.
       sessionStorage.setItem(`dbr-report-${res.report_id}`, JSON.stringify(res));
@@ -92,10 +103,23 @@ export default function UploadPage() {
             </div>
 
             {stage === "ready" && (
-              <div style={{ display: "flex", justifyContent: "center", marginTop: 28, animation: "dbr-pop-in .4s both" }}>
-                <button onClick={run} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 30px", borderRadius: 12, background: T.ink, color: T.textD, fontWeight: 600, fontSize: 15.5, border: "none", cursor: "pointer", fontFamily: T.sans, boxShadow: "0 14px 32px -16px rgba(10,22,40,0.6)" }}>
-                  Run 25 checks <Icon.Arrow size={17} color={T.textD} />
-                </button>
+              <div style={{ marginTop: 28, animation: "dbr-pop-in .4s both" }}>
+                <div style={{ maxWidth: 420, margin: "0 auto" }}>
+                  <label style={{ display: "block", fontFamily: T.mono, fontSize: 11, color: T.subtle, letterSpacing: "0.06em", marginBottom: 7 }}>
+                    YOUR EMAIL <span style={{ color: VERDICTS.FLAW.fg }}>*</span>
+                  </label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@firm.com"
+                    onKeyDown={(e) => { if (e.key === "Enter" && emailValid) run(); }}
+                    style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: `1px solid ${email && !emailValid ? VERDICTS.FLAW.line : T.border}`, background: T.panel, color: T.ink, fontSize: 14.5, fontFamily: T.sans, outline: "none" }} />
+                  <div style={{ fontSize: 11.5, color: T.muted, marginTop: 6 }}>
+                    Reports are saved under your email so you can find them later in History.
+                  </div>
+                </div>
+                <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+                  <button onClick={run} disabled={!emailValid} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 30px", borderRadius: 12, background: emailValid ? T.ink : T.sand, color: emailValid ? T.textD : T.muted, fontWeight: 600, fontSize: 15.5, border: "none", cursor: emailValid ? "pointer" : "not-allowed", fontFamily: T.sans, boxShadow: emailValid ? "0 14px 32px -16px rgba(10,22,40,0.6)" : "none", transition: `all .2s ${T.spring}` }}>
+                    Run 25 checks <Icon.Arrow size={17} color={emailValid ? T.textD : T.muted} />
+                  </button>
+                </div>
               </div>
             )}
           </>

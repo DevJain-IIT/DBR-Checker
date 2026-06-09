@@ -3,6 +3,7 @@
 
 import type {
   AdminStats,
+  AdminUser,
   AnalyzeResponse,
   CheckResponse,
   Citation,
@@ -26,9 +27,10 @@ async function jsonOrThrow<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export async function analyzePdf(file: File): Promise<AnalyzeResponse> {
+export async function analyzePdf(file: File, userEmail: string): Promise<AnalyzeResponse> {
   const form = new FormData();
   form.append("file", file);
+  form.append("user_email", userEmail);
   const res = await fetch(`${BASE}/api/analyze`, { method: "POST", body: form });
   return jsonOrThrow<AnalyzeResponse>(res);
 }
@@ -37,11 +39,12 @@ export async function recheck(
   extracted: DBRData,
   reportId?: string | null,
   filename?: string | null,
+  userEmail?: string | null,
 ): Promise<CheckResponse> {
   const res = await fetch(`${BASE}/api/check`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ extracted, report_id: reportId ?? null, filename: filename ?? null }),
+    body: JSON.stringify({ extracted, report_id: reportId ?? null, filename: filename ?? null, user_email: userEmail ?? null }),
   });
   return jsonOrThrow<CheckResponse>(res);
 }
@@ -51,8 +54,10 @@ export async function getClause(id: string): Promise<Citation & Record<string, u
   return jsonOrThrow(res);
 }
 
-export async function listReports(limit = 50): Promise<ReportListItem[]> {
-  const res = await fetch(`${BASE}/api/reports?limit=${limit}`, { cache: "no-store" });
+export async function listReports(limit = 50, email?: string | null): Promise<ReportListItem[]> {
+  const q = new URLSearchParams({ limit: String(limit) });
+  if (email) q.set("email", email);
+  const res = await fetch(`${BASE}/api/reports?${q.toString()}`, { cache: "no-store" });
   const data = await jsonOrThrow<{ reports: ReportListItem[] }>(res);
   return data.reports;
 }
@@ -67,10 +72,51 @@ export async function health(): Promise<Record<string, unknown>> {
   return jsonOrThrow(res);
 }
 
-export async function adminStats(passcode: string): Promise<AdminStats> {
-  const res = await fetch(`${BASE}/api/admin/stats`, {
-    cache: "no-store",
-    headers: { "X-Admin-Passcode": passcode },
+// ---- Admin auth (email + password -> bearer token) ----
+function authHeader(token: string): Record<string, string> {
+  return { Authorization: `Bearer ${token}` };
+}
+
+export async function adminLogin(email: string, password: string): Promise<{ token: string; admin: AdminUser }> {
+  const res = await fetch(`${BASE}/api/admin/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
   });
+  return jsonOrThrow(res);
+}
+
+export async function adminStats(token: string): Promise<AdminStats> {
+  const res = await fetch(`${BASE}/api/admin/stats`, { cache: "no-store", headers: authHeader(token) });
   return jsonOrThrow<AdminStats>(res);
+}
+
+export async function listAdmins(token: string): Promise<AdminUser[]> {
+  const res = await fetch(`${BASE}/api/admin/admins`, { cache: "no-store", headers: authHeader(token) });
+  const data = await jsonOrThrow<{ admins: AdminUser[] }>(res);
+  return data.admins;
+}
+
+export async function createAdmin(token: string, email: string, password: string): Promise<AdminUser> {
+  const res = await fetch(`${BASE}/api/admin/admins`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader(token) },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await jsonOrThrow<{ admin: AdminUser }>(res);
+  return data.admin;
+}
+
+export async function deleteAdmin(token: string, adminId: string): Promise<void> {
+  const res = await fetch(`${BASE}/api/admin/admins/${adminId}`, { method: "DELETE", headers: authHeader(token) });
+  await jsonOrThrow(res);
+}
+
+export async function changeAdminPassword(token: string, adminId: string, password: string): Promise<void> {
+  const res = await fetch(`${BASE}/api/admin/admins/${adminId}/password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader(token) },
+    body: JSON.stringify({ password }),
+  });
+  await jsonOrThrow(res);
 }

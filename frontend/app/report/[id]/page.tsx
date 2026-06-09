@@ -40,7 +40,7 @@ export default function ReportPage() {
     if (!working) return;
     setRerunning(true);
     try {
-      const res = await recheck(working, id, data?.extracted ? undefined : null);
+      const res = await recheck(working, id, data?.extracted ? undefined : null, data?.user_email ?? null);
       setData((prev) => prev ? { ...prev, extracted: res.extracted, findings: res.findings, summary: res.summary, overall_status: res.overall_status } : prev);
       setEdited(null); setDirty(false);
     } catch (e) {

@@ -10,10 +10,25 @@ import { GridBg, Icon, T, VERDICTS, VERDICT_ORDER, VIcon, Wordmark } from "@/lib
 export default function HistoryPage() {
   const [reports, setReports] = React.useState<ReportListItem[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [email, setEmail] = React.useState("");
+  const [activeEmail, setActiveEmail] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    listReports().then(setReports).catch((e) => setError(e instanceof Error ? e.message : "Could not load history."));
+  const load = React.useCallback((filterEmail: string | null) => {
+    setReports(null); setError(null);
+    listReports(50, filterEmail || undefined)
+      .then(setReports)
+      .catch((e) => setError(e instanceof Error ? e.message : "Could not load history."));
   }, []);
+
+  // Default to the email used on upload (saved in localStorage).
+  React.useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("dbr-user-email") : null;
+    if (saved) { setEmail(saved); setActiveEmail(saved); load(saved); }
+    else { setActiveEmail(null); load(null); }
+  }, [load]);
+
+  const applyFilter = () => { const e = email.trim().toLowerCase(); setActiveEmail(e || null); load(e || null); };
+  const showAll = () => { setActiveEmail(null); load(null); };
 
   return (
     <div className="dbr-scroll" style={{ minHeight: "100vh", background: T.paper, color: T.ink, fontFamily: T.sans, position: "relative" }}>
@@ -29,7 +44,18 @@ export default function HistoryPage() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontFamily: T.mono, fontSize: 11, color: T.cyanDeep, letterSpacing: "0.18em", marginBottom: 12 }}>SAVED REPORTS</div>
           <h1 style={{ fontFamily: T.serif, fontSize: 40, margin: 0, fontWeight: 400, letterSpacing: "-0.02em" }}>Report history</h1>
-          <p style={{ fontSize: 15, color: T.muted, marginTop: 12 }}>Every analysis you run is saved here. Open one to revisit its findings and citations.</p>
+          <p style={{ fontSize: 15, color: T.muted, marginTop: 12 }}>
+            {activeEmail ? <>Reports saved under <b>{activeEmail}</b>.</> : "All saved reports."} Open one to revisit its findings and citations.
+          </p>
+
+          {/* email filter */}
+          <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap", alignItems: "center" }}>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="filter by email"
+              onKeyDown={(e) => { if (e.key === "Enter") applyFilter(); }}
+              style={{ padding: "9px 13px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.panel, color: T.ink, fontSize: 13.5, fontFamily: T.sans, outline: "none", minWidth: 240 }} />
+            <button onClick={applyFilter} style={{ padding: "9px 16px", borderRadius: 9, border: "none", background: T.ink, color: T.textD, fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Filter</button>
+            {activeEmail && <button onClick={showAll} style={{ padding: "9px 14px", borderRadius: 9, border: `1px solid ${T.border}`, background: T.panel, color: T.muted, fontSize: 13, cursor: "pointer" }}>Show all</button>}
+          </div>
         </div>
 
         {error && (
