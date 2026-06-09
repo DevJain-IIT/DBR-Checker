@@ -167,13 +167,71 @@ def _cited_codes(v: Any) -> list:
     return out
 
 
+def lookup_district(district: Optional[str], state: Optional[str] = None) -> Optional[dict]:
+    """
+    Look up a district in the district_locations table (seeded from the CSV).
+    Case/space-insensitive match on district name (optionally narrowed by state).
+    Returns the row dict, or None if not found. Import is local so the checks
+    engine never hard-depends on the DB layer.
+    """
+    if not district:
+        return None
+    try:
+        from db import DistrictLocation, SessionLocal
+    except Exception:
+        return None
+    key = district.strip().lower()
+    db = SessionLocal()
+    try:
+        rows = db.query(DistrictLocation).all()
+        # exact (case-insensitive) match first
+        for r in rows:
+            if r.district.strip().lower() == key and (
+                    not state or r.state.strip().lower() == state.strip().lower()):
+                return r.to_dict()
+        # loose contains match as a fallback (handles "Gautam Buddha Nagar" vs "GAUTAM BUDDHA NAGAR")
+        for r in rows:
+            rd = r.district.strip().lower()
+            if (key in rd or rd in key) and (
+                    not state or r.state.strip().lower() == state.strip().lower()):
+                return r.to_dict()
+    finally:
+        db.close()
+    return None
+
+
 def resolve_location(profile: BuildingProfile) -> BuildingProfile:
     """
-    STUB resolver. Full district -> {seismic_zone, Vb} lookup (BMTPC / IS 1893
-    Annex E + IS 875-3 Annex A) is future work. For now we only keep explicitly
-    stated values; we do not guess from district. Kept as a seam so D19 can later
-    compare stated-vs-resolved.
+    Resolve the project's district to its authoritative seismic zone (+ basic
+    wind speed where known) from the district_locations lookup.
+
+    Policy (decided with the user):
+      - Use the CONSERVATIVE zone as ground-truth, but keep both + the straddler
+        flag attached so D19 can REVIEW ambiguous (straddler) districts.
+      - Only FILL IN profile.seismic_zone / basic_wind_speed when the DBR did
+        NOT state them — never silently overwrite a stated value (D19 compares
+        stated-vs-resolved, so the stated value must survive).
+      - Wind is partial (~10% of districts); absent -> left as-is, flagged later.
+
+    The resolved ground-truth is stashed on the profile via attributes the engine
+    ignores (`_resolved_*`), so checks.py stays untouched.
     """
+    row = lookup_district(profile.district)
+    # stash ground-truth for the API/UI even if nothing is filled
+    setattr(profile, "_resolved_location", row)
+    if not row:
+        return profile
+
+    truth_zone = row.get("zone_conservative") or row.get("zone_majority")
+    # Straddler districts span two zones (e.g. II-III); BOTH are valid for the
+    # district and we can't pick one without the precise site lat/long
+    # (lat/long search is upcoming). So do NOT auto-fill a single zone for
+    # straddlers — leave it unresolved so the UI/D19 can ask for coordinates.
+    if profile.seismic_zone is None and truth_zone and not row.get("is_straddler"):
+        profile.seismic_zone = truth_zone
+    # fill missing wind only (data is partial)
+    if profile.basic_wind_speed is None and row.get("basic_wind_speed_ms"):
+        profile.basic_wind_speed = row["basic_wind_speed_ms"]
     return profile
 
 
@@ -235,3 +293,66 @@ def dbr_to_dict(d: DBRData) -> dict:
     """Serialise DBRData (incl. nested BuildingProfile) for JSON responses / editing."""
     from dataclasses import asdict
     return asdict(d)
+
+
+def location_status(profile: BuildingProfile) -> Optional[dict]:
+    """
+    Structured location resolution for the API/UI (D19 can't express straddlers
+    or the lat/long prompt). Built from the resolved district row + stated values.
+      - matched: did we find the district in the lookup?
+      - is_straddler: spans two zones -> both valid, needs precise lat/long
+      - zone_conservative / zone_majority / zone_span
+      - stated_zone vs resolved (mismatch detection for non-straddlers)
+      - wind: known speed or 'not in lookup yet'
+      - needs_coordinates: true when a straddler -> ask for lat/long
+    """
+    row = getattr(profile, "_resolved_location", None)
+    if not profile.district and not row:
+        return None
+    if not row:
+        return {
+            "district": profile.district,
+            "matched": False,
+            "message": f"District '{profile.district}' not found in the lookup; "
+                       "confirm seismic zone (IS 1893 Annex E) and Vb (IS 875-3 Annex A) manually.",
+        }
+
+    is_straddler = bool(row.get("is_straddler"))
+    truth_zone = row.get("zone_conservative") or row.get("zone_majority")
+    stated = profile.seismic_zone
+
+    status = {
+        "district": row.get("district"),
+        "state": row.get("state"),
+        "matched": True,
+        "is_straddler": is_straddler,
+        "zone_conservative": row.get("zone_conservative"),
+        "zone_majority": row.get("zone_majority"),
+        "zone_span": row.get("zone_span"),
+        "stated_zone": stated,
+        "wind_known": row.get("basic_wind_speed_ms") is not None,
+        "basic_wind_speed_ms": row.get("basic_wind_speed_ms"),
+        "wind_source": row.get("wind_source"),
+        "needs_coordinates": is_straddler,
+    }
+
+    if is_straddler:
+        status["message"] = (
+            f"{row.get('district')} spans seismic zones {row.get('zone_span')} — "
+            "both are valid for this district. Provide the precise site latitude & "
+            "longitude to pinpoint the exact zone."
+        )
+    elif stated and truth_zone and stated != truth_zone:
+        status["message"] = (
+            f"DBR states Zone {stated}, but the district resolves to Zone {truth_zone}. "
+            "Verify the seismic zone basis."
+        )
+    elif truth_zone:
+        status["message"] = f"District resolves to Zone {truth_zone}."
+
+    if not status["wind_known"]:
+        status["wind_message"] = (
+            "Basic wind speed for this district is not in the lookup yet — "
+            "confirm from IS 875-3 Annex A."
+        )
+    return status

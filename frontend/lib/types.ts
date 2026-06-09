@@ -108,6 +108,23 @@ export interface AdminUser {
 
 export type Summary = Partial<Record<Verdict, number>>;
 
+export interface LocationStatus {
+  district: string | null;
+  state?: string | null;
+  matched: boolean;
+  is_straddler?: boolean;
+  zone_conservative?: string | null;
+  zone_majority?: string | null;
+  zone_span?: string | null;
+  stated_zone?: string | null;
+  wind_known?: boolean;
+  basic_wind_speed_ms?: number | null;
+  wind_source?: string | null;
+  needs_coordinates?: boolean;
+  message?: string;
+  wind_message?: string;
+}
+
 export interface AnalyzeResponse {
   report_id: string;
   extracted: DBRData;
@@ -116,6 +133,7 @@ export interface AnalyzeResponse {
   overall_status: Verdict;
   extraction_model?: string | null;
   user_email?: string | null;
+  location?: LocationStatus | null;
 }
 
 export interface CheckResponse {

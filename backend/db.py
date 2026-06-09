@@ -16,7 +16,8 @@ import os
 import uuid
 from typing import Optional
 
-from sqlalchemy import String, DateTime, Integer, create_engine, inspect, text
+from sqlalchemy import (Boolean, DateTime, Float, Integer, String,
+                        create_engine, inspect, text)
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from sqlalchemy.types import JSON
 
@@ -106,6 +107,37 @@ class Admin(Base):
             "email": self.email,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
+        }
+
+
+class DistrictLocation(Base):
+    """
+    Authoritative district -> seismic zone (+ basic wind speed) lookup, seeded
+    from district_seismic_wind.csv. Seismic data is complete; wind is partial
+    (~10% of districts) and will be filled in over time. Powers D19 / location.
+    """
+    __tablename__ = "district_locations"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    state: Mapped[str] = mapped_column(String(120), index=True)
+    district: Mapped[str] = mapped_column(String(160), index=True)
+    zone_conservative: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)
+    zone_majority: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)
+    zone_span: Mapped[Optional[str]] = mapped_column(String(12), nullable=True)
+    is_straddler: Mapped[bool] = mapped_column(Boolean, default=False)
+    basic_wind_speed_ms: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    wind_source: Mapped[Optional[str]] = mapped_column(String(160), nullable=True)
+
+    def to_dict(self) -> dict:
+        return {
+            "state": self.state,
+            "district": self.district,
+            "zone_conservative": self.zone_conservative,
+            "zone_majority": self.zone_majority,
+            "zone_span": self.zone_span,
+            "is_straddler": self.is_straddler,
+            "basic_wind_speed_ms": self.basic_wind_speed_ms,
+            "wind_source": self.wind_source,
         }
 
 

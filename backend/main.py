@@ -36,7 +36,7 @@ from db import Admin, Report, SessionLocal, get_session, init_db  # noqa: E402
 from enrich import enrich_report  # noqa: E402
 from explain import explain_findings  # noqa: E402
 from extract import ExtractionError, extract_dbr  # noqa: E402
-from normalize import build_dbr, dbr_to_dict  # noqa: E402
+from normalize import build_dbr, dbr_to_dict, location_status, lookup_district  # noqa: E402
 
 import datetime as _dt  # noqa: E402
 import re as _re  # noqa: E402
@@ -83,6 +83,12 @@ def _startup() -> None:
         seed_first_admin(db)
     finally:
         db.close()
+    # Seed/refresh the district lookup from the CSV (idempotent upsert).
+    try:
+        from scripts.seed_districts import main as seed_districts
+        seed_districts()
+    except Exception as e:  # never block startup on seeding
+        print(f"district seeding skipped: {e}")
 
 
 # --------------------------------------------------------------------------- #
@@ -203,6 +209,7 @@ async def analyze(file: UploadFile = File(...),
         "overall_status": rep["overall_status"],
         "extraction_model": model,
         "user_email": email,
+        "location": location_status(dbr.profile),
     }
 
 
@@ -225,6 +232,7 @@ def check(req: CheckRequest, db: Session = Depends(get_session)) -> dict:
         "findings": rep["findings"],
         "summary": rep["summary"],
         "overall_status": rep["overall_status"],
+        "location": location_status(dbr.profile),
     }
 
 
@@ -234,6 +242,21 @@ def clause(clause_id: str) -> dict:
     if obj is None:
         raise HTTPException(404, f"No corpus object with id '{clause_id}'.")
     return obj
+
+
+@app.get("/api/location")
+def location(district: str, state: str | None = None) -> dict:
+    """
+    District -> seismic zone (+ Vb where known) from the lookup table.
+    Straddler districts return both zones + needs_coordinates=true (precise
+    lat/long resolution is upcoming). Returns matched=false if not found.
+    """
+    row = lookup_district(district, state)
+    if not row:
+        return {"district": district, "matched": False,
+                "message": f"District '{district}' not found in the lookup."}
+    return {"matched": True, **row,
+            "needs_coordinates": bool(row.get("is_straddler"))}
 
 
 @app.get("/api/reports")

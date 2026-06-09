@@ -4,8 +4,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 import { getReport, recheck } from "@/lib/api";
-import type { AnalyzeResponse, DBRData, Finding, Verdict } from "@/lib/types";
-import { CATEGORY_ORDER, CHECK_CATEGORY, Icon, T, VERDICTS, Wordmark } from "@/lib/design";
+import type { AnalyzeResponse, DBRData, Finding, LocationStatus, Verdict } from "@/lib/types";
+import { CATEGORY_ORDER, CHECK_CATEGORY, Icon, T, VERDICTS, VIcon, Wordmark } from "@/lib/design";
 import { SummaryBar } from "@/components/SummaryBar";
 import { ExtractedPanel } from "@/components/ExtractedPanel";
 import { CategorySection } from "@/components/FindingCard";
@@ -118,6 +118,8 @@ export default function ReportPage() {
 
         <ExtractedPanel data={working} onChange={onChange} onRerun={onRerun} rerunning={rerunning} dirty={dirty} />
 
+        {data.location && <LocationBanner loc={data.location} />}
+
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "28px 2px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <h2 style={{ fontFamily: T.serif, fontSize: 24, margin: 0, fontWeight: 400 }}>Findings</h2>
@@ -141,6 +143,65 @@ export default function ReportPage() {
           DBR CHECK · {String(filename).toUpperCase()} · 25 CHECKS · 8 IS CODES{data.extraction_model ? ` · ${data.extraction_model}` : ""}
         </div>
       </main>
+    </div>
+  );
+}
+
+function LocationBanner({ loc }: { loc: LocationStatus }) {
+  // Tone: straddler needs coords = amber; mismatch = amber; unmatched = grey; ok = cyan.
+  const straddler = !!loc.needs_coordinates;
+  const tone = straddler || (loc.matched === false) ? VERDICTS.REVIEW : VERDICTS.PASS;
+  return (
+    <div style={{ marginTop: 16, background: tone.bg, border: `1px solid ${tone.line}`, borderRadius: 14, padding: "16px 18px" }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+        <div style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, background: T.panel, border: `1px solid ${tone.line}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon.Search size={16} color={tone.solid} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>Location basis</span>
+            {loc.district && <span style={{ fontFamily: T.mono, fontSize: 11.5, color: T.muted }}>{loc.district}{loc.state ? `, ${loc.state}` : ""}</span>}
+            {straddler && <span style={{ fontFamily: T.mono, fontSize: 10, fontWeight: 600, letterSpacing: "0.06em", color: tone.fg, background: T.panel, border: `1px solid ${tone.line}`, borderRadius: 5, padding: "2px 7px" }}>STRADDLER · ZONES {loc.zone_span}</span>}
+          </div>
+          {loc.message && <div style={{ fontSize: 13, color: T.ink, marginTop: 7, lineHeight: 1.55 }}>{loc.message}</div>}
+
+          {/* zones side by side for straddlers */}
+          {straddler && (
+            <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+              <ZoneChip label="Conservative" zone={loc.zone_conservative} emphasis />
+              <ZoneChip label="Majority" zone={loc.zone_majority} />
+            </div>
+          )}
+
+          {/* coordinate prompt (lat/long resolution is upcoming) */}
+          {loc.needs_coordinates && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, padding: "10px 13px", background: T.panel, border: `1px dashed ${tone.line}`, borderRadius: 10 }}>
+              <Icon.Search size={14} color={T.subtle} />
+              <span style={{ fontSize: 12.5, color: T.muted }}>
+                Enter the precise site <b>latitude &amp; longitude</b> to pinpoint the exact zone. (Coordinate lookup coming soon.)
+              </span>
+            </div>
+          )}
+
+          {/* wind status */}
+          {loc.matched && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontFamily: T.mono, fontSize: 11.5, color: T.muted }}>
+              {loc.wind_known
+                ? <><VIcon name="check" size={13} color={VERDICTS.PASS.solid} /> Vb {loc.basic_wind_speed_ms} m/s{loc.wind_source ? ` · ${loc.wind_source}` : ""}</>
+                : <><VIcon name="dash" size={13} color={VERDICTS.MISSING.solid} /> {loc.wind_message || "Wind speed not in lookup yet."}</>}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ZoneChip({ label, zone, emphasis }: { label: string; zone?: string | null; emphasis?: boolean }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 13px", background: T.panel, border: `1px solid ${emphasis ? VERDICTS.REVIEW.line : T.border}`, borderRadius: 10 }}>
+      <span style={{ fontFamily: T.mono, fontSize: 9.5, color: T.subtle, letterSpacing: "0.08em" }}>{label.toUpperCase()}</span>
+      <span style={{ fontFamily: T.serif, fontSize: 20, color: T.ink, lineHeight: 1 }}>Zone {zone || "—"}</span>
     </div>
   );
 }
