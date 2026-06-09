@@ -194,11 +194,14 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
   // for the whole network wait, only nudging forward if it runs unusually long.
   const [active, setActive] = React.useState(0);
 
+  // When done flips true, play a brief sequenced finish (normalize -> checks ->
+  // complete) so even a fast analysis visibly shows all three phases instead of
+  // snapping straight to done. finishStep: 0=extract done, 1=normalize done,
+  // 2=checks done (all complete).
+  const [finishStep, setFinishStep] = React.useState(-1);
+
   React.useEffect(() => {
     if (done) return;
-    // While extraction is in flight, hold on phase 0. If it's taking a long
-    // time (>22s, a big/scanned PDF), gently advance so it doesn't look stuck —
-    // but never reach "done": the real completion comes from `done`.
     const timers = [
       setTimeout(() => setActive((a) => Math.max(a, 1)), 22000),
       setTimeout(() => setActive((a) => Math.max(a, 2)), 30000),
@@ -206,12 +209,26 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
     return () => timers.forEach(clearTimeout);
   }, [done]);
 
-  // When the real call resolves, snap everything to complete.
-  const allDone = done;
-  const checksRun = useCountUp(25, { start: allDone, duration: 700 });
+  React.useEffect(() => {
+    if (!done) return;
+    setFinishStep(0);
+    const timers = [
+      setTimeout(() => setFinishStep(1), 350),
+      setTimeout(() => setFinishStep(2), 750),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [done]);
+
+  const allDone = finishStep >= 2;
+  const checksRun = useCountUp(25, { start: done && finishStep >= 1, duration: 600 });
 
   const phaseState = (i: number): "done" | "active" | "wait" => {
-    if (allDone) return "done";
+    if (done) {
+      // sequenced finish: phase i is done once finishStep passed it, active on the current one
+      if (i < finishStep) return "done";
+      if (i === finishStep) return finishStep >= 2 ? "done" : "active";
+      return "done"; // remaining collapse to done at the end
+    }
     if (i < active) return "done";
     if (i === active) return "active";
     return "wait";

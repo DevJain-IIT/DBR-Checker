@@ -152,7 +152,10 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
                 raw = _parse_json(content)
                 raw["_extraction_model"] = model
                 return raw
-            except (httpx.HTTPError, KeyError, ExtractionError) as e:
+            except (httpx.HTTPError, KeyError, IndexError, ValueError, ExtractionError) as e:
+                # ValueError covers json.JSONDecodeError (a 200 with a non-JSON
+                # body, e.g. an HTML error page) so we fall back to the next
+                # model instead of crashing the request.
                 last_err = e
                 continue
 

@@ -1,0 +1,832 @@
+{
+  "_meta": {
+    "source": "IS 16700:2023 Criteria for Structural Safety of Tall Concrete Buildings (First Revision). Pages 1-2 (Scope/References/Terminology) and 4-16 (Clause 5 General Requirements through Clause 10 NSE), Tables 1-10.",
+    "scope_gate": "Applies to REINFORCED CONCRETE buildings with 50 m < H <= 250 m. Every IS 16700 check must gate on material==RC AND 50<H<=250. Below 50 m or non-RC: not applicable, fall back to IS 1893/IS 456.",
+    "extraction_note": "Clean machine-readable text in this render; transcribed directly, no verify flags. Numbering confirmed against the actual PDF (supersedes any earlier web-derived guesses).",
+    "table_numbering_confirmed": {
+      "Table 1": "Max height by structural system x seismic zone (Cl 5.1.1)",
+      "Table 2": "Max slenderness ratio Ht/Bt (Cl 5.1.2)",
+      "Table 3": "Permissible peak combined LATERAL (wind) acceleration (Cl 6.2.3)  [Residential 0.18, Mercantile 0.25 only]",
+      "Table 4": "Minimum design base shear coefficient % (Cl 6.3.3)",
+      "Table 5": "Cracked section properties of RC members / stiffness modifiers (Cls 5.5.2, 7.3.6, 8.1.3.2.1, 7.2)"
+    },
+    "in_code_typo_flag": "Clause 7.2(c) prints 'Cracked cross sectional area properties as per Table 6' but the actual table is Table 5 (and 7.3.6 correctly cites Table 5). When wiring D9, map 7.2(c)'s 'Table 6' -> Table 5. There is no Table 6 on these pages.",
+    "still_missing_from_is16700": [
+      "Table 10 (ap, Rp coefficients for NSEs) - only the Architectural rows i(a)-(d) are in the supplied render; Mechanical/Electrical rows not captured. NSE design (Cl 10) is outside the D1-D25 set, so this is low priority.",
+      "Annex A (referenced standards list - useful for the D2 editions registry), Annex B (non-conforming approval procedure), Annex C (higher-grade concrete) - not yet supplied."
+    ],
+    "schema_keys": [
+      "id",
+      "clause",
+      "title",
+      "statement",
+      "formula (opt)",
+      "tables (opt)",
+      "feeds_check",
+      "page"
+    ],
+    "gaps_closed_this_update": "Clause 1 scope/applicability gates, Clause 3 terminology incl. 3.12 system definitions (D17) and 3.7 key elements, Clause 8 structural design incl. 8.1.3 backstay (D18) + Tables 6/7/8, Clause 9 Foundations complete (D15: raft H/15, pile H/20, FoS 1.5, settlement 125mm/50mm rock), Clause 10 NSE + Table 9."
+  },
+  "clauses": [
+    {
+      "id": "IS16700-2023_5.1.1",
+      "clause": "5.1.1",
+      "title": "Height Limit for Structural Systems",
+      "statement": "Maximum building height (m) shall not exceed values in Table 1 for the relevant structural system and seismic zone.",
+      "tables": [
+        "IS16700_Table1_max_height"
+      ],
+      "feeds_check": "D17",
+      "page": 4
+    },
+    {
+      "id": "IS16700-2023_5.1.2",
+      "clause": "5.1.2",
+      "title": "Slenderness Ratio",
+      "statement": "Maximum ratio of height to minimum base width B (Ht/Bt) shall not exceed values in Table 2.",
+      "tables": [
+        "IS16700_Table2_slenderness"
+      ],
+      "feeds_check": "D17",
+      "page": 4
+    },
+    {
+      "id": "IS16700-2023_5.1.3",
+      "clause": "5.1.3",
+      "title": "Aerodynamic Effects",
+      "statement": "Elevation profile, facade features and plan shape shall attract minimum wind drag. Effects of sharp corners, projected balconies, etc, shall be considered.",
+      "feeds_check": "D21",
+      "page": 4
+    },
+    {
+      "id": "IS16700-2023_5.2.1",
+      "clause": "5.2.1",
+      "title": "Plan Geometry",
+      "statement": "Plan shall preferably be rectangular (incl. square) or elliptical (incl. circular) so members resist lateral loads without re-entrant-corner effects.",
+      "feeds_check": "D18",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.2.2",
+      "clause": "5.2.2",
+      "title": "Plan Aspect Ratio",
+      "statement": "Maximum plan aspect ratio (Lt/Bt) shall not exceed 5.0. For an L-shaped building, Lt and Bt refer to length and width of each leg.",
+      "feeds_check": "D18",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.3",
+      "clause": "5.3",
+      "title": "Storey Stiffness and Strength",
+      "statement": "(a) Lateral stiffness of any storey shall not be less than 70 percent of the storey above. (b) Lateral strength of any storey shall not be less than 90 percent of the storey above.",
+      "feeds_check": "D18",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.4.1",
+      "clause": "5.4.1",
+      "title": "Lateral Drift",
+      "statement": "Under serviceability loads (incl. wind with 20-year return period), inter-storey drift ratio (dMax/hi) estimated using serviceability sectional properties (Table 5 / 7.2) shall be limited to 1/500. Total drift at topmost usable floor limited to H/500. Single storey may be relaxed to hi/400. For design earthquake force, inter-storey drift shall be hi/250.",
+      "feeds_check": "D11",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.5.1",
+      "clause": "5.5.1",
+      "title": "Torsional Mode Limit",
+      "statement": "Natural period of the fundamental torsional mode shall not exceed 0.9 times the smaller of the fundamental translational periods in the two orthogonal plan directions.",
+      "feeds_check": "D18",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.5.2",
+      "clause": "5.5.2",
+      "title": "Fundamental Translational Period Cap",
+      "statement": "Fundamental translational natural period in either horizontal plan direction shall not exceed 8 s, considering sectional properties per Table 5 corresponding to serviceability loads.",
+      "feeds_check": "D8",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.6.1",
+      "clause": "5.6.1",
+      "title": "Floor Material",
+      "statement": "All floor slabs shall be cast in-situ. Precast floor systems require a minimum structural topping of 75 mm concrete with reinforcing mesh in seismic zones III, IV and V; may reduce to 50 mm in zone II.",
+      "feeds_check": "D12",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.6.2",
+      "clause": "5.6.2",
+      "title": "Diaphragm Openings",
+      "statement": "5.6.2.1 Openings shall not be along any diaphragm edge unless perimeter members have adequate stability/strength. 5.6.2.2 Max opening area <= 30 percent of diaphragm plan area; transfer of lateral forces ensured via collector elements if required. 5.6.2.3 Minimum slab width after deducting openings >= 5 m if no perimeter beam; cumulative slab width preferably >= 50 percent of floor width.",
+      "feeds_check": "D12",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.6.3",
+      "clause": "5.6.3",
+      "title": "Floor Vertical Vibration Frequency",
+      "statement": "Natural vertical vibration frequency of any floor system shall not be less than 3 Hz without demonstration of acceptability using rational procedures.",
+      "feeds_check": "new/serviceability",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.7.1.1",
+      "clause": "5.7.1.1",
+      "title": "Minimum Concrete Grade",
+      "statement": "Minimum grade of concrete shall be M30.",
+      "feeds_check": "D4",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.7.1.2",
+      "clause": "5.7.1.2",
+      "title": "Maximum Concrete Grade",
+      "statement": "Maximum grade of concrete shall be M70. For higher grades the designer shall ensure (by experiment) a minimum crushing strain in compression of 0.002. See Annex C for higher-grade specifications.",
+      "feeds_check": "D4",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.7.2.1",
+      "clause": "5.7.2.1",
+      "title": "Reinforcing Steel",
+      "statement": "Reinforcing steel shall conform to provisions of IS 13920.",
+      "feeds_check": "D5",
+      "page": 5
+    },
+    {
+      "id": "IS16700-2023_5.7.2.3",
+      "clause": "5.7.2.3",
+      "title": "Bar Lapping / Couplers",
+      "statement": "Lapping of longitudinal bars shall be avoided in RC columns and walls that form part of the lateral load resisting system; for bar diameter 20 mm or higher, mechanical couplers per IS 16172 shall be used to extend bars.",
+      "feeds_check": "D5/detailing",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_5.8",
+      "clause": "5.8",
+      "title": "Progressive Collapse and Key Elements",
+      "statement": "5.8.1 Progressive collapse shall be precluded by appropriate structural systems, rigorous investigation of behaviour when critical members fail, and adequate redundancy/integrity. 5.8.2 Key elements (whose failure causes disproportionate collapse) shall be strengthened (e.g. higher partial safety factors) so they do not yield before designated ductile elements; adjoining alternative-load-path elements shall be designed/detailed.",
+      "feeds_check": "declaration",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_6.1",
+      "clause": "6.1",
+      "title": "Loads and Load Combinations",
+      "statement": "Loads and load combinations of IS 875 (Parts 1 to 5), IS 456, IS 1893 (Part 1) and IS 13920 apply to tall buildings, plus the additional requirements in subsequent clauses.",
+      "feeds_check": "D14",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_6.2.1",
+      "clause": "6.2.1",
+      "title": "Wind Tunnel Study Triggers",
+      "statement": "Site-specific wind tunnel studies are required for buildings: (a) height > 150 m, or (b) complexities in plan or elevation geometry, or (c) sited on complex topography with group/interference effect (existing or future), or (d) natural period > 5 s.",
+      "feeds_check": "D21",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_6.2.2",
+      "clause": "6.2.2",
+      "title": "Use of Wind Tunnel Results",
+      "statement": "6.2.2.1 If tunnel gives higher storey shears/overturning moments than IS 875 (Part 3), tunnel results may be used. 6.2.2.2 If lower, design wind base shear shall be >= 70 percent of the IS 875 (Part 3) value, with storey-shear distribution from the tunnel. 6.2.2.3 If tunnel indicates torsional motion, modify the structural system to bring torsional velocity below 0.003 rad/s for 10-year return period. 6.2.2.4 Damping ratio shall not exceed 2 percent of critical for concrete buildings.",
+      "feeds_check": "D21",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_6.2.3",
+      "clause": "6.2.3",
+      "title": "Lateral Acceleration (comfort)",
+      "statement": "Under standard wind loads with 10-year return period, the maximum structural peak combined horizontal acceleration aMax (along + across wind) at any floor shall not exceed Table 3 values, with or without wind dampers.",
+      "tables": [
+        "IS16700_Table3_lateral_acceleration"
+      ],
+      "feeds_check": "D21",
+      "page": 6
+    },
+    {
+      "id": "IS16700-2023_6.3.1",
+      "clause": "6.3.1",
+      "title": "Vertical Shaking (Zone V)",
+      "statement": "Vertical shaking shall be considered simultaneously with horizontal shaking for tall buildings in seismic zone V.",
+      "feeds_check": "D7",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_6.3.2",
+      "clause": "6.3.2",
+      "title": "Site-Specific Spectra (Zone V)",
+      "statement": "For zone V buildings, deterministic site-specific design spectra may preferably be used; if site-specific investigation gives higher hazard, those results shall be used.",
+      "feeds_check": "D7",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_6.3.3",
+      "clause": "6.3.3",
+      "title": "Minimum Design Base Shear Coefficient",
+      "statement": "Design base shear coefficient under design lateral forces shall not be taken less than Table 4.",
+      "tables": [
+        "IS16700_Table4_min_base_shear"
+      ],
+      "feeds_check": "D7",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_6.3.4",
+      "clause": "6.3.4",
+      "title": "Approximate Fundamental Natural Period",
+      "statement": "For buildings of height 50 m and more, period T shall be from rigorously validated analysis but shall not exceed the approximate Ta below.",
+      "formula": "Ta = 0.0644 * H^0.9 (concrete moment-resisting-frame systems); Ta = 0.0672 * H^0.75 (all other concrete structural systems); H in m, Ta in s",
+      "feeds_check": "D8",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_7.1",
+      "clause": "7.1",
+      "title": "Software",
+      "statement": "Structural analysis shall use a standard 3-D computer model with well-established structural analysis software.",
+      "feeds_check": "D22",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_7.2",
+      "clause": "7.2",
+      "title": "Modelling Considerations",
+      "statement": "Computer modelling shall consider: (a) rigid end offsets of linear members in the joint region when centreline modelling is used; (b) floor diaphragm flexibility as applicable; (c) cracked cross-sectional area properties as per Table 5 (the code text prints 'Table 6' here - in-code typo, use Table 5); (d) the initial P-Delta analysis load combination shall be 1.2 DL + 0.5 IL +/- 1.5 EL/WL.",
+      "tables": [
+        "IS16700_Table5_cracked_sections"
+      ],
+      "feeds_check": "D9/D14/D16",
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_7.3.6",
+      "clause": "7.3.6",
+      "title": "Cracked Sectional Properties",
+      "statement": "Cracked sectional properties shall be used when representing concrete elements as per Table 5.",
+      "tables": [
+        "IS16700_Table5_cracked_sections"
+      ],
+      "feeds_check": "D9",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.9",
+      "clause": "7.3.9",
+      "title": "Second-Order (P-Delta) Effects",
+      "statement": "Second-order deformation effects (P-Delta effects) shall be considered.",
+      "feeds_check": "D16",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.10",
+      "clause": "7.3.10",
+      "title": "Inter-Storey Drift Stability Coefficient",
+      "statement": "Building flexibility shall be such that the inter-storey drift stability coefficient theta satisfies theta <= 0.2.",
+      "formula": "theta = (Pi * Delta_i) / (Vi * h_{i-1} * R) <= 0.2; Pi = total design vertical load at level i; Delta_i = design storey drift at level i; Vi = design shear at level i; h_{i-1} = storey height below level i; R = response reduction factor",
+      "feeds_check": "D16",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.11",
+      "clause": "7.3.11",
+      "title": "Flat-Slab Frame Stiffness",
+      "statement": "Stiffness of frames with flat slabs as horizontal members (slab-column frames) shall be ignored in lateral load resistance in all seismic zones; these shall be designed as gravity elements for deformation compatibility.",
+      "feeds_check": "D17",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.12",
+      "clause": "7.3.12",
+      "title": "Structural Wall / Coupling Beam Modelling",
+      "statement": "Models of solid/coupled/perforated/punched structural walls shall represent stiffness, strength and deformation capacities of walls, wall segments, and coupling beams/spandrels, capturing aspect ratio, anticipated cracking, and reinforcement.",
+      "feeds_check": "D17/M-D3",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.13",
+      "clause": "7.3.13",
+      "title": "Construction Sequence Effects",
+      "statement": "Construction-sequence effects shall be considered for buildings taller than 150 m.",
+      "feeds_check": "modelling",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.3.14",
+      "clause": "7.3.14",
+      "title": "Podium-Connected Towers",
+      "statement": "Tower(s) connected by a podium shall be modelled both separately and integrally.",
+      "feeds_check": "modelling",
+      "page": 8
+    },
+    {
+      "id": "IS16700-2023_7.4",
+      "clause": "7.4",
+      "title": "Building Movements",
+      "statement": "For buildings taller than 150 m, and for buildings taller than 100 m with mass asymmetry, analysis shall cover both vertical and horizontal long-term building movements. 7.4.1 Measures shall minimise adverse effects of shrinkage, creep, temperature variation and foundation settlement over the design life (not less than 30 years). 7.4.2 Non-structural elements (curtain walls, cladding, partitions, finishes, services) shall withstand long-term movements and differential effects.",
+      "feeds_check": "D20",
+      "page": 8
+    },
+    {
+      "id": "IS16700_Table1_max_height",
+      "clause": "Table 1",
+      "title": "Maximum Values of Height H above Top of Base Level, by Structural System (m)",
+      "ref_clause": "5.1.1",
+      "systems": [
+        "Moment Frame",
+        "Structural Wall (Well-Distributed)",
+        "Structural Wall + Moment Frame",
+        "Structural Wall + Perimeter Frame",
+        "Structural Wall + Framed Tube"
+      ],
+      "rows": {
+        "Zone V": [
+          "NA",
+          120,
+          150,
+          150,
+          180
+        ],
+        "Zone IV": [
+          "NA",
+          150,
+          200,
+          200,
+          225
+        ],
+        "Zone III": [
+          60,
+          200,
+          225,
+          225,
+          250
+        ],
+        "Zone II": [
+          80,
+          250,
+          250,
+          250,
+          250
+        ]
+      },
+      "notes": [
+        "1) Walls are well-distributed when walls outside the core carry at least 25 percent of lateral loads.",
+        "2) Framed-tube column includes systems under 1.5(g), 1.5(h), 1.5(k)."
+      ],
+      "page": 4
+    },
+    {
+      "id": "IS16700_Table2_slenderness",
+      "clause": "Table 2",
+      "title": "Maximum Slenderness Ratio (Ht/Bt)",
+      "ref_clause": "5.1.2",
+      "systems": [
+        "Moment Frame",
+        "Structural Wall (Well-Distributed)",
+        "Structural Wall + Moment Frame",
+        "Structural Wall + Perimeter Frame",
+        "Structural Wall + Framed Tube"
+      ],
+      "rows": {
+        "Zone V": [
+          "NA",
+          8,
+          8,
+          9,
+          9
+        ],
+        "Zone IV": [
+          "NA",
+          8,
+          8,
+          9,
+          9
+        ],
+        "Zone III": [
+          4,
+          8,
+          8,
+          9,
+          10
+        ],
+        "Zone II": [
+          5,
+          9,
+          9,
+          10,
+          10
+        ]
+      },
+      "page": 4
+    },
+    {
+      "id": "IS16700_Table3_lateral_acceleration",
+      "clause": "Table 3",
+      "title": "Permissible Peak Combined (along+across wind) Acceleration aMax (m/s2)",
+      "ref_clause": "6.2.3",
+      "rows": {
+        "Residential": 0.18,
+        "Mercantile": 0.25
+      },
+      "note": "Only two rows in the 2023 edition (no separate Office row). For office/hotel occupancies, treat as REVIEW or apply engineering judgment (commonly the Mercantile 0.25 bound).",
+      "page": 6
+    },
+    {
+      "id": "IS16700_Table4_min_base_shear",
+      "clause": "Table 4",
+      "title": "Minimum Design Base Shear Coefficient (Percent of Seismic Weight)",
+      "ref_clause": "6.3.3",
+      "columns": [
+        "Zone II",
+        "Zone III",
+        "Zone IV",
+        "Zone V"
+      ],
+      "rows": {
+        "H_le_120m": [
+          0.7,
+          1.1,
+          1.6,
+          2.4
+        ],
+        "H_ge_200m": [
+          0.5,
+          0.75,
+          1.25,
+          1.75
+        ]
+      },
+      "note": "For intermediate height 120 m to 200 m, use linear interpolation.",
+      "page": 7
+    },
+    {
+      "id": "IS16700_Table5_cracked_sections",
+      "clause": "Table 5",
+      "title": "Cracked Section Properties of RC Members (stiffness modifiers)",
+      "ref_clauses": [
+        "5.5.2",
+        "7.3.6",
+        "8.1.3.2.1",
+        "7.2"
+      ],
+      "columns": [
+        "Serviceability_Area",
+        "Serviceability_MoI",
+        "Strength_Area",
+        "Strength_MoI"
+      ],
+      "rows": {
+        "Slabs": [
+          "1.0Ag",
+          "0.35Ig",
+          "1.00Ag",
+          "0.25Ig"
+        ],
+        "Beams": [
+          "1.0Ag",
+          "0.7Ig",
+          "1.00Ag",
+          "0.35Ig"
+        ],
+        "Columns": [
+          "1.0Ag",
+          "0.9Ig",
+          "1.00Ag",
+          "0.70Ig"
+        ],
+        "Walls": [
+          "1.0Ag",
+          "0.9Ig",
+          "1.00Ag",
+          "0.70Ig"
+        ]
+      },
+      "page": 7
+    },
+    {
+      "id": "IS16700-2023_1.1",
+      "clause": "1.1",
+      "title": "Scope",
+      "statement": "Covers design of reinforced concrete (RC) buildings of height greater than 50 m but less than or equal to 250 m, on a prescriptive basis: selection of structural system, geometric proportioning, integrity, resistance to wind and earthquake, and other special tall-building considerations.",
+      "feeds_check": "applicability gate",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.2",
+      "clause": "1.2",
+      "title": "Near-Field Exclusion",
+      "statement": "Not applicable to tall buildings in the near-field of seismogenic faults (within 10 km shortest distance). Such buildings need a more rigorous approach; the prescriptive requirements may be used for proportioning but more stringent specifications may be imposed by the client/owner or the tall-building committee.",
+      "feeds_check": "applicability gate / D7",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.3",
+      "clause": "1.3",
+      "title": "Occupancy Limit",
+      "statement": "Applicable only for buildings housing 20 000 or fewer persons.",
+      "feeds_check": "applicability gate",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.4",
+      "clause": "1.4",
+      "title": "Use Below 50 m / Above 250 m",
+      "statement": "May also be used for buildings of height <= 50 m (adds value). NOT applicable for buildings taller than 250 m.",
+      "feeds_check": "applicability gate",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.5",
+      "clause": "1.5",
+      "title": "Structural Systems Addressed",
+      "statement": "Addresses these typical RC tall-building systems: (a) Structural wall systems; (b) Moment frame systems; (c) Moment frame - Structural wall systems; (d) Structural wall - Flat slab floor systems with perimeter moment frame; (e) Structural wall - Framed tube systems; (f) Framed-tube system; (g) Tube-in-tube system; (h) Multiple tube system; (j) Hybrid system; (k) any of the above with additional framing (outrigger trusses, belt trusses, braced frames). NOTE: Table 1/Table 2 footnotes map systems (g),(h),(k) to the 'Structural Wall + Framed Tube' column.",
+      "feeds_check": "D17",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.6",
+      "clause": "1.6",
+      "title": "Conflict Rule",
+      "statement": "Shall be read with all relevant Indian Standards for building design/construction; in case of conflict, the clauses of this standard apply.",
+      "feeds_check": "D14/general",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_1.7",
+      "clause": "1.7",
+      "title": "Non-Conforming Buildings",
+      "statement": "Buildings not conforming to the prescriptive requirements need a more rigorous design/review per Annex B (proportion, analyze, design, detail, gain approval, construct). More stringent objectives may be imposed by client/owner or the local tall-building committee.",
+      "feeds_check": "D17/D22",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_3.1",
+      "clause": "3.1",
+      "title": "Building Height (definition)",
+      "statement": "Difference in levels between the base level (where inertia forces transfer to the foundation) and the highest structurally integral/continuous roof level. See also Clause 4.",
+      "feeds_check": "D8/D17/height-gate",
+      "page": 1
+    },
+    {
+      "id": "IS16700-2023_3.7",
+      "clause": "3.7",
+      "title": "Key Elements (definition)",
+      "statement": "An element whose failure would cause collapse of more than a limited area close to it; the limited area is taken as 70 m2 or 15 percent of the storey area, whichever is lesser. If key elements exist, it is preferable to modify the layout to avoid them.",
+      "feeds_check": "D18/progressive collapse",
+      "page": 2
+    },
+    {
+      "id": "IS16700-2023_3.12",
+      "clause": "3.12",
+      "title": "Structural Systems and Sub-Systems (definitions)",
+      "statement": "3.12.1 Structural Wall System - inter-connected walls resist vertical+lateral loads via axial/in-plane bending/shear and coupling. 3.12.2 Moment Frame System - beam-column frames resist vertical+lateral. 3.12.3 Moment Frame-Structural Wall System - frames + walls share lateral load by relative stiffness (dual system). 3.12.4 Structural Wall System with Flat Slab Floor - walls + beamless floor + columns. 3.12.5 Core and Outrigger System - core walls + perimeter (gravity) columns linked by outriggers at discrete floors to boost lateral stiffness.",
+      "feeds_check": "D17",
+      "page": 2
+    },
+    {
+      "id": "IS16700-2023_7.4.3_to_7.4.6",
+      "clause": "7.4.3-7.4.6",
+      "title": "Long-Term Movement Detailing & Shrinkage Cap",
+      "statement": "7.4.3 Non-structural connection details shall allow relative movement without distress. 7.4.4 Vertical and sway compensation shall be accounted for during construction. 7.4.5 Gravity-load analysis shall include internal forces from differential vertical movement (shrinkage, creep, temperature, settlement, construction compensation); in any case total shrinkage strain of concrete shall not exceed 0.04 percent. 7.4.6 Creep/shrinkage strain prediction models shall follow established mechanics from specialist literature.",
+      "feeds_check": "D20",
+      "page": 9
+    },
+    {
+      "id": "IS16700-2023_8.1.1",
+      "clause": "8.1.1",
+      "title": "Method of Design",
+      "statement": "Limit state design method (per IS 456) shall be used for RC members.",
+      "feeds_check": "D14",
+      "page": 9
+    },
+    {
+      "id": "IS16700-2023_8.1.2",
+      "clause": "8.1.2",
+      "title": "Staircase",
+      "statement": "Staircases built integrally with the structural system and not confined by structural walls shall be included in the 3-D model and designed for induced forces under load combinations; alternatively a sliding joint may be provided.",
+      "feeds_check": "modelling",
+      "page": 9
+    },
+    {
+      "id": "IS16700-2023_8.1.3",
+      "clause": "8.1.3",
+      "title": "Multiple Tall Buildings with Common Podium / Backstay",
+      "statement": "Covers single-tower-with-podium and multiple-towers-with-common-podium (Fig 1A/1B). 8.1.3.2.1 requires two sets of backstay sensitivity analyses using upper/lower-bound cracked diaphragm and podium/perimeter-wall stiffness from Table 6. 8.1.3.3 backstay: two load paths (direct via tower core/foundation; backstay via in-plane diaphragm+perimeter-wall forces). Backstay diaphragm >=150 mm thick, double mesh >=0.25 percent each direction; seismic forces amplified x1.5 for IS 1893 plan irregularities Type I/II/IV and vertical Type IV, x2.5 over-strength for plan Type III at backstay levels; strut inclination 45 deg at diaphragm-wall connections. 8.1.3.3.3 towers on common podium: model separate AND integral, design podium for worst; period from individual model; no transfer structure at first connected floor.",
+      "tables": [
+        "IS16700_Table6_backstay_stiffness"
+      ],
+      "feeds_check": "D18",
+      "page": 9
+    },
+    {
+      "id": "IS16700-2023_8.2",
+      "clause": "8.2",
+      "title": "Ductility",
+      "statement": "Designer shall ensure sufficient ductility capacity, acceptable energy-dissipation mechanism, and a desirable sequence of initiation of ductile behaviour in members.",
+      "feeds_check": "D5/D18",
+      "page": 13
+    },
+    {
+      "id": "IS16700-2023_8.3",
+      "clause": "8.3",
+      "title": "Frame Buildings",
+      "statement": "Frame structures for seismic design shall have at least two planar frames with a minimum of 3 bays in the direction where moment frames provide lateral resistance.",
+      "feeds_check": "D17",
+      "page": 13
+    },
+    {
+      "id": "IS16700-2023_8.4",
+      "clause": "8.4",
+      "title": "Moment Frame - Structural Wall Systems",
+      "statement": "8.4.1 Designed as dual systems per IS 1893 (Part 1). 8.4.2 Moment frame complies with 8.3, wall with 8.5, and both with IS 13920. 8.4.3 In Zones IV and V, special moment frames and shear walls shall not be discontinued in lower storeys or supported on less stiff/brittle elements.",
+      "feeds_check": "D17/D18",
+      "page": 13
+    },
+    {
+      "id": "IS16700-2023_8.5",
+      "clause": "8.5",
+      "title": "Structural Wall Systems",
+      "statement": "8.5.1 Wall thickness >= 160 mm or hi/20, whichever larger. 8.5.2 opening limits in walls/coupling beams (wall opening < 800 mm or 1/3 length; all opening sides strengthened, bar dia >= 12 mm, per IS 13920). 8.5.8 nominal design shear stress limited to tau_c,max (no axial tension) or 0.5 tau_c,max (under tension / coupling beams), tau_c,max per IS 456 Table 20. 8.5.10 development length 1.25x at yielding locations. 8.5.11 max longitudinal reinforcement in coupling beams per Table 7. 8.5.12 wall removal rule if < 1/3 storey shear strength and no resulting torsional irregularity. 8.5.13 Zones IV/V: walls continuous to base (no transfer), min longitudinal reinf >= 0.4 percent, min transverse >= 0.25 percent, two curtains, fully embedded/anchored (no support on slabs/beams), openings aligned vertically.",
+      "tables": [
+        "IS16700_Table7_coupling_beam_reinf"
+      ],
+      "feeds_check": "D17/M-D3",
+      "page": 13
+    },
+    {
+      "id": "IS16700-2023_8.6",
+      "clause": "8.6",
+      "title": "Flat Slab - Structural Wall Systems",
+      "statement": "Where flat slab is the gravity system, structural walls shall carry ALL lateral loads; column strips of the flat slab shall not be included in the lateral load resisting system. All IS 1893 (Part 1) flat-slab requirements shall be met.",
+      "feeds_check": "D17",
+      "page": 14
+    },
+    {
+      "id": "IS16700-2023_8.7",
+      "clause": "8.7",
+      "title": "Framed Tube / Tube-in-Tube / Multiple Tube Systems",
+      "statement": "8.7.1 tube-in-tube plan regular, L/W <= 2, inner tube centred. 8.7.3 column spacing of framed tube preferably <= 5 m. 8.7.4 corner column area 1-2x internal column. 8.7.5 consider shear-lag. 8.7.6 Zones III/IV/V: no single-span frame; axial compression ratio per IS 13920. 8.7.8 min reinforcement bar diameters in beams per Table 8.",
+      "tables": [
+        "IS16700_Table8_tube_beam_reinf"
+      ],
+      "feeds_check": "D17",
+      "page": 14
+    },
+    {
+      "id": "IS16700-2023_9.1",
+      "clause": "9.1",
+      "title": "Foundation Load Paths",
+      "statement": "Load paths and mechanisms shall be explicitly ensured for transferring vertical and lateral loads between structure and soil.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.2",
+      "clause": "9.2",
+      "title": "Factor of Safety (Overturning/Sliding)",
+      "statement": "A factor of safety of 1.5 against overturning and sliding shall be provided under: (a) unfactored design wind + gravity + permanent imposed load; and (b) 2.5 times design earthquake load + unfactored gravity + permanent imposed load.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.3",
+      "clause": "9.3",
+      "title": "Geotechnical Investigations",
+      "statement": "All geotechnical investigations needed for safety shall be conducted, including liquefaction potential analysis and estimation of soil spring constants / modulus of subgrade reaction. 9.3.1 refer IS 1892.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.4",
+      "clause": "9.4",
+      "title": "Depth of Foundation",
+      "statement": "Embedded depth shall be at least H/15 for raft foundation and H/20 for pile and piled-raft foundation (excluding pile length). May be relaxed (a) on hard rock, or (b) where there is no uplift under any portion of the raft in any service load combination and the minimum competent founding strata requirement is met.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.5",
+      "clause": "9.5",
+      "title": "Podium/Basement Roof Slab Shear Transfer",
+      "statement": "Podium and basement roof slab shall be capable of transferring in-plane shear from the tower to the foundation.",
+      "feeds_check": "D15/D12",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.6",
+      "clause": "9.6",
+      "title": "Basement Expansion Joints",
+      "statement": "Expansion joints shall preferably be avoided in basements of tall buildings; if provided, detailed for water tightness.",
+      "feeds_check": "D15/D20",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.7",
+      "clause": "9.7",
+      "title": "Modelling of Soil",
+      "statement": "9.7.1 Use zoned spring constants / zoned modulus of subgrade reaction for raft design (at least for DL+LL); for rafts of buildings taller than 150 m a soil-structure interaction study using actual column loads/locations is required. 9.7.2 piled rafts with settlement-reducing piles require SSI study for DL, LL, Wind X, Wind Y, Seismic X, Seismic Y.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_9.8",
+      "clause": "9.8",
+      "title": "Settlements of Foundations",
+      "statement": "9.8.1 Max vertical settlement of raft/piled-raft under gravity per IS 1904 and IS 12070: limited to 125 mm in raft or raft-pile (with max angular distortion 1/500) and 50 mm in rock.",
+      "feeds_check": "D15",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_10.1",
+      "clause": "10.1",
+      "title": "Non-Structural Elements - Design Strategy",
+      "statement": "NSEs classified by earthquake behaviour into acceleration-sensitive, deformation-sensitive, and acceleration-and-deformation-sensitive; major NSEs protected by engineered calculations. Clauses 10.1-10.3 govern over similar clauses in other Indian Standards.",
+      "feeds_check": "bonus/NSE",
+      "page": 15
+    },
+    {
+      "id": "IS16700-2023_10.2",
+      "clause": "10.2",
+      "title": "Acceleration-Sensitive NSE Design Force",
+      "statement": "Design lateral force for acceleration-sensitive NSEs.",
+      "formula": "Fp = Z * (1 + x/h) * (ap/Rp) * Ip * Wp; Z = seismic zone factor per IS 1893(1); Ip = NSE importance factor (Table 9); Rp = component response modification factor (Table 10); ap = component amplification factor (Table 10); Wp = weight of NSE; x = height of attachment above top base; h = overall building height",
+      "tables": [
+        "IS16700_Table9_NSE_importance"
+      ],
+      "feeds_check": "bonus/NSE",
+      "page": 16
+    },
+    {
+      "id": "IS16700_Table6_backstay_stiffness",
+      "clause": "Table 6",
+      "title": "Stiffness Parameters (backstay sensitivity)",
+      "ref_clause": "8.1.3.2.1",
+      "columns": [
+        "Upper-Bound",
+        "Lower-Bound"
+      ],
+      "rows": {
+        "Ieff/Ig": [
+          0.5,
+          0.15
+        ],
+        "Acr/Ag": [
+          0.5,
+          0.15
+        ]
+      },
+      "page": 9
+    },
+    {
+      "id": "IS16700_Table7_coupling_beam_reinf",
+      "clause": "Table 7",
+      "title": "Maximum Longitudinal Reinforcement in Coupling Beams (each at top and bottom surface), percent",
+      "ref_clause": "8.5.11",
+      "rows": {
+        "Ls/D <= 1.0": 0.6,
+        "1.0 <= Ls/D < 2.0": 1.2,
+        "2.0 <= Ls/D": 1.5
+      },
+      "page": 14
+    },
+    {
+      "id": "IS16700_Table8_tube_beam_reinf",
+      "clause": "Table 8",
+      "title": "Reinforcement Requirements in Beams (framed-tube moment frames), mm",
+      "ref_clause": "8.7.8",
+      "columns": [
+        "Zone II",
+        "Zone III/IV/V"
+      ],
+      "rows": {
+        "stirrup_diameter": [
+          ">8",
+          ">10"
+        ],
+        "stirrup_spacing": [
+          "<150",
+          "<100"
+        ],
+        "main_longitudinal_reinforcement": [
+          ">16",
+          ">16"
+        ]
+      },
+      "page": 15
+    },
+    {
+      "id": "IS16700_Table9_NSE_importance",
+      "clause": "Table 9",
+      "title": "Proposed Importance Factors Ip for NSEs",
+      "ref_clause": "10.2",
+      "rows": {
+        "component_with_hazardous_contents": 2.5,
+        "life_safety_component_post_earthquake (e.g. fire sprinklers)": 2.5,
+        "storage_racks_in_public_structures": 2.5,
+        "all_other_components": 2.0
+      },
+      "page": 16
+    }
+  ]
+}

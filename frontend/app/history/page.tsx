@@ -12,12 +12,14 @@ export default function HistoryPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [email, setEmail] = React.useState("");
   const [activeEmail, setActiveEmail] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   const load = React.useCallback((filterEmail: string | null) => {
-    setReports(null); setError(null);
+    setError(null); setLoading(true);
     listReports(50, filterEmail || undefined)
       .then(setReports)
-      .catch((e) => setError(e instanceof Error ? e.message : "Could not load history."));
+      .catch((e) => setError(e instanceof Error ? e.message : "Could not load history."))
+      .finally(() => setLoading(false));
   }, []);
 
   // Default to the email used on upload (saved in localStorage).
@@ -62,9 +64,14 @@ export default function HistoryPage() {
           <div style={{ padding: "14px 18px", background: VERDICTS.FLAW.bg, border: `1px solid ${VERDICTS.FLAW.line}`, borderRadius: 12, color: VERDICTS.FLAW.fg, fontSize: 13.5 }}>{error}</div>
         )}
 
-        {!reports && !error && <div style={{ color: T.muted, padding: "40px 0" }}>Loading…</div>}
+        {!reports && !error && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, color: T.muted, padding: "40px 0" }}>
+            <span style={{ display: "flex", animation: "spin .8s linear infinite" }}><Icon.Refresh size={16} color={T.cyanDeep} /></span>
+            Loading…
+          </div>
+        )}
 
-        {reports && reports.length === 0 && (
+        {reports && reports.length === 0 && !loading && (
           <div style={{ textAlign: "center", padding: "60px 24px", background: T.panel, border: `1px dashed ${T.border}`, borderRadius: 16 }}>
             <div style={{ fontFamily: T.serif, fontSize: 22, color: T.ink }}>No reports yet</div>
             <div style={{ fontSize: 14, color: T.muted, marginTop: 8 }}>Upload a DBR to create your first analysis.</div>
@@ -73,7 +80,7 @@ export default function HistoryPage() {
         )}
 
         {reports && reports.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, opacity: loading ? 0.5 : 1, transition: "opacity .2s" }}>
             {reports.map((r, i) => <ReportRow key={r.id} r={r} delay={i * 0.03} />)}
           </div>
         )}

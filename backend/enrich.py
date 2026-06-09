@@ -39,6 +39,7 @@ _MAX_STATEMENT = 600  # keep quoted code text short
 # (e.g. "IS1893-1-2016_6.1.5", "IS875-3-2015_6.3", "NBC-4-2016_3.1.1"). Map those
 # id prefixes to the same normalised code space used in finding citations.
 _ID_PREFIX_TO_CODE = [
+    (re.compile(r"^IS16700[-_]"), "IS 16700"),
     (re.compile(r"^IS1893-1-\d{4}"), "IS 1893"),
     (re.compile(r"^IS875-3-\d{4}"), "IS 875"),
     (re.compile(r"^IS875-5-\d{4}"), "IS 875"),
@@ -60,24 +61,36 @@ def _norm_code(s: str) -> str:
 
 
 def _clause_text(obj: dict) -> str:
-    # Prose clauses
-    txt = obj.get("text") or obj.get("statement") or obj.get("content")
-    # Tables/figures keep their content in caption / nl_summary (+ rows).
+    # Prose clauses (various field names across the corpus files)
+    txt = (obj.get("text") or obj.get("statement") or obj.get("content")
+           or obj.get("description") or obj.get("requirement") or obj.get("summary"))
+    # Tables/figures keep their content in caption / nl_summary (+ rows) or, in
+    # the IS 1893/875/269 files, a structured `data` dict (e.g. {"II":0.1,...}).
     if not txt:
         parts = []
+        if obj.get("title"):
+            parts.append(str(obj["title"]))
         if obj.get("caption"):
             parts.append(str(obj["caption"]))
         elif obj.get("nl_summary"):
             parts.append(str(obj["nl_summary"]))
-        rows = obj.get("rows")
-        headers = obj.get("headers")
+        # headers + rows form (IS 456 tables)
+        rows, headers = obj.get("rows"), obj.get("headers")
         if isinstance(rows, list) and rows:
             if isinstance(headers, list) and headers:
                 parts.append(" | ".join(str(h) for h in headers))
             for r in rows[:8]:
                 if isinstance(r, list):
                     parts.append(" | ".join(str(c) for c in r))
-        txt = "\n".join(parts)
+        # data-dict form (IS 1893/875 tables): "II: 0.10 · III: 0.16 · ..."
+        data = obj.get("data")
+        if isinstance(data, dict) and data:
+            parts.append(" · ".join(f"{k}: {v}" for k, v in data.items()))
+        elif isinstance(data, list) and data:
+            parts.append("; ".join(str(x) for x in data[:8]))
+        if obj.get("ref_clause"):
+            parts.append(f"(see Cl {obj['ref_clause']})")
+        txt = "  ".join(p for p in parts if p)
     if isinstance(txt, (dict, list)):
         txt = str(txt)
     txt = str(txt or "").strip()
@@ -97,7 +110,10 @@ def _obj_code(oid: str, obj: dict) -> str:
 def _match_clause(corpus: Corpus, code: str, clause: str) -> list[dict]:
     code_n = _norm_code(code)
     want = clause.strip()
-    exact, prefixed = [], []
+    # token-boundary match: 3.2.2.2 should match a clause stored as
+    # "3.2.2.2 + 3.2.6" or "3.1.2-3.1.10", but NOT 3.2.2.20.
+    tok = re.compile(rf"(?<!\d){re.escape(want)}(?!\d)")
+    exact, prefixed, contained = [], [], []
     for oid, obj in corpus.by_id.items():
         if not isinstance(obj, dict) or _obj_code(oid, obj) != code_n:
             continue
@@ -107,7 +123,10 @@ def _match_clause(corpus: Corpus, code: str, clause: str) -> list[dict]:
         elif cl.startswith(want + ".") or cl.startswith(want + "("):
             # cited parent (7.11.1) resolves to its sub-clauses (7.11.1.1, ...)
             prefixed.append((oid, obj))
-    return exact or prefixed
+        elif tok.search(cl):
+            # cited clause appears as a token in a combined/range clause string
+            contained.append((oid, obj))
+    return exact or prefixed or contained
 
 
 def _match_table(corpus: Corpus, code: str, table_no: str) -> list[dict]:

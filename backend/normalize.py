@@ -167,36 +167,55 @@ def _cited_codes(v: Any) -> list:
     return out
 
 
-def lookup_district(district: Optional[str], state: Optional[str] = None) -> Optional[dict]:
-    """
-    Look up a district in the district_locations table (seeded from the CSV).
-    Case/space-insensitive match on district name (optionally narrowed by state).
-    Returns the row dict, or None if not found. Import is local so the checks
-    engine never hard-depends on the DB layer.
-    """
-    if not district:
-        return None
+# In-memory cache of all district rows (loaded once). The table is small (~742
+# rows) and read-only at runtime, so caching avoids a DB session + full-table
+# scan on every /api/analyze and /api/check call (which would risk exhausting
+# the connection pool under demo load). Call _reset_district_cache() after a
+# reseed if the process stays alive.
+_DISTRICT_CACHE: Optional[list] = None
+
+
+def _reset_district_cache() -> None:
+    global _DISTRICT_CACHE
+    _DISTRICT_CACHE = None
+
+
+def _district_rows() -> list:
+    global _DISTRICT_CACHE
+    if _DISTRICT_CACHE is not None:
+        return _DISTRICT_CACHE
     try:
         from db import DistrictLocation, SessionLocal
     except Exception:
-        return None
-    key = district.strip().lower()
+        return []
     db = SessionLocal()
     try:
-        rows = db.query(DistrictLocation).all()
-        # exact (case-insensitive) match first
-        for r in rows:
-            if r.district.strip().lower() == key and (
-                    not state or r.state.strip().lower() == state.strip().lower()):
-                return r.to_dict()
-        # loose contains match as a fallback (handles "Gautam Buddha Nagar" vs "GAUTAM BUDDHA NAGAR")
-        for r in rows:
-            rd = r.district.strip().lower()
-            if (key in rd or rd in key) and (
-                    not state or r.state.strip().lower() == state.strip().lower()):
-                return r.to_dict()
+        _DISTRICT_CACHE = [r.to_dict() for r in db.query(DistrictLocation).all()]
+    except Exception:
+        _DISTRICT_CACHE = []
     finally:
         db.close()
+    return _DISTRICT_CACHE
+
+
+def lookup_district(district: Optional[str], state: Optional[str] = None) -> Optional[dict]:
+    """
+    Look up a district in the cached district_locations data (seeded from CSV).
+    Case/space-insensitive exact match first, then a loose contains fallback.
+    Returns the row dict, or None if not found.
+    """
+    if not district:
+        return None
+    rows = _district_rows()
+    key = district.strip().lower()
+    st = state.strip().lower() if state else None
+    for r in rows:  # exact match
+        if r["district"].strip().lower() == key and (not st or r["state"].strip().lower() == st):
+            return r
+    for r in rows:  # loose contains fallback
+        rd = r["district"].strip().lower()
+        if (key in rd or rd in key) and (not st or r["state"].strip().lower() == st):
+            return r
     return None
 
 

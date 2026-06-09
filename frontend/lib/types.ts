@@ -142,6 +142,7 @@ export interface CheckResponse {
   findings: Finding[];
   summary: Summary;
   overall_status: Verdict;
+  location?: LocationStatus | null;
 }
 
 export interface ReportListItem {

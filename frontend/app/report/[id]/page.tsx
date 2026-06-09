@@ -41,7 +41,7 @@ export default function ReportPage() {
     setRerunning(true);
     try {
       const res = await recheck(working, id, data?.extracted ? undefined : null, data?.user_email ?? null);
-      setData((prev) => prev ? { ...prev, extracted: res.extracted, findings: res.findings, summary: res.summary, overall_status: res.overall_status } : prev);
+      setData((prev) => prev ? { ...prev, extracted: res.extracted, findings: res.findings, summary: res.summary, overall_status: res.overall_status, location: res.location ?? prev.location } : prev);
       setEdited(null); setDirty(false);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : "Re-run failed.");

@@ -87,6 +87,8 @@ def _startup() -> None:
     try:
         from scripts.seed_districts import main as seed_districts
         seed_districts()
+        from normalize import _reset_district_cache
+        _reset_district_cache()  # ensure the lookup cache reflects seeded data
     except Exception as e:  # never block startup on seeding
         print(f"district seeding skipped: {e}")
 
@@ -190,14 +192,21 @@ async def analyze(file: UploadFile = File(...),
 
     model = raw.pop("_extraction_model", None)
     provenance = raw.get("_provenance")
-    dbr = build_dbr(raw)
-    extracted = dbr_to_dict(dbr)
-    if provenance:
-        extracted["_provenance"] = provenance
+    try:
+        dbr = build_dbr(raw)
+        extracted = dbr_to_dict(dbr)
+        if provenance:
+            extracted["_provenance"] = provenance
+        rep = _run_and_enrich(dbr)
+    except Exception as e:
+        raise HTTPException(422, f"Could not interpret the extracted data: {e}")
 
-    rep = _run_and_enrich(dbr)
-    # Plain-English explanations for the findings that matter (best-effort).
-    await explain_findings(rep["findings"])
+    # Plain-English explanations for the findings that matter — best-effort,
+    # must never fail the request.
+    try:
+        await explain_findings(rep["findings"])
+    except Exception as e:
+        print(f"explain_findings skipped: {e}")
     row = _persist(db, filename=file.filename, extracted=extracted, rep=rep,
                    model=model, user_email=email)
 
@@ -216,9 +225,14 @@ async def analyze(file: UploadFile = File(...),
 @app.post("/api/check")
 def check(req: CheckRequest, db: Session = Depends(get_session)) -> dict:
     """Re-run checks on (edited) DBRData without re-extracting."""
-    dbr = build_dbr(req.extracted)
-    extracted = dbr_to_dict(dbr)
-    rep = _run_and_enrich(dbr)
+    if not isinstance(req.extracted, dict) or not isinstance(req.extracted.get("profile", {}), dict):
+        raise HTTPException(422, "Invalid extracted data: 'profile' must be an object.")
+    try:
+        dbr = build_dbr(req.extracted)
+        extracted = dbr_to_dict(dbr)
+        rep = _run_and_enrich(dbr)
+    except Exception as e:
+        raise HTTPException(422, f"Could not interpret the edited data: {e}")
 
     report_id = req.report_id
     if report_id:
