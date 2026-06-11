@@ -195,6 +195,8 @@ async def analyze(file: UploadFile = File(...),
         raise HTTPException(502, f"Extraction failed: {e}")
 
     model = raw.pop("_extraction_model", None)
+    pdf_kind = raw.pop("_pdf_kind", None)
+    raw.pop("_used_markdown", None)
     provenance = raw.get("_provenance")
     try:
         dbr = build_dbr(raw)
@@ -221,6 +223,7 @@ async def analyze(file: UploadFile = File(...),
         "summary": rep["summary"],
         "overall_status": rep["overall_status"],
         "extraction_model": model,
+        "pdf_kind": pdf_kind,
         "user_email": email,
         "location": location_status(dbr.profile),
     }

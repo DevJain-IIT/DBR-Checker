@@ -34,6 +34,10 @@ FALLBACK_MODELS = [
         "anthropic/claude-opus-4.8,google/gemini-2.5-flash",
     ).split(",") if m.strip()
 ]
+# OpenRouter file-parser engines: 'pdf-text' (cheap, text layer) for text PDFs,
+# 'mistral-ocr' (vision OCR) for scanned/image PDFs.
+PDF_TEXT_ENGINE = os.getenv("OPENROUTER_PDF_ENGINE", "pdf-text")
+OCR_ENGINE = os.getenv("OPENROUTER_OCR_ENGINE", "mistral-ocr")
 
 # Verbatim from the Claude Code prompt, Section 7.
 SYSTEM_PROMPT = """You extract structured data from an Indian structural-engineering Design Basis Report (DBR).
@@ -95,14 +99,33 @@ def _parse_json(text: str) -> dict:
         raise ExtractionError("Model did not return parseable JSON.")
 
 
-def _build_messages(pdf_b64: str, filename: str) -> list[dict]:
+# cap how much extracted Markdown we inline (very long DBRs); the PDF still
+# carries the full content for the model to cross-check.
+_MAX_MD_CHARS = 60_000
+
+
+def _build_messages(pdf_b64: str, filename: str, markdown: str | None) -> list[dict]:
+    """
+    User turn: the PDF is always attached (ground truth). For text-based PDFs we
+    ALSO inline the locally-extracted Markdown so the model gets clean tables and
+    can reconcile the two — fewer discrepancies, no information lost.
+    """
+    if markdown:
+        instruction = (
+            "Extract the DBR data as the JSON object specified.\n\n"
+            "Two views of the same document are provided:\n"
+            "1) MARKDOWN extracted from the PDF's text layer (clean tables/headings) — use as your primary read.\n"
+            "2) The original PDF (attached) — cross-check the Markdown against it; if they disagree, trust the PDF.\n\n"
+            f"--- DBR MARKDOWN ---\n{markdown[:_MAX_MD_CHARS]}\n--- END MARKDOWN ---"
+        )
+    else:
+        instruction = "Extract the DBR data from the attached PDF as the JSON object specified."
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
             "content": [
-                {"type": "text",
-                 "text": "Extract the DBR data from the attached PDF as the JSON object specified."},
+                {"type": "text", "text": instruction},
                 {"type": "file",
                  "file": {"filename": filename,
                           "file_data": f"data:application/pdf;base64,{pdf_b64}"}},
@@ -112,10 +135,30 @@ def _build_messages(pdf_b64: str, filename: str) -> list[dict]:
 
 
 async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
-    """Send the PDF to OpenRouter and return the raw extraction dict."""
+    """
+    Pre-process the PDF locally, then send it (plus extracted Markdown for
+    text-based PDFs) to OpenRouter and return the raw extraction dict.
+
+    - text-based  -> pymupdf4llm Markdown + PDF, file-parser engine 'pdf-text'
+    - scanned     -> PDF only, OCR engine 'mistral-ocr'
+    """
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise ExtractionError("OPENROUTER_API_KEY is not set.")
+
+    # ---- local pre-processing: detect kind, extract Markdown if text-based ----
+    kind, markdown = "text", None
+    try:
+        from pdf_text import classify, to_markdown
+        kind = classify(pdf_bytes)
+        if kind == "text":
+            markdown = to_markdown(pdf_bytes)
+            if not markdown:           # extraction yielded nothing -> treat as scanned
+                kind = "scanned"
+    except Exception:
+        kind, markdown = "text", None  # any failure: fall back to PDF-only path
+
+    engine = OCR_ENGINE if kind == "scanned" else PDF_TEXT_ENGINE
 
     pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
     headers = {
@@ -128,15 +171,13 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
     models = [DEFAULT_MODEL] + [m for m in FALLBACK_MODELS if m != DEFAULT_MODEL]
     last_err: Exception | None = None
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
+    async with httpx.AsyncClient(timeout=180.0) as client:
         for model in models:
             payload = {
                 "model": model,
-                "messages": _build_messages(pdf_b64, filename),
+                "messages": _build_messages(pdf_b64, filename, markdown),
                 "temperature": 0,
-                # Lets non-native-PDF chat models read the document.
-                "plugins": [{"id": "file-parser",
-                             "pdf": {"engine": "pdf-text"}}],
+                "plugins": [{"id": "file-parser", "pdf": {"engine": engine}}],
             }
             try:
                 resp = await client.post(OPENROUTER_URL, headers=headers, json=payload)
@@ -151,6 +192,8 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
                                       if isinstance(part, dict))
                 raw = _parse_json(content)
                 raw["_extraction_model"] = model
+                raw["_pdf_kind"] = kind
+                raw["_used_markdown"] = bool(markdown)
                 return raw
             except (httpx.HTTPError, KeyError, IndexError, ValueError, ExtractionError) as e:
                 # ValueError covers json.JSONDecodeError (a 200 with a non-JSON

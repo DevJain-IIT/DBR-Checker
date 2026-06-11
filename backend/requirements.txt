@@ -10,3 +10,5 @@ python-dotenv==1.0.1
 bcrypt==4.2.1
 PyJWT==2.10.1
 shapely==2.1.2
+pymupdf==1.27.2.3
+pymupdf4llm==1.27.2.3
