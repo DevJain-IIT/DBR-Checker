@@ -34,7 +34,7 @@ from checks import run_all, report as build_report  # noqa: E402
 from corpus_loader import UTF8Corpus  # noqa: E402
 from db import Admin, Report, SessionLocal, get_session, init_db  # noqa: E402
 from enrich import enrich_report  # noqa: E402
-from explain import explain_findings  # noqa: E402
+from explain import explain_findings, explain_one_finding  # noqa: E402
 from extract import ExtractionError, extract_dbr  # noqa: E402
 from normalize import build_dbr, dbr_to_dict, location_status, lookup_district  # noqa: E402
 
@@ -158,6 +158,10 @@ class ChangePasswordRequest(BaseModel):
     password: str
 
 
+class ExplainRequest(BaseModel):
+    finding: dict            # a single enriched finding dict to explain on demand
+
+
 # --------------------------------------------------------------------------- #
 #  Endpoints
 # --------------------------------------------------------------------------- #
@@ -248,6 +252,18 @@ def check(req: CheckRequest, db: Session = Depends(get_session)) -> dict:
         "overall_status": rep["overall_status"],
         "location": location_status(dbr.profile),
     }
+
+
+@app.post("/api/explain")
+async def explain(req: ExplainRequest) -> dict:
+    """On-demand plain-English explanation for a single finding (the 'Explain
+    with AI' button). Returns {explanation} or 503 if AI is unavailable."""
+    if not isinstance(req.finding, dict) or not req.finding.get("check_id"):
+        raise HTTPException(422, "A finding object with a check_id is required.")
+    text = await explain_one_finding(req.finding)
+    if not text:
+        raise HTTPException(503, "AI explanation is unavailable right now.")
+    return {"explanation": text}
 
 
 @app.get("/api/clause/{clause_id}")

@@ -8,6 +8,7 @@ import type {
   CheckResponse,
   Citation,
   DBRData,
+  Finding,
   ReportListItem,
 } from "./types";
 
@@ -65,6 +66,16 @@ export async function listReports(limit = 50, email?: string | null): Promise<Re
 export async function getReport(id: string): Promise<AnalyzeResponse> {
   const res = await fetch(`${BASE}/api/reports/${encodeURIComponent(id)}`, { cache: "no-store" });
   return jsonOrThrow<AnalyzeResponse>(res);
+}
+
+export async function explainFinding(finding: Finding): Promise<string> {
+  const res = await fetch(`${BASE}/api/explain`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ finding }),
+  });
+  const data = await jsonOrThrow<{ explanation: string }>(res);
+  return data.explanation;
 }
 
 export interface ZoneByCoords {

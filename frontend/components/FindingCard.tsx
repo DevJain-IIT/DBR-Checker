@@ -2,6 +2,7 @@
 
 import React from "react";
 import type { Citation, Finding } from "@/lib/types";
+import { explainFinding } from "@/lib/api";
 import { fmtValue, sevTag } from "@/lib/format";
 import { CATEGORIES, Icon, T, VERDICTS, VerdictBadge } from "@/lib/design";
 
@@ -87,17 +88,46 @@ function CitationDrawer({ check }: { check: Finding }) {
   const cites = check.citations || [];
   const primary: Citation | undefined = cites.find((c) => !c.missing && c.statement) || cites[0];
 
+  // On-demand AI explanation (REVIEW cards). FLAW/MISSING already carry one.
+  const [aiText, setAiText] = React.useState<string | null>(check.ai_explanation ?? null);
+  const [aiBusy, setAiBusy] = React.useState(false);
+  const [aiError, setAiError] = React.useState<string | null>(null);
+  const canRequest = check.verdict === "REVIEW" && !aiText;
+
+  const requestExplain = async () => {
+    setAiBusy(true); setAiError(null);
+    try {
+      setAiText(await explainFinding(check));
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : "Could not generate an explanation.");
+    } finally {
+      setAiBusy(false);
+    }
+  };
+
   return (
     <div style={{ padding: "4px 18px 20px", animation: `dbr-drawer .3s ${T.spring} both` }}>
-      {check.ai_explanation && (
+      {aiText && (
         <div style={{ display: "flex", gap: 11, padding: "13px 15px", marginBottom: 14, background: `${T.indigo}0c`, border: `1px solid ${T.indigo}33`, borderRadius: 10 }}>
           <div style={{ flexShrink: 0, width: 26, height: 26, borderRadius: 7, background: `${T.indigo}1a`, border: `1px solid ${T.indigo}3a`, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <Icon.Spark size={15} color={T.indigo} />
           </div>
           <div>
             <div style={{ fontFamily: T.mono, fontSize: 9.5, color: T.indigo, letterSpacing: "0.1em", marginBottom: 5, fontWeight: 600 }}>AI EXPLANATION</div>
-            <div style={{ fontSize: 13, color: T.ink, lineHeight: 1.6 }}>{check.ai_explanation}</div>
+            <div style={{ fontSize: 13, color: T.ink, lineHeight: 1.6 }}>{aiText}</div>
           </div>
+        </div>
+      )}
+
+      {canRequest && (
+        <div style={{ marginBottom: 14 }}>
+          <button onClick={requestExplain} disabled={aiBusy} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "9px 15px", borderRadius: 10, border: `1px solid ${T.indigo}44`, background: `${T.indigo}0c`, color: T.indigo, fontSize: 13, fontWeight: 600, cursor: aiBusy ? "default" : "pointer", fontFamily: T.sans }}>
+            <span style={{ display: "flex", animation: aiBusy ? "spin .8s linear infinite" : "none" }}>
+              {aiBusy ? <Icon.Refresh size={15} color={T.indigo} /> : <Icon.Spark size={15} color={T.indigo} />}
+            </span>
+            {aiBusy ? "Generating…" : "Explain with AI"}
+          </button>
+          {aiError && <div style={{ fontSize: 12, color: VERDICTS.FLAW.fg, marginTop: 8 }}>{aiError}</div>}
         </div>
       )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 0.85fr", gap: 16, borderTop: `1px dashed ${T.border}`, paddingTop: 16 }}>

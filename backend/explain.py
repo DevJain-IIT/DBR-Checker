@@ -88,30 +88,47 @@ async def _explain_one(client: httpx.AsyncClient, headers: dict, finding: dict) 
         return None
 
 
+def _auth_headers() -> Optional[dict]:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return None
+    return {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "https://dbr-check.local"),
+        "X-Title": "DBR Compliance Checker",
+    }
+
+
 async def explain_findings(findings: list[dict], verdicts: set[str] | None = None) -> None:
     """
     Mutate findings in place, adding `ai_explanation` to those whose verdict is in
     `verdicts` (default FLAW/MISSING). No-op without an API key. Best-effort: any
     individual failure just leaves that finding without an explanation.
     """
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
+    headers = _auth_headers()
+    if not headers:
         return
     targets = verdicts or {"FLAW", "MISSING"}
     todo = [f for f in findings if f.get("verdict") in targets]
     if not todo:
         return
-
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": os.getenv("OPENROUTER_REFERER", "https://dbr-check.local"),
-        "X-Title": "DBR Compliance Checker",
-    }
     import asyncio
-
     async with httpx.AsyncClient(timeout=60.0) as client:
         results = await asyncio.gather(*[_explain_one(client, headers, f) for f in todo])
     for f, text in zip(todo, results):
         if text:
             f["ai_explanation"] = text
+
+
+async def explain_one_finding(finding: dict) -> Optional[str]:
+    """
+    Generate a plain-English explanation for a SINGLE finding on demand (used by
+    the 'Explain with AI' button on REVIEW cards). Returns the text or None if
+    the API key is missing / the call fails.
+    """
+    headers = _auth_headers()
+    if not headers:
+        return None
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        return await _explain_one(client, headers, finding)
