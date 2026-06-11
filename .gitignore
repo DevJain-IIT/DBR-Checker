@@ -16,3 +16,10 @@ frontend/.env*.local
 # OS
 .DS_Store
 Thumbs.db
+
+# Raw 121MB seismic GeoJSON + working scripts (simplified version ships in backend/data/)
+Seismic zone geojson/
+backend/data/*.bak
+
+# Duplicate raw geojson drop
+New folder/

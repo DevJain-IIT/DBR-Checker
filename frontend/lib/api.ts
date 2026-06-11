@@ -67,6 +67,23 @@ export async function getReport(id: string): Promise<AnalyzeResponse> {
   return jsonOrThrow<AnalyzeResponse>(res);
 }
 
+export interface ZoneByCoords {
+  lat: number; lon: number;
+  seismic_zone: string | null;
+  district: string | null;
+  state: string | null;
+  msk_intensity: string | null;
+  boundary_case: boolean;
+  note: string | null;
+  citation: string;
+  method: string;
+}
+
+export async function zoneByCoords(lat: number, lon: number): Promise<ZoneByCoords> {
+  const res = await fetch(`${BASE}/api/location/zone?lat=${lat}&lon=${lon}`, { cache: "no-store" });
+  return jsonOrThrow<ZoneByCoords>(res);
+}
+
 export async function health(): Promise<Record<string, unknown>> {
   const res = await fetch(`${BASE}/api/health`, { cache: "no-store" });
   return jsonOrThrow(res);

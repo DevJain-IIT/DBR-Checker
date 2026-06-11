@@ -273,6 +273,44 @@ def location(district: str, state: str | None = None) -> dict:
             "needs_coordinates": bool(row.get("is_straddler"))}
 
 
+# India bounding box (generous, includes islands) for the coordinate lookup.
+_LAT_MIN, _LAT_MAX = 6.0, 38.0
+_LON_MIN, _LON_MAX = 68.0, 98.0
+
+
+@app.get("/api/location/zone")
+def location_zone(lat: float, lon: float) -> dict:
+    """
+    Precise lat/long -> IS 1893 seismic zone via point-in-polygon over the
+    district x zone overlay. Resolver is loaded lazily on first call. Returns the
+    exact zone, the district the point falls in, and a boundary_case flag (point
+    near a zone line -> higher zone returned, conservative).
+    """
+    if not (_LAT_MIN <= lat <= _LAT_MAX and _LON_MIN <= lon <= _LON_MAX):
+        raise HTTPException(400, f"Coordinates outside India "
+                                 f"(lat {_LAT_MIN}-{_LAT_MAX}, lon {_LON_MIN}-{_LON_MAX}).")
+    try:
+        from zone_resolver import get_resolver
+        res = get_resolver().lookup(lat, lon)
+    except Exception as e:
+        raise HTTPException(503, f"Zone resolver unavailable: {e}")
+    if res is None:
+        raise HTTPException(404, "No zone polygon at this point (sea, or outside the digitised boundary).")
+    note = ("Point lies on/near a zone boundary; the higher (conservative) zone "
+            "is returned per IS 1893 practice.") if res["boundary_case"] else None
+    return {
+        "lat": lat, "lon": lon,
+        "seismic_zone": res["zone"],
+        "district": res["district"],
+        "state": res["state"],
+        "msk_intensity": res["intensity"],
+        "boundary_case": res["boundary_case"],
+        "note": note,
+        "citation": "IS 1893 (Part 1):2016, Fig. 1 / Annex E",
+        "method": "point-in-polygon (district x zone overlay, EPSG:4326)",
+    }
+
+
 @app.get("/api/reports")
 def list_reports(limit: int = 50, email: str | None = None,
                  db: Session = Depends(get_session)) -> dict:

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
-import { getReport, recheck } from "@/lib/api";
+import { getReport, recheck, zoneByCoords, type ZoneByCoords } from "@/lib/api";
 import type { AnalyzeResponse, DBRData, Finding, LocationStatus, Verdict } from "@/lib/types";
 import { CATEGORY_ORDER, CHECK_CATEGORY, Icon, T, VERDICTS, VIcon, Wordmark } from "@/lib/design";
 import { SummaryBar } from "@/components/SummaryBar";
@@ -173,15 +173,8 @@ function LocationBanner({ loc }: { loc: LocationStatus }) {
             </div>
           )}
 
-          {/* coordinate prompt (lat/long resolution is upcoming) */}
-          {loc.needs_coordinates && (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12, padding: "10px 13px", background: T.panel, border: `1px dashed ${tone.line}`, borderRadius: 10 }}>
-              <Icon.Search size={14} color={T.subtle} />
-              <span style={{ fontSize: 12.5, color: T.muted }}>
-                Enter the precise site <b>latitude &amp; longitude</b> to pinpoint the exact zone. (Coordinate lookup coming soon.)
-              </span>
-            </div>
-          )}
+          {/* coordinate lookup: exact zone from precise lat/long */}
+          <CoordinateLookup loc={loc} defaultOpen={!!loc.needs_coordinates} />
 
           {/* wind status */}
           {loc.matched && (
@@ -202,6 +195,83 @@ function ZoneChip({ label, zone, emphasis }: { label: string; zone?: string | nu
     <div style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 13px", background: T.panel, border: `1px solid ${emphasis ? VERDICTS.REVIEW.line : T.border}`, borderRadius: 10 }}>
       <span style={{ fontFamily: T.mono, fontSize: 9.5, color: T.subtle, letterSpacing: "0.08em" }}>{label.toUpperCase()}</span>
       <span style={{ fontFamily: T.serif, fontSize: 20, color: T.ink, lineHeight: 1 }}>Zone {zone || "—"}</span>
+    </div>
+  );
+}
+
+function CoordinateLookup({ loc, defaultOpen }: { loc: LocationStatus; defaultOpen: boolean }) {
+  const [open, setOpen] = React.useState(defaultOpen);
+  const [lat, setLat] = React.useState("");
+  const [lon, setLon] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [result, setResult] = React.useState<ZoneByCoords | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const valid = (() => {
+    const la = parseFloat(lat), lo = parseFloat(lon);
+    return !Number.isNaN(la) && !Number.isNaN(lo) && la >= 6 && la <= 38 && lo >= 68 && lo <= 98;
+  })();
+
+  const resolve = async () => {
+    if (!valid) return;
+    setBusy(true); setError(null); setResult(null);
+    try {
+      setResult(await zoneByCoords(parseFloat(lat), parseFloat(lon)));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not resolve coordinates.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  // Compare the resolved zone with what the DBR stated (mismatch detection).
+  const stated = loc.stated_zone;
+  const resolvedZone = result?.seismic_zone || null;
+  const mismatch = stated && resolvedZone && stated !== resolvedZone;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      {!open ? (
+        <button onClick={() => setOpen(true)} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 13px", background: T.panel, border: `1px solid ${T.border}`, borderRadius: 10, cursor: "pointer", fontSize: 12.5, color: T.cyanDeep, fontWeight: 600, fontFamily: T.sans }}>
+          <Icon.Search size={14} color={T.cyanDeep} /> Pinpoint exact zone from coordinates
+        </button>
+      ) : (
+        <div style={{ padding: "12px 14px", background: T.panel, border: `1px solid ${T.border}`, borderRadius: 10 }}>
+          <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 10 }}>
+            Enter the precise site latitude &amp; longitude (decimal degrees, WGS84) to resolve the exact IS 1893 zone.
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <input value={lat} onChange={(e) => setLat(e.target.value)} placeholder="lat e.g. 19.0760" inputMode="decimal"
+              onKeyDown={(e) => { if (e.key === "Enter" && valid) resolve(); }}
+              style={{ width: 150, padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontFamily: T.mono, fontSize: 13, outline: "none" }} />
+            <input value={lon} onChange={(e) => setLon(e.target.value)} placeholder="lon e.g. 72.8777" inputMode="decimal"
+              onKeyDown={(e) => { if (e.key === "Enter" && valid) resolve(); }}
+              style={{ width: 150, padding: "9px 12px", borderRadius: 8, border: `1px solid ${T.border}`, fontFamily: T.mono, fontSize: 13, outline: "none" }} />
+            <button onClick={resolve} disabled={!valid || busy} style={{ padding: "9px 16px", borderRadius: 8, border: "none", background: valid ? T.ink : T.sand, color: valid ? T.textD : T.muted, fontSize: 13, fontWeight: 600, cursor: valid && !busy ? "pointer" : "not-allowed", fontFamily: T.sans }}>
+              {busy ? "Resolving…" : "Resolve zone"}
+            </button>
+          </div>
+
+          {error && <div style={{ fontSize: 12.5, color: VERDICTS.FLAW.fg, marginTop: 10 }}>{error}</div>}
+
+          {result && (
+            <div style={{ marginTop: 12, padding: "12px 14px", background: (mismatch ? VERDICTS.FLAW : VERDICTS.PASS).bg, border: `1px solid ${(mismatch ? VERDICTS.FLAW : VERDICTS.PASS).line}`, borderRadius: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <span style={{ fontFamily: T.serif, fontSize: 22, color: T.ink, lineHeight: 1 }}>Zone {result.seismic_zone || "—"}</span>
+                <span style={{ fontFamily: T.mono, fontSize: 11, color: T.muted }}>at {result.district}{result.state ? `, ${result.state}` : ""}</span>
+                {result.boundary_case && <span style={{ fontFamily: T.mono, fontSize: 9.5, fontWeight: 600, color: VERDICTS.REVIEW.fg, background: VERDICTS.REVIEW.bg, border: `1px solid ${VERDICTS.REVIEW.line}`, borderRadius: 5, padding: "2px 7px" }}>NEAR BOUNDARY</span>}
+              </div>
+              {mismatch && (
+                <div style={{ fontSize: 12.5, color: VERDICTS.FLAW.fg, marginTop: 8, fontWeight: 600 }}>
+                  ⚠ DBR states Zone {stated}, but these coordinates resolve to Zone {resolvedZone}. Verify the seismic zone basis.
+                </div>
+              )}
+              {result.note && <div style={{ fontSize: 12, color: T.muted, marginTop: 8 }}>{result.note}</div>}
+              <div style={{ fontFamily: T.mono, fontSize: 10.5, color: T.subtle, marginTop: 8 }}>{result.citation}</div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
