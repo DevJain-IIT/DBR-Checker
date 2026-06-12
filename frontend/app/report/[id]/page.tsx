@@ -140,7 +140,7 @@ export default function ReportPage() {
         })}
 
         <div style={{ textAlign: "center", fontFamily: T.mono, fontSize: 11, color: T.subtle, marginTop: 40, paddingTop: 24, borderTop: `1px solid ${T.border}` }}>
-          DBR CHECK · {String(filename).toUpperCase()} · 25 CHECKS · 8 IS CODES{data.extraction_model ? ` · ${data.extraction_model}` : ""}
+          DBR CHECK · {String(filename).toUpperCase()} · CODE CHECKS · 8 IS CODES{data.extraction_model ? ` · ${data.extraction_model}` : ""}
         </div>
       </main>
     </div>

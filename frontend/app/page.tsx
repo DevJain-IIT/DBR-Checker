@@ -44,14 +44,14 @@ export default function LandingPage() {
         <section style={{ display: "grid", gridTemplateColumns: "1.05fr 0.95fr", gap: 56, alignItems: "center", padding: "76px 0 88px" }}>
           <div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "6px 13px", border: `1px solid ${T.borderD}`, borderRadius: 999, fontFamily: T.mono, fontSize: 11, color: T.mutedD, letterSpacing: "0.08em", marginBottom: 28 }}>
-              <StatusDot color={T.cyan} /> 25 CHECKS · 8 IS CODES · WITH CITATIONS
+              <StatusDot color={T.cyan} /> CODE CHECKS · 8 IS CODES · WITH CITATIONS
             </div>
             <h1 style={{ fontFamily: T.serif, fontSize: 62, lineHeight: 1.06, letterSpacing: "-0.02em", margin: 0, fontWeight: 400 }}>
               Validate a Design&nbsp;Basis Report against IS&nbsp;codes —<br />
               <span style={{ color: T.cyan, fontStyle: "italic" }}>in seconds, with citations.</span>
             </h1>
             <p style={{ fontSize: 17, color: T.mutedD, lineHeight: 1.6, maxWidth: 480, marginTop: 26 }}>
-              Upload a DBR. We extract the building basis, run 25 code checks, and return a findings report — each verdict backed by the exact IS clause, table and page.
+              Upload a DBR. We extract the building basis, run the code checks, and return a findings report — each verdict backed by the exact IS clause, table and page.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 36 }}>
               <button onClick={onStart} style={ctaBig}>
@@ -69,7 +69,7 @@ export default function LandingPage() {
           {[
             { n: "01", t: "Upload", d: "Drop the Design Basis Report PDF. Processed in your session.", ic: "Upload" as const },
             { n: "02", t: "Extract", d: "We read the building basis — material, system, height, zone, foundation — fully editable.", ic: "Layers" as const },
-            { n: "03", t: "25 cited checks", d: "Each finding gets a verdict, expected-vs-found, and the exact IS clause to defend it.", ic: "Shield" as const },
+            { n: "03", t: "Cited checks", d: "Each finding gets a verdict, expected-vs-found, and the exact IS clause to defend it.", ic: "Shield" as const },
           ].map((s, i) => <HiwCard key={s.n} {...s} delay={i * 0.08} />)}
         </div>
 

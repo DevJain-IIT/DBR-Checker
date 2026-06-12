@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 import { analyzePdf, warmup } from "@/lib/api";
-import { GridBg, Icon, T, VERDICTS, VIcon, Wordmark, useCountUp } from "@/lib/design";
+import { GridBg, Icon, T, VERDICTS, VIcon, Wordmark } from "@/lib/design";
 
 type Stage = "idle" | "drag" | "ready" | "processing" | "error";
 
@@ -73,7 +73,7 @@ export default function UploadPage() {
             <div style={{ textAlign: "center", marginBottom: 36 }}>
               <div style={{ fontFamily: T.mono, fontSize: 11, color: T.cyanDeep, letterSpacing: "0.18em", marginBottom: 14 }}>STEP 1 · UPLOAD</div>
               <h1 style={{ fontFamily: T.serif, fontSize: 44, margin: 0, fontWeight: 400, letterSpacing: "-0.02em" }}>Drop your Design&nbsp;Basis Report</h1>
-              <p style={{ fontSize: 16, color: T.muted, marginTop: 14, lineHeight: 1.55 }}>A single PDF — we&rsquo;ll extract the building basis and run 25 IS-code checks.</p>
+              <p style={{ fontSize: 16, color: T.muted, marginTop: 14, lineHeight: 1.55 }}>A single PDF — we&rsquo;ll extract the building basis and run the IS-code checks.</p>
             </div>
 
             <input ref={inputRef} type="file" accept="application/pdf,.pdf" style={{ display: "none" }} onChange={(e) => pick(e.target.files?.[0] ?? null)} />
@@ -90,7 +90,7 @@ export default function UploadPage() {
               {[
                 { ic: "Lock" as const, t: "Stays private", d: "Processed in-session via the API." },
                 { ic: "File" as const, t: "PDF up to 40 MB", d: "Multi-page DBRs accepted." },
-                { ic: "Clock" as const, t: "Seconds", d: "Extraction + 25 checks." },
+                { ic: "Clock" as const, t: "Seconds", d: "Extraction + code checks." },
               ].map((x) => {
                 const C = Icon[x.ic];
                 return (
@@ -120,7 +120,7 @@ export default function UploadPage() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
                   <button onClick={run} disabled={!emailValid} style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 30px", borderRadius: 12, background: emailValid ? T.ink : T.sand, color: emailValid ? T.textD : T.muted, fontWeight: 600, fontSize: 15.5, border: "none", cursor: emailValid ? "pointer" : "not-allowed", fontFamily: T.sans, boxShadow: emailValid ? "0 14px 32px -16px rgba(10,22,40,0.6)" : "none", transition: `all .2s ${T.spring}` }}>
-                    Run 25 checks <Icon.Arrow size={17} color={emailValid ? T.textD : T.muted} />
+                    Run checks <Icon.Arrow size={17} color={emailValid ? T.textD : T.muted} />
                   </button>
                 </div>
               </div>
@@ -191,7 +191,7 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
   const phases = [
     { key: "extract", label: "Extracting data", sub: "Reading the building basis from the PDF" },
     { key: "normalize", label: "Normalizing", sub: "Mapping values to IS-code parameters" },
-    { key: "checks", label: "Running 25 checks", sub: "Comparing against clauses & tables" },
+    { key: "checks", label: "Running checks", sub: "Comparing against clauses & tables" },
   ];
   // active = how many phases are fully done; we stay on phase 0 (extracting)
   // for the whole network wait, only nudging forward if it runs unusually long.
@@ -223,7 +223,6 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
   }, [done]);
 
   const allDone = finishStep >= 2;
-  const checksRun = useCountUp(25, { start: done && finishStep >= 1, duration: 600 });
 
   const phaseState = (i: number): "done" | "active" | "wait" => {
     if (done) {
@@ -257,7 +256,7 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>
                   {p.key === "checks" && allDone
-                    ? <>Running checks · <span style={{ fontFamily: T.mono, color: T.cyanDeep }}>{checksRun}/25</span></>
+                    ? <>Running checks · <span style={{ fontFamily: T.mono, color: T.cyanDeep }}>done</span></>
                     : p.label}
                 </div>
                 <div style={{ fontSize: 12, color: T.muted, marginTop: 3 }}>

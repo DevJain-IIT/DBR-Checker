@@ -93,7 +93,7 @@ export function ExtractedPanel({ data, onChange, onRerun, rerunning, dirty }: {
             <div style={{ position: "absolute", inset: 0, zIndex: 3, background: "rgba(255,255,255,0.6)", backdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", background: T.panel, border: `1px solid ${T.cyan}55`, borderRadius: 12, boxShadow: `0 14px 30px -16px ${T.cyan}` }}>
                 <span style={{ display: "flex", animation: "spin .8s linear infinite" }}><Icon.Refresh size={18} color={T.cyanDeep} /></span>
-                <span style={{ fontSize: 13.5, fontWeight: 600 }}>Re-running 25 checks…</span>
+                <span style={{ fontSize: 13.5, fontWeight: 600 }}>Re-running checks…</span>
               </div>
             </div>
           )}
