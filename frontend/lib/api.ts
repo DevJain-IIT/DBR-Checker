@@ -28,12 +28,33 @@ async function jsonOrThrow<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+/**
+ * Fire-and-forget warm-up: ping health so the backend is awake before the user
+ * submits (matters if the instance was idle / just restarted). Never throws.
+ */
+export function warmup(): void {
+  fetch(`${BASE}/api/health`, { cache: "no-store" }).catch(() => {});
+}
+
 export async function analyzePdf(file: File, userEmail: string): Promise<AnalyzeResponse> {
-  const form = new FormData();
-  form.append("file", file);
-  form.append("user_email", userEmail);
-  const res = await fetch(`${BASE}/api/analyze`, { method: "POST", body: form });
-  return jsonOrThrow<AnalyzeResponse>(res);
+  const doPost = async () => {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("user_email", userEmail);
+    const res = await fetch(`${BASE}/api/analyze`, { method: "POST", body: form });
+    return jsonOrThrow<AnalyzeResponse>(res);
+  };
+  try {
+    return await doPost();
+  } catch (e) {
+    // One retry on a transient network error (e.g. the server was mid-restart /
+    // cold-starting and dropped the first connection). Don't retry real HTTP
+    // errors like 4xx/5xx — those carry a status and won't change on retry.
+    const transient = e instanceof TypeError;  // fetch network failure
+    if (!transient) throw e;
+    await new Promise((r) => setTimeout(r, 2000));
+    return doPost();
+  }
 }
 
 export async function recheck(

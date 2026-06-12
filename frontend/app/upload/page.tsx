@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
-import { analyzePdf } from "@/lib/api";
+import { analyzePdf, warmup } from "@/lib/api";
 import { GridBg, Icon, T, VERDICTS, VIcon, Wordmark, useCountUp } from "@/lib/design";
 
 type Stage = "idle" | "drag" | "ready" | "processing" | "error";
@@ -21,6 +21,9 @@ export default function UploadPage() {
   React.useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("dbr-user-email") : null;
     if (saved) setEmail(saved);
+    // Warm the backend the moment the upload page opens, so it's awake by the
+    // time the user finishes picking a file + entering their email.
+    warmup();
   }, []);
 
   const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
@@ -280,8 +283,12 @@ function ElapsedHint() {
     const id = setInterval(() => setS((x) => x + 1), 1000);
     return () => clearInterval(id);
   }, []);
+  // After a long wait, reassure the user it's a server warm-up, not a freeze.
+  const msg = s >= 25
+    ? "Waking the server (first run after a quiet spell can take up to a minute)…"
+    : "Reading the building basis from the PDF";
   return (
-    <span>Reading the building basis from the PDF · <span style={{ fontFamily: T.mono, color: T.cyanDeep }}>{s}s</span></span>
+    <span>{msg} · <span style={{ fontFamily: T.mono, color: T.cyanDeep }}>{s}s</span></span>
   );
 }
 
