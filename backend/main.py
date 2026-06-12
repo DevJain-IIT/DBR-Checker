@@ -165,8 +165,10 @@ class ExplainRequest(BaseModel):
 # --------------------------------------------------------------------------- #
 #  Endpoints
 # --------------------------------------------------------------------------- #
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health() -> dict:
+    # HEAD is allowed so uptime monitors (UptimeRobot) get a clean 200 instead
+    # of 405 — it's their HEAD pings that keep the free instance warm.
     return {
         "status": "ok",
         "corpus_files": len(corpus.files),

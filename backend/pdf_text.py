@@ -58,7 +58,12 @@ def to_markdown(pdf_bytes: bytes) -> str | None:
         with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
             tmp.write(pdf_bytes)
             tmp_path = tmp.name
-        md = pymupdf4llm.to_markdown(tmp_path)
+        # pymupdf4llm prints a per-page progress bar to stdout; silence it so it
+        # doesn't flood the server logs.
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            md = pymupdf4llm.to_markdown(tmp_path, show_progress=False)
         return (md or "").strip() or None
     except Exception:
         return None
