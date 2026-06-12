@@ -88,11 +88,13 @@ function CitationDrawer({ check }: { check: Finding }) {
   const cites = check.citations || [];
   const primary: Citation | undefined = cites.find((c) => !c.missing && c.statement) || cites[0];
 
-  // On-demand AI explanation (REVIEW cards). FLAW/MISSING already carry one.
+  // On-demand AI explanation for any check (nothing is auto-generated on upload).
   const [aiText, setAiText] = React.useState<string | null>(check.ai_explanation ?? null);
   const [aiBusy, setAiBusy] = React.useState(false);
   const [aiError, setAiError] = React.useState<string | null>(null);
-  const canRequest = check.verdict === "REVIEW" && !aiText;
+  // On-demand explanation is available on EVERY check (no auto-generation on
+  // upload). Show the button whenever we don't already have an explanation.
+  const canRequest = !aiText;
 
   const requestExplain = async () => {
     setAiBusy(true); setAiError(null);

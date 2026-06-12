@@ -34,7 +34,7 @@ from checks import run_all, report as build_report  # noqa: E402
 from corpus_loader import UTF8Corpus  # noqa: E402
 from db import Admin, Report, SessionLocal, get_session, init_db  # noqa: E402
 from enrich import enrich_report  # noqa: E402
-from explain import explain_findings, explain_one_finding  # noqa: E402
+from explain import explain_one_finding  # noqa: E402
 from extract import ExtractionError, extract_dbr  # noqa: E402
 from normalize import build_dbr, dbr_to_dict, location_status, lookup_district  # noqa: E402
 
@@ -230,12 +230,11 @@ async def analyze(file: UploadFile = File(...),
     except Exception as e:
         raise HTTPException(422, f"Could not interpret the extracted data: {e}")
 
-    # Plain-English explanations for the findings that matter — best-effort,
-    # must never fail the request.
-    try:
-        await explain_findings(rep["findings"])
-    except Exception as e:
-        print(f"explain_findings skipped: {e}")
+    # NOTE: we no longer auto-generate AI explanations here. That used to fire
+    # one model call per FLAW/MISSING finding on EVERY upload (slow + costly even
+    # if never read). Explanations are now strictly on-demand via the per-check
+    # "Explain with AI" button -> /api/explain. So each upload is just 1 model
+    # call (extraction). explain_findings() remains available but is unused here.
     row = _persist(db, filename=file.filename, extracted=extracted, rep=rep,
                    model=model, user_email=email)
 
