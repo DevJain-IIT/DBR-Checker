@@ -24,16 +24,8 @@ import httpx
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Vision/PDF-capable default; comma-separated fallbacks tried in order.
-# Sonnet primary (balanced cost/quality); Opus + Gemini Flash as fallbacks.
-# Slugs are current OpenRouter ids (verified against /api/v1/models).
+# Single extraction model — Claude Sonnet 4.6. No fallback chain (kept simple).
 DEFAULT_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.6")
-FALLBACK_MODELS = [
-    m.strip() for m in os.getenv(
-        "OPENROUTER_FALLBACK_MODELS",
-        "anthropic/claude-opus-4.8,google/gemini-2.5-flash",
-    ).split(",") if m.strip()
-]
 # OpenRouter file-parser engines: 'pdf-text' (cheap, text layer) for text PDFs,
 # 'mistral-ocr' (vision OCR) for scanned/image PDFs.
 PDF_TEXT_ENGINE = os.getenv("OPENROUTER_PDF_ENGINE", "pdf-text")
@@ -176,49 +168,32 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
         "X-Title": "DBR Compliance Checker",
     }
 
-    models = [DEFAULT_MODEL] + [m for m in FALLBACK_MODELS if m != DEFAULT_MODEL]
-    last_err: Exception | None = None
-
-    # Bound BOTH the per-request timeout and the total time across the fallback
-    # loop, so a slow/hung OpenRouter can never tie up a worker for minutes.
+    # ONE model, ONE call — Sonnet 4.6. No fallback loop (simpler + faster; a
+    # hung/failed call surfaces an error immediately instead of compounding).
+    model = DEFAULT_MODEL
     per_request_timeout = float(os.getenv("EXTRACT_TIMEOUT_S", "90"))
-    total_budget = float(os.getenv("EXTRACT_TOTAL_BUDGET_S", "120"))
-    import time as _time
-    deadline = _time.monotonic() + total_budget
 
-    async with httpx.AsyncClient(timeout=per_request_timeout) as client:
-        for model in models:
-            if _time.monotonic() >= deadline:
-                last_err = last_err or ExtractionError("Extraction time budget exceeded.")
-                break
-            payload = {
-                "model": model,
-                "messages": _build_messages(pdf_b64, filename, markdown),
-                "temperature": 0,
-            }
-            if use_pdf:  # scanned path: let the OCR engine read the attached PDF
-                payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]
-            try:
-                resp = await client.post(OPENROUTER_URL, headers=headers, json=payload)
-                if resp.status_code >= 400:
-                    last_err = ExtractionError(
-                        f"OpenRouter {resp.status_code} for {model}: {resp.text[:300]}")
-                    continue
-                data = resp.json()
-                content = data["choices"][0]["message"]["content"]
-                if isinstance(content, list):  # some models return content parts
-                    content = "".join(part.get("text", "") for part in content
-                                      if isinstance(part, dict))
-                raw = _parse_json(content)
-                raw["_extraction_model"] = model
-                raw["_pdf_kind"] = kind
-                raw["_used_markdown"] = bool(markdown)
-                return raw
-            except (httpx.HTTPError, KeyError, IndexError, ValueError, ExtractionError) as e:
-                # ValueError covers json.JSONDecodeError (a 200 with a non-JSON
-                # body, e.g. an HTML error page) so we fall back to the next
-                # model instead of crashing the request.
-                last_err = e
-                continue
+    payload = {
+        "model": model,
+        "messages": _build_messages(pdf_b64, filename, markdown),
+        "temperature": 0,
+    }
+    if use_pdf:  # scanned path: let the OCR engine read the attached PDF
+        payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]
 
-    raise ExtractionError(f"All extraction models failed. Last error: {last_err}")
+    try:
+        async with httpx.AsyncClient(timeout=per_request_timeout) as client:
+            resp = await client.post(OPENROUTER_URL, headers=headers, json=payload)
+        if resp.status_code >= 400:
+            raise ExtractionError(f"OpenRouter {resp.status_code}: {resp.text[:300]}")
+        data = resp.json()
+        content = data["choices"][0]["message"]["content"]
+        if isinstance(content, list):  # some models return content parts
+            content = "".join(part.get("text", "") for part in content if isinstance(part, dict))
+        raw = _parse_json(content)
+        raw["_extraction_model"] = model
+        raw["_pdf_kind"] = kind
+        raw["_used_markdown"] = bool(markdown)
+        return raw
+    except (httpx.HTTPError, KeyError, IndexError, ValueError) as e:
+        raise ExtractionError(f"Extraction call failed: {e}")
