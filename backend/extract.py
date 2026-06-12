@@ -24,8 +24,9 @@ import httpx
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# Single extraction model — Claude Sonnet 4.6. No fallback chain (kept simple).
-DEFAULT_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.6")
+# Single extraction model — Gemini 2.5 Flash (supports `seed` for reproducible
+# extraction; native PDF; fast/cheap). Override via OPENROUTER_MODEL.
+DEFAULT_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.5-flash")
 # OpenRouter file-parser engines: 'pdf-text' (cheap, text layer) for text PDFs,
 # 'mistral-ocr' (vision OCR) for scanned/image PDFs.
 PDF_TEXT_ENGINE = os.getenv("OPENROUTER_PDF_ENGINE", "pdf-text")
@@ -177,10 +178,12 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
         "model": model,
         "messages": _build_messages(pdf_b64, filename, markdown),
         "temperature": 0,
-        # Cap output tokens: the DBR JSON is small (~5-8k tokens). Without this,
-        # OpenRouter reserves the model's full 64k context and can 402 on a
-        # low-credit key ("requested up to 65536 tokens, can only afford ...").
-        "max_tokens": int(os.getenv("EXTRACT_MAX_TOKENS", "8000")),
+        # Fixed seed -> deterministic extraction: the same PDF yields the same
+        # JSON every run (reproducible reports, easier debugging).
+        "seed": int(os.getenv("EXTRACT_SEED", "42")),
+        # Generous output budget so large DBRs (many elements/grades) never get
+        # truncated. Override via env if needed.
+        "max_tokens": int(os.getenv("EXTRACT_MAX_TOKENS", "16000")),
     }
     if use_pdf:  # scanned path: let the OCR engine read the attached PDF
         payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]
