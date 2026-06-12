@@ -177,6 +177,10 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
         "model": model,
         "messages": _build_messages(pdf_b64, filename, markdown),
         "temperature": 0,
+        # Cap output tokens: the DBR JSON is small (~5-8k tokens). Without this,
+        # OpenRouter reserves the model's full 64k context and can 402 on a
+        # low-credit key ("requested up to 65536 tokens, can only afford ...").
+        "max_tokens": int(os.getenv("EXTRACT_MAX_TOKENS", "8000")),
     }
     if use_pdf:  # scanned path: let the OCR engine read the attached PDF
         payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]
