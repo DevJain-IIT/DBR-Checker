@@ -66,31 +66,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import logging  # noqa: E402
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger("dbr")
+
 # Load the corpus ONCE at startup (UTF-8 safe so every code's clause text loads).
 corpus = UTF8Corpus(CORPUS_DIR)
 
-# Ensure tables exist at import time (idempotent) so the app works whether or not
-# the ASGI startup hook has fired (e.g. under TestClient without a context mgr).
-init_db()
+# Ensure tables exist at import time (idempotent). Wrapped so a transient DB
+# blip at import time can't crash the whole process into a Render restart loop —
+# the startup hook retries init_db() once the app is up.
+try:
+    init_db()
+except Exception as e:  # noqa: BLE001
+    log.warning("init_db at import time failed (will retry on startup): %s", e)
 
 
 @app.on_event("startup")
 def _startup() -> None:
-    init_db()
-    # Seed the first admin from env if the admins table is empty.
-    db = SessionLocal()
     try:
-        seed_first_admin(db)
-    finally:
-        db.close()
+        init_db()
+    except Exception:
+        log.exception("init_db failed on startup")
+    # Seed the first admin from env if the admins table is empty.
+    try:
+        db = SessionLocal()
+        try:
+            seed_first_admin(db)
+        finally:
+            db.close()
+    except Exception:
+        log.exception("seed_first_admin failed")
     # Seed/refresh the district lookup from the CSV (idempotent upsert).
     try:
         from scripts.seed_districts import main as seed_districts
         seed_districts()
         from normalize import _reset_district_cache
         _reset_district_cache()  # ensure the lookup cache reflects seeded data
-    except Exception as e:  # never block startup on seeding
-        print(f"district seeding skipped: {e}")
+    except Exception:
+        # never block startup on seeding, but log the full traceback so failures
+        # are visible in Render logs (not silently swallowed).
+        log.exception("district seeding skipped")
 
 
 # --------------------------------------------------------------------------- #

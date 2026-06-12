@@ -42,51 +42,96 @@ def normalize_zone(raw) -> Optional[str]:
     return None
 
 
-class ZoneResolver:
-    def __init__(self, geojson_path: str = GEOJSON_FILE):
-        from shapely.geometry import shape  # local import: heavy native dep
-        from shapely.strtree import STRtree
+def _geom_bbox(geom: dict):
+    """(min_lon, min_lat, max_lon, max_lat) over all coords of a GeoJSON geometry."""
+    minx = miny = float("inf")
+    maxx = maxy = float("-inf")
 
+    def walk(coords):
+        nonlocal minx, miny, maxx, maxy
+        # coords is nested lists; leaves are [lon, lat]
+        if coords and isinstance(coords[0], (int, float)):
+            x, y = coords[0], coords[1]
+            if x < minx: minx = x
+            if x > maxx: maxx = x
+            if y < miny: miny = y
+            if y > maxy: maxy = y
+        else:
+            for c in coords:
+                walk(c)
+
+    walk(geom.get("coordinates", []))
+    return (minx, miny, maxx, maxy)
+
+
+class ZoneResolver:
+    """
+    Query-on-demand resolver (low memory). At init we keep only each feature's
+    raw geometry dict + a precomputed bounding box + metadata — NO shapely
+    objects. On lookup we bbox-filter to the few candidate polygons that could
+    contain the point, build shapely geometries for ONLY those, test, and discard.
+    Peak RAM is a few tens of MB instead of ~300 MB.
+    """
+    def __init__(self, geojson_path: str = GEOJSON_FILE):
         with open(geojson_path, encoding="utf-8") as f:
             gj = json.load(f)
         feats = gj.get("features", [])
         if not feats:
             raise ValueError("GeoJSON contains 0 features.")
 
-        self.geoms, self.meta = [], []
+        self.features = []  # list of {geom, bbox, zone, district, state, intensity}
         for feat in feats:
+            geom = feat.get("geometry")
+            if not geom or not geom.get("coordinates"):
+                continue
             try:
-                g = shape(feat["geometry"])
+                bbox = _geom_bbox(geom)
             except Exception:
                 continue
-            if g.is_empty:
-                continue
-            if not g.is_valid:
-                g = g.buffer(0)
-            p = feat["properties"]
-            self.geoms.append(g)
-            self.meta.append({
+            p = feat.get("properties", {})
+            self.features.append({
+                "geom": geom,
+                "bbox": bbox,
                 "zone": normalize_zone(p.get(ZONE_FIELD)),
                 "district": p.get(DISTRICT_FIELD),
                 "state": p.get(STATE_FIELD),
                 "intensity": p.get(INTENSITY_FIELD),
             })
-        del gj
-        self.tree = STRtree(self.geoms)
+        # gj (and its parsed dicts) are still referenced via feature['geom'], but
+        # we no longer hold any shapely C-objects — the heavy part is gone.
+
+    @property
+    def geoms(self):  # back-compat for health endpoint count
+        return self.features
 
     def lookup(self, lat: float, lon: float) -> Optional[dict]:
         """{'zone','district','state','intensity','boundary_case'} or None."""
-        from shapely.geometry import Point
+        from shapely.geometry import shape, Point  # local import: heavy native dep
         pt = Point(lon, lat)  # shapely is (x=lon, y=lat)
-        idxs = self.tree.query(pt)
-        hits = [int(i) for i in idxs if self.geoms[int(i)].covers(pt)]
+
+        hits = []
+        for f in self.features:
+            minx, miny, maxx, maxy = f["bbox"]
+            # cheap bbox reject before building any geometry
+            if not (minx <= lon <= maxx and miny <= lat <= maxy):
+                continue
+            try:
+                g = shape(f["geom"])
+                if not g.is_valid:
+                    g = g.buffer(0)
+                if g.covers(pt):
+                    hits.append(f)
+            except Exception:
+                continue
         if not hits:
             return None
         # Conservative: on a shared boundary between different zones, return the higher.
-        best = max(hits, key=lambda i: ZONE_RANK.get(self.meta[i]["zone"] or "", 0))
-        result = dict(self.meta[best])
-        result["boundary_case"] = len({self.meta[i]["zone"] for i in hits}) > 1
-        return result
+        best = max(hits, key=lambda f: ZONE_RANK.get(f["zone"] or "", 0))
+        return {
+            "zone": best["zone"], "district": best["district"],
+            "state": best["state"], "intensity": best["intensity"],
+            "boundary_case": len({f["zone"] for f in hits}) > 1,
+        }
 
 
 # ---- lazy singleton ----

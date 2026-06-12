@@ -30,8 +30,25 @@ elif _raw.startswith("postgresql://"):
 
 DATABASE_URL = _raw or "sqlite:///./dbr_reports.db"
 
-_connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=_connect_args, pool_pre_ping=True)
+_is_sqlite = DATABASE_URL.startswith("sqlite")
+_connect_args = {"check_same_thread": False} if _is_sqlite else {}
+
+if _is_sqlite:
+    engine = create_engine(DATABASE_URL, connect_args=_connect_args, pool_pre_ping=True)
+else:
+    # Postgres (Supabase pooler): recycle connections well before the pooler
+    # drops idle ones (~a few min), and pre-ping so a stale/closed connection is
+    # transparently replaced instead of stalling/erroring a request. Bounded pool
+    # keeps memory predictable on the 512MB instance.
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args=_connect_args,
+        pool_pre_ping=True,     # check liveness before handing out a connection
+        pool_recycle=240,       # drop+reopen connections older than 4 min
+        pool_size=5,
+        max_overflow=5,
+        pool_timeout=30,        # fail fast if the pool is exhausted (don't hang)
+    )
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 

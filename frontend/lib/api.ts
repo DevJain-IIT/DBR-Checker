@@ -36,21 +36,31 @@ export function warmup(): void {
   fetch(`${BASE}/api/health`, { cache: "no-store" }).catch(() => {});
 }
 
+// Hard ceiling so the upload can NEVER spin forever — if the backend hangs or
+// dies mid-request, abort and surface a retry-able error instead of a frozen UI.
+const ANALYZE_TIMEOUT_MS = 150_000;  // 150s > backend's 120s extraction budget
+
 export async function analyzePdf(file: File, userEmail: string): Promise<AnalyzeResponse> {
   const doPost = async () => {
     const form = new FormData();
     form.append("file", file);
     form.append("user_email", userEmail);
-    const res = await fetch(`${BASE}/api/analyze`, { method: "POST", body: form });
-    return jsonOrThrow<AnalyzeResponse>(res);
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), ANALYZE_TIMEOUT_MS);
+    try {
+      const res = await fetch(`${BASE}/api/analyze`, { method: "POST", body: form, signal: ctrl.signal });
+      return await jsonOrThrow<AnalyzeResponse>(res);
+    } finally {
+      clearTimeout(timer);
+    }
   };
   try {
     return await doPost();
   } catch (e) {
-    // One retry on a transient network error (e.g. the server was mid-restart /
-    // cold-starting and dropped the first connection). Don't retry real HTTP
-    // errors like 4xx/5xx — those carry a status and won't change on retry.
-    const transient = e instanceof TypeError;  // fetch network failure
+    // Retry once on a transient network error or an abort/timeout (server was
+    // mid-restart, cold-starting, or briefly unavailable). Don't retry real HTTP
+    // errors (4xx/5xx carry a status and won't change on retry).
+    const transient = e instanceof TypeError || (e instanceof DOMException && e.name === "AbortError");
     if (!transient) throw e;
     await new Promise((r) => setTimeout(r, 2000));
     return doPost();

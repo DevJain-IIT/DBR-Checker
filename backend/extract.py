@@ -171,8 +171,18 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
     models = [DEFAULT_MODEL] + [m for m in FALLBACK_MODELS if m != DEFAULT_MODEL]
     last_err: Exception | None = None
 
-    async with httpx.AsyncClient(timeout=180.0) as client:
+    # Bound BOTH the per-request timeout and the total time across the fallback
+    # loop, so a slow/hung OpenRouter can never tie up a worker for minutes.
+    per_request_timeout = float(os.getenv("EXTRACT_TIMEOUT_S", "90"))
+    total_budget = float(os.getenv("EXTRACT_TOTAL_BUDGET_S", "120"))
+    import time as _time
+    deadline = _time.monotonic() + total_budget
+
+    async with httpx.AsyncClient(timeout=per_request_timeout) as client:
         for model in models:
+            if _time.monotonic() >= deadline:
+                last_err = last_err or ExtractionError("Extraction time budget exceeded.")
+                break
             payload = {
                 "model": model,
                 "messages": _build_messages(pdf_b64, filename, markdown),
