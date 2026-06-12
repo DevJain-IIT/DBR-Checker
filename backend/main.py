@@ -210,7 +210,12 @@ async def analyze(file: UploadFile = File(...),
     try:
         raw = await extract_dbr(pdf_bytes, file.filename or "dbr.pdf")
     except ExtractionError as e:
-        raise HTTPException(502, f"Extraction failed: {e}")
+        log.warning("extraction failed for %s: %s", file.filename, e)
+        raise HTTPException(
+            502,
+            "Couldn't read this PDF. It may be image-only, corrupted, or in an "
+            "unusual format. Try re-saving it (Print to PDF / flatten) and upload again.",
+        )
 
     model = raw.pop("_extraction_model", None)
     pdf_kind = raw.pop("_pdf_kind", None)

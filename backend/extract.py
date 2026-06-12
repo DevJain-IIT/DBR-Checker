@@ -106,26 +106,33 @@ _MAX_MD_CHARS = 60_000
 
 def _build_messages(pdf_b64: str, filename: str, markdown: str | None) -> list[dict]:
     """
-    User turn: the PDF is always attached (ground truth). For text-based PDFs we
-    ALSO inline the locally-extracted Markdown so the model gets clean tables and
-    can reconcile the two — fewer discrepancies, no information lost.
+    Build the user turn.
+
+    - If we have locally-extracted MARKDOWN (text-based PDF): send TEXT ONLY — no
+      PDF attachment, no file-parser plugin. We already have the full text, so
+      there's no reason to make OpenRouter re-parse the PDF (which fails on some
+      'Print to PDF' / signed / large files with a 400 "Failed to parse").
+    - If we have NO markdown (scanned/image PDF): attach the PDF so the OCR engine
+      can read it.
     """
     if markdown:
-        instruction = (
-            "Extract the DBR data as the JSON object specified.\n\n"
-            "Two views of the same document are provided:\n"
-            "1) MARKDOWN extracted from the PDF's text layer (clean tables/headings) — use as your primary read.\n"
-            "2) The original PDF (attached) — cross-check the Markdown against it; if they disagree, trust the PDF.\n\n"
-            f"--- DBR MARKDOWN ---\n{markdown[:_MAX_MD_CHARS]}\n--- END MARKDOWN ---"
+        text = (
+            "Extract the DBR data as the JSON object specified, from this document "
+            "(Markdown extracted from the source PDF; tables/headings preserved):\n\n"
+            f"--- DBR DOCUMENT ---\n{markdown[:_MAX_MD_CHARS]}\n--- END DOCUMENT ---"
         )
-    else:
-        instruction = "Extract the DBR data from the attached PDF as the JSON object specified."
+        return [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": text},
+        ]
+    # scanned path: attach the PDF for the OCR engine to read
     return [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
             "content": [
-                {"type": "text", "text": instruction},
+                {"type": "text",
+                 "text": "Extract the DBR data from the attached PDF as the JSON object specified."},
                 {"type": "file",
                  "file": {"filename": filename,
                           "file_data": f"data:application/pdf;base64,{pdf_b64}"}},
@@ -158,9 +165,10 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
     except Exception:
         kind, markdown = "text", None  # any failure: fall back to PDF-only path
 
-    engine = OCR_ENGINE if kind == "scanned" else PDF_TEXT_ENGINE
-
-    pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii")
+    # Only the scanned path needs the PDF + a file-parser plugin. When we have
+    # local markdown we send text only (no PDF re-parsing -> no 400 on tricky PDFs).
+    use_pdf = markdown is None
+    pdf_b64 = base64.b64encode(pdf_bytes).decode("ascii") if use_pdf else ""
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
@@ -187,8 +195,9 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
                 "model": model,
                 "messages": _build_messages(pdf_b64, filename, markdown),
                 "temperature": 0,
-                "plugins": [{"id": "file-parser", "pdf": {"engine": engine}}],
             }
+            if use_pdf:  # scanned path: let the OCR engine read the attached PDF
+                payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]
             try:
                 resp = await client.post(OPENROUTER_URL, headers=headers, json=payload)
                 if resp.status_code >= 400:
