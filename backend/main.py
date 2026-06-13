@@ -209,6 +209,11 @@ class ExplainRequest(BaseModel):
     finding: dict            # a single enriched finding dict to explain on demand
 
 
+class ReviewDecisionsRequest(BaseModel):
+    # engineer's REVIEW-tab sign-off: {check_id: "accepted"|"revise"|"ignored"}
+    decisions: dict
+
+
 # --------------------------------------------------------------------------- #
 #  Endpoints
 # --------------------------------------------------------------------------- #
@@ -405,6 +410,30 @@ def get_report(report_id: str, db: Session = Depends(get_session)) -> dict:
     if row is None:
         raise HTTPException(404, "Report not found.")
     return row.full()
+
+
+_VALID_REVIEW_DECISIONS = {"accepted", "revise", "ignored"}
+
+
+@app.patch("/api/reports/{report_id}/reviews")
+def save_review_decisions(report_id: str, req: ReviewDecisionsRequest,
+                          db: Session = Depends(get_session)) -> dict:
+    """Persist the engineer's REVIEW-tab decisions on a saved report. The full
+    decisions map replaces what's stored (the client owns the state). Unknown
+    decision values are dropped so the column stays clean."""
+    row = db.get(Report, report_id)
+    if row is None:
+        raise HTTPException(404, "Report not found.")
+    if not isinstance(req.decisions, dict):
+        raise HTTPException(422, "'decisions' must be an object of {check_id: decision}.")
+    clean = {
+        str(k): v for k, v in req.decisions.items()
+        if isinstance(v, str) and v in _VALID_REVIEW_DECISIONS
+    }
+    row.review_decisions = clean
+    db.commit()
+    db.refresh(row)
+    return {"report_id": row.id, "review_decisions": row.review_decisions or {}}
 
 
 # --------------------------------------------------------------------------- #

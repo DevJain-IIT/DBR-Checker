@@ -94,6 +94,16 @@ function ReportRow({ r, delay }: { r: ReportListItem; delay: number }) {
   const total = r.check_count || Object.values(r.summary).reduce((a, b) => a + (b ?? 0), 0);
   const statusV = r.overall_status && VERDICTS[r.overall_status] ? VERDICTS[r.overall_status] : VERDICTS.REVIEW;
 
+  // engineer's review sign-off counts (from saved review_decisions)
+  const dec = r.review_decisions || {};
+  const flagged = Object.values(dec).filter((v) => v === "revise").length;
+  const correct = Object.values(dec).filter((v) => v === "accepted").length;
+  const ignored = Object.values(dec).filter((v) => v === "ignored").length;
+  const reviewParts: { color: string; text: string }[] = [];
+  if (flagged) reviewParts.push({ color: VERDICTS.FLAW.fg, text: `${flagged} flagged` });
+  if (correct) reviewParts.push({ color: VERDICTS.PASS.fg, text: `${correct} correct` });
+  if (ignored) reviewParts.push({ color: T.subtle, text: `${ignored} ignored` });
+
   return (
     <Link href={`/report/${r.id}`} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ display: "block", textDecoration: "none", background: T.panel, border: `1px solid ${hover ? `${T.cyan}55` : T.border}`, borderLeft: `3px solid ${statusV.solid}`, borderRadius: 14, padding: "16px 20px", transform: hover ? "translateY(-2px)" : "none", boxShadow: hover ? "0 18px 38px -26px rgba(10,22,40,0.4)" : "none", transition: `all .2s ${T.spring}`, animation: `dbr-fade-up .4s ${delay}s both` }}>
@@ -103,7 +113,14 @@ function ReportRow({ r, delay }: { r: ReportListItem; delay: number }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14.5, fontWeight: 600, color: T.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.filename || "Untitled DBR"}</div>
-          <div style={{ fontFamily: T.mono, fontSize: 11.5, color: T.subtle, marginTop: 4 }}>{fmtDate(r.created_at)} · {total} checks</div>
+          <div style={{ fontFamily: T.mono, fontSize: 11.5, color: T.subtle, marginTop: 4 }}>
+            {fmtDate(r.created_at)} · {total} checks
+            {reviewParts.length > 0 && (
+              <> · {reviewParts.map((p, i) => (
+                <span key={p.text} style={{ color: p.color, fontWeight: 600 }}>{i > 0 ? " · " : ""}{p.text}</span>
+              ))}</>
+            )}
+          </div>
         </div>
         {/* mini verdict bar */}
         <div style={{ display: "flex", height: 8, width: 180, borderRadius: 999, overflow: "hidden", border: `1px solid ${T.border}`, flexShrink: 0 }}>

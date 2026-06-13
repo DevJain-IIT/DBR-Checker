@@ -61,7 +61,7 @@ export default function ReportPage() {
     onError: (e) => setLoadError(e instanceof Error ? e.message : "Re-check failed."),
   });
   const { isIgnored, toggle: toggleIgnore } = useIgnored(id);
-  const { decisionOf, decide } = useReviewDecisions(id);
+  const { decisionOf, decide } = useReviewDecisions(id, data?.review_decisions as Record<string, "accepted" | "revise" | "ignored"> | undefined);
 
   // A fix from a guided control: update working immediately, then debounce a recheck.
   const onGuidedChange = (next: DBRData) => { setEdited(next); setDirty(true); scheduleRecheck(next); };

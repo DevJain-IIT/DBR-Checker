@@ -102,7 +102,7 @@ export default function PrintReportPage() {
           <h3 className="cat-title">{g.cat}</h3>
           {g.items.map((f) => {
             idx += 1;
-            return <CheckBlock key={f.check_id} f={f} n={idx} />;
+            return <CheckBlock key={f.check_id} f={f} n={idx} decision={(data.review_decisions || {})[f.check_id]} />;
           })}
         </section>
       ))}
@@ -121,10 +121,17 @@ function MetaRow({ k, v }: { k: string; v: string }) {
   );
 }
 
-function CheckBlock({ f, n }: { f: Finding; n: number }) {
+const REVIEW_DECISION_LABEL: Record<string, string> = {
+  accepted: "Engineer reviewed — looks correct",
+  revise: "Engineer flagged — needs revision",
+  ignored: "Engineer reviewed — ignored (not applicable)",
+};
+
+function CheckBlock({ f, n, decision }: { f: Finding; n: number; decision?: string }) {
   const v = VERDICTS[f.verdict];
   const meta = CHECK_META[f.check_id];
   const clauseText = (f.citations || []).find((c) => !c.missing && c.statement);
+  const decisionLabel = decision ? REVIEW_DECISION_LABEL[decision] : null;
   return (
     <div className="check">
       <div className="check-head">
@@ -138,6 +145,7 @@ function CheckBlock({ f, n }: { f: Finding; n: number }) {
           {meta && <Row k="Governing code & clause" v={meta.governing} />}
           {meta && <Row k="Method" v={meta.method} />}
           <Row k="Finding" v={f.summary} />
+          {decisionLabel && <Row k="Engineer review" v={decisionLabel} />}
           {f.expected != null && <Row k="Expected" v={fmtValue(f.expected)} mono />}
           {f.found != null && <Row k="Found" v={fmtValue(f.found)} mono flag={f.verdict === "FLAW" || f.verdict === "MISSING"} />}
           {f.citation && <Row k="Citation" v={f.citation} />}

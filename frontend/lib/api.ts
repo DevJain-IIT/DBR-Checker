@@ -99,6 +99,21 @@ export async function getReport(id: string): Promise<AnalyzeResponse> {
   return jsonOrThrow<AnalyzeResponse>(res);
 }
 
+// Persist the engineer's REVIEW-tab decisions on a saved report. The full map
+// replaces what's stored server-side.
+export async function saveReviewDecisions(
+  reportId: string,
+  decisions: Record<string, string>,
+): Promise<Record<string, string>> {
+  const res = await fetch(`${BASE}/api/reports/${encodeURIComponent(reportId)}/reviews`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ decisions }),
+  });
+  const data = await jsonOrThrow<{ review_decisions: Record<string, string> }>(res);
+  return data.review_decisions;
+}
+
 export async function explainFinding(finding: Finding): Promise<string> {
   const res = await fetch(`${BASE}/api/explain`, {
     method: "POST",

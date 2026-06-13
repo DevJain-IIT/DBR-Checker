@@ -81,6 +81,10 @@ class Report(Base):
     findings: Mapped[list] = mapped_column(JSON, default=list)    # enriched findings
     summary: Mapped[dict] = mapped_column(JSON, default=dict)     # verdict counts
 
+    # engineer's per-check sign-off on REVIEW items, e.g. {"D9": "accepted",
+    # "D12": "revise", "D20": "ignored"}. Set from the Review tab; shared per report.
+    review_decisions: Mapped[dict] = mapped_column(JSON, default=dict)
+
     # denormalised for cheap history listing
     overall_status: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     flaw_count: Mapped[int] = mapped_column(Integer, default=0)
@@ -97,6 +101,7 @@ class Report(Base):
             "overall_status": self.overall_status,
             "flaw_count": self.flaw_count,
             "check_count": self.check_count,
+            "review_decisions": self.review_decisions or {},
         }
 
     def full(self) -> dict:
@@ -173,6 +178,14 @@ def init_db() -> None:
                 # index name kept consistent with the SQLAlchemy model / Alembic
                 conn.execute(text(
                     "CREATE INDEX IF NOT EXISTS ix_reports_user_email ON reports (user_email)"))
+        if "review_decisions" not in cols:
+            # JSON column type differs by backend: Postgres JSONB, SQLite TEXT.
+            json_type = "JSONB" if not _is_sqlite else "TEXT"
+            default = "'{}'::jsonb" if not _is_sqlite else "'{}'"
+            with engine.begin() as conn:
+                conn.execute(text(
+                    f"ALTER TABLE reports ADD COLUMN review_decisions {json_type} "
+                    f"NOT NULL DEFAULT {default}"))
     except Exception:
         # Never block startup on this; the column will simply be absent and
         # user_email writes/filters will no-op until a migration is applied.

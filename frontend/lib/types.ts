@@ -134,6 +134,7 @@ export interface AnalyzeResponse {
   extraction_model?: string | null;
   user_email?: string | null;
   location?: LocationStatus | null;
+  review_decisions?: Record<string, string>;
 }
 
 export interface CheckResponse {
@@ -155,4 +156,5 @@ export interface ReportListItem {
   overall_status: Verdict | null;
   flaw_count: number;
   check_count: number;
+  review_decisions?: Record<string, string>;
 }
