@@ -51,6 +51,37 @@ def _valid_email(email: str) -> bool:
 def _now_utc() -> _dt.datetime:
     return _dt.datetime.now(_dt.timezone.utc)
 
+
+def _normalize_provenance(prov) -> dict:
+    """Coerce the LLM's _provenance into a flat {field_path: page:int} map.
+
+    The model is asked for {field: {page, snippet}}, but be liberal: also accept
+    {field: page}, {field: "p.4"}, or a nested page under other keys. Anything we
+    can't read a positive page number out of is dropped. The frontend uses this to
+    show 'you stated this on p.X of your DBR' next to a flaw."""
+    if not isinstance(prov, dict):
+        return {}
+    out: dict = {}
+    for key, val in prov.items():
+        page = None
+        if isinstance(val, dict):
+            page = val.get("page")
+        else:
+            page = val
+        # accept ints, numeric strings, or "p.4"/"page 4"
+        if isinstance(page, bool):
+            continue
+        if isinstance(page, (int, float)):
+            page = int(page)
+        elif isinstance(page, str):
+            m = _re.search(r"\d+", page)
+            page = int(m.group()) if m else None
+        else:
+            page = None
+        if isinstance(page, int) and page > 0:
+            out[str(key)] = page
+    return out
+
 CORPUS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus")
 
 app = FastAPI(title="DBR Compliance Checker", version="0.4.1")
@@ -220,7 +251,7 @@ async def analyze(file: UploadFile = File(...),
     model = raw.pop("_extraction_model", None)
     pdf_kind = raw.pop("_pdf_kind", None)
     raw.pop("_used_markdown", None)
-    provenance = raw.get("_provenance")
+    provenance = _normalize_provenance(raw.get("_provenance"))
     try:
         dbr = build_dbr(raw)
         extracted = dbr_to_dict(dbr)
@@ -259,6 +290,11 @@ def check(req: CheckRequest, db: Session = Depends(get_session)) -> dict:
     try:
         dbr = build_dbr(req.extracted)
         extracted = dbr_to_dict(dbr)
+        # carry the DBR-page provenance through a recheck (build_dbr drops it),
+        # so "you stated this on p.X" survives editing.
+        provenance = _normalize_provenance(req.extracted.get("_provenance"))
+        if provenance:
+            extracted["_provenance"] = provenance
         rep = _run_and_enrich(dbr)
     except Exception as e:
         raise HTTPException(422, f"Could not interpret the edited data: {e}")

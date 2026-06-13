@@ -38,15 +38,20 @@ export default function PrintReportPage() {
 
   const tb = data.extracted.title_block || {};
   const p = data.extracted.profile;
-  const counts = data.summary;
-  const total = data.findings.length;
+  // Hide N/A (out-of-scope) checks and the removed D1, matching the app view.
+  const findings = data.findings.filter((f) => f.verdict !== "NOT_APPLICABLE" && f.check_id !== "D1");
+  const counts = ALL_VERDICTS.reduce<Record<string, number>>((acc, v) => {
+    acc[v] = findings.filter((f) => f.verdict === v).length;
+    return acc;
+  }, {});
+  const total = findings.length;
   const project = tb.project || data.extracted.title_block?.project || "Untitled project";
 
   // sort findings into reading order: by category, FLAW/MISSING first within each
   const ordered: { cat: string; items: Finding[] }[] = CATEGORY_ORDER
     .map((cat) => ({
       cat,
-      items: data.findings
+      items: findings
         .filter((f) => CHECK_CATEGORY[f.check_id] === cat)
         .sort((a, b) => VERDICTS[b.verdict].weight - VERDICTS[a.verdict].weight),
     }))
@@ -75,12 +80,12 @@ export default function PrintReportPage() {
         </table>
 
         <div className="legend">
-          <b>Legend — Status:</b> PASS (compliant) · FLAW (does not meet code / DBR) · REVIEW (needs engineer judgement) · MISSING (not stated) · N/A (out of scope).
+          <b>Legend — Status:</b> PASS (compliant) · FLAW (does not meet code / DBR) · REVIEW (needs engineer judgement) · MISSING (not stated). Out-of-scope checks are omitted.
         </div>
 
         {/* summary line */}
         <div className="summary-strip">
-          {ALL_VERDICTS.map((k) => (
+          {ALL_VERDICTS.filter((k) => k !== "NOT_APPLICABLE").map((k) => (
             <span key={k} className="summary-chip">
               <span className="dot" style={{ background: VERDICTS[k].solid }} />
               {VERDICTS[k].label.toUpperCase()} <b>{counts[k] ?? 0}</b>
@@ -91,7 +96,7 @@ export default function PrintReportPage() {
       </header>
 
       {/* ---- Findings, grouped ---- */}
-      <h2 className="part">PART 1 — Design Basis Report (DBR) Review · D1–D25</h2>
+      <h2 className="part">PART 1 — Design Basis Report (DBR) Review</h2>
       {ordered.map((g) => (
         <section key={g.cat} className="cat">
           <h3 className="cat-title">{g.cat}</h3>

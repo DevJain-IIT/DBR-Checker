@@ -35,8 +35,16 @@ OCR_ENGINE = os.getenv("OPENROUTER_OCR_ENGINE", "mistral-ocr")
 # Verbatim from the Claude Code prompt, Section 7.
 SYSTEM_PROMPT = """You extract structured data from an Indian structural-engineering Design Basis Report (DBR).
 Return ONLY a JSON object matching this schema (no prose, no markdown fences). Use null for
-anything not stated in the document — never guess or fill defaults. Where possible include a
-"_provenance" map giving the page/snippet for key fields.
+anything not stated in the document — never guess or fill defaults.
+
+You MUST also return a "_provenance" map. For EVERY field you fill with a non-null value, add an
+entry keyed by the field's path (e.g. "profile.seismic_zone", "zone_factor_Z", "exposure_condition",
+"nominal_cover_mm", "title_block.revision") whose value is an object:
+  { "page": <1-based PDF page number where you read it, integer>, "snippet": "<short verbatim quote>" }
+The "page" is the page of THIS uploaded DBR document where the value appears (not a code page). If a
+value spans pages or you are unsure of the exact page, give your best single page number. Omit the
+provenance entry only for fields you left null. This page is shown to the engineer so they can find
+where they wrote a value — accuracy matters.
 
 Schema (field names are exact):
 {
@@ -55,7 +63,8 @@ Schema (field names are exact):
   "load_combinations": ["..."],
   "foundation_depth_m": <num>, "fos_overturning": <num>, "fos_sliding": <num>, "settlement_mm": <num>,
   "cited_codes": [ { "code":"IS 456", "year":"2000" } ],
-  "software_used": "...", "title_block": { "project","document_no","revision","date" }
+  "software_used": "...", "title_block": { "project","document_no","revision","date" },
+  "_provenance": { "<field.path>": { "page": <int>, "snippet": "..." } }
 }
 
 Normalization rules:

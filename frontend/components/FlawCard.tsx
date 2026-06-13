@@ -2,8 +2,8 @@
 
 import React from "react";
 import type { DBRData, Finding } from "@/lib/types";
-import { T, VERDICTS, VIcon } from "@/lib/design";
-import { CHECK_INPUTS } from "@/lib/checkInputs";
+import { Icon, T, VERDICTS, VIcon } from "@/lib/design";
+import { CHECK_INPUTS, dbrPageForCheck } from "@/lib/checkInputs";
 import { flawMessage } from "@/lib/flawMessages";
 import { FixControl } from "@/components/FixControl";
 
@@ -33,6 +33,18 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
 
   const statusLabel = fixed ? "FIXED" : ignored ? "ACKNOWLEDGED" : underReview ? "UNDER REVIEW" : isMissing ? "MISSING" : "TO FIX";
   const verb = isMissing ? "Provide" : "Correct";
+
+  // Page in the engineer's own DBR where this value was stated (from extraction
+  // provenance). Shown so they can find where they wrote it. null when unknown.
+  const dbrPage = dbrPageForCheck(finding.check_id, (working as { _provenance?: Record<string, number> })._provenance);
+
+  // The fix controls edit a local draft; "Update" commits it (which triggers the
+  // parent's debounced recheck). This gives an explicit apply step rather than
+  // re-checking on every keystroke. Reset the draft whenever the upstream value
+  // changes (e.g. after a recheck syncs `working`).
+  const [draft, setDraft] = React.useState<DBRData>(working);
+  React.useEffect(() => { setDraft(working); }, [working]);
+  const dirty = draft !== working;
 
   return (
     <div style={{
@@ -73,6 +85,12 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
               </div>
             )
           )}
+          {!green && dbrPage != null && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 7, fontFamily: T.mono, fontSize: 11, color: T.subtle }}>
+              <Icon.File size={12} color={T.subtle} />
+              You stated this on page {dbrPage} of your DBR.
+            </div>
+          )}
         </div>
         <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
           <button onClick={onToggleIgnore} className="no-print" style={{ fontFamily: T.sans, fontSize: 12, fontWeight: 600, padding: "6px 11px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.panel, color: ignored ? T.cyanDeep : T.muted, cursor: "pointer", whiteSpace: "nowrap" }}>
@@ -90,8 +108,20 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
           {inputs.hint && <div style={{ fontSize: 12, color: T.cyanDeep, marginBottom: 10 }}>{verb}: {inputs.hint}</div>}
           <div style={{ display: "grid", gridTemplateColumns: inputs.controls.length > 1 ? "repeat(auto-fit, minmax(180px, 1fr))" : "minmax(220px, 360px)", gap: 10 }}>
             {inputs.controls.map((def) => (
-              <FixControl key={def.path} def={def} working={working} onChange={onChange} />
+              <FixControl key={def.path} def={def} working={draft} onChange={setDraft} />
             ))}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+            <button onClick={() => onChange(draft)} disabled={!dirty} className="no-print" style={{
+              display: "inline-flex", alignItems: "center", gap: 7, padding: "9px 18px", borderRadius: 9, border: "none",
+              fontFamily: T.sans, fontSize: 13, fontWeight: 600,
+              background: dirty ? T.cyan : T.sand, color: dirty ? T.navy : T.subtle,
+              cursor: dirty ? "pointer" : "not-allowed",
+              boxShadow: dirty ? `0 10px 22px -14px ${T.cyan}` : "none", transition: `all .2s ${T.spring}`,
+            }}>
+              <VIcon name="check" size={14} color={dirty ? T.navy : T.subtle} /> Update
+            </button>
+            {dirty && <span style={{ fontFamily: T.mono, fontSize: 11, color: T.muted }}>Apply your change and re-run this check.</span>}
           </div>
         </div>
       )}

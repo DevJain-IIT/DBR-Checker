@@ -4,6 +4,10 @@ import React from "react";
 import type { Summary, Verdict } from "@/lib/types";
 import { Icon, T, VERDICTS, VERDICT_ORDER, VIcon, useCountUp } from "@/lib/design";
 
+// N/A checks are hidden everywhere in the app, so they don't get a chip or a
+// donut segment. (The verdict still exists in the type for completeness.)
+const SHOWN_VERDICTS = VERDICT_ORDER.filter((v) => v !== "NOT_APPLICABLE");
+
 export function SummaryBar({ counts, total, filter, toggle, allOn }: {
   counts: Summary; total: number;
   filter: Set<Verdict>; toggle: (k: Verdict) => void; allOn: boolean;
@@ -37,7 +41,7 @@ export function SummaryBar({ counts, total, filter, toggle, allOn }: {
         <div style={{ width: 1, height: 38, background: T.border }} />
 
         <div style={{ display: "flex", gap: 8, flex: 1, flexWrap: "wrap" }}>
-          {VERDICT_ORDER.map((k, i) => (
+          {SHOWN_VERDICTS.map((k) => (
             <StatChip key={k} vk={k} n={counts[k] ?? 0} active={filter.has(k)} dim={!allOn && !filter.has(k)} onClick={() => toggle(k)} mounted={mounted} />
           ))}
         </div>
@@ -68,7 +72,7 @@ function StatChip({ vk, n, active, dim, onClick, mounted }: { vk: Verdict; n: nu
 function Donut({ counts, total, mounted }: { counts: Summary; total: number; mounted: boolean }) {
   const R = 21, C = 2 * Math.PI * R;
   let offset = 0;
-  const segs = VERDICT_ORDER.map((k) => {
+  const segs = SHOWN_VERDICTS.map((k) => {
     const frac = total ? (counts[k] ?? 0) / total : 0;
     const seg = { k, dash: frac * C, off: offset, color: VERDICTS[k].solid };
     offset += frac * C;

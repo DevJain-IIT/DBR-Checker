@@ -96,9 +96,14 @@ export default function ReportPage() {
   if (loadError) return <CenterMsg title="Couldn't load this report" body={loadError} action={() => router.push("/upload")} actionLabel="Upload a DBR" />;
   if (!data || !working) return <CenterMsg title="Loading report…" body="" />;
 
-  const findings = data.findings;
+  // Hide N/A checks (not relevant to this building) and the removed D1 entirely.
+  // The count the engineer sees is "checks that applied" — N/A excluded.
+  const findings = data.findings.filter((f) => f.verdict !== "NOT_APPLICABLE" && f.check_id !== "D1");
   const total = findings.length;
-  const counts = data.summary;
+  const counts = ALL_VERDICTS.reduce<Record<string, number>>((acc, v) => {
+    acc[v] = findings.filter((f) => f.verdict === v).length;
+    return acc;
+  }, {});
 
   // sort flaw/missing first within each category, then group by category
   const visible = findings.filter((f) => filter.has(f.verdict));
@@ -143,7 +148,7 @@ export default function ReportPage() {
           <div style={{ fontFamily: T.serif, fontSize: 26 }}>DBR Compliance Report</div>
           <div style={{ fontSize: 13, color: T.muted, marginTop: 4 }}>{String(filename)}</div>
           <div style={{ fontFamily: T.mono, fontSize: 11, marginTop: 8 }}>
-            {ALL_VERDICTS.map((k) => `${VERDICTS[k].label.toUpperCase()} ${counts[k] ?? 0}`).join("  ·  ")}  ·  TOTAL {total}
+            {ALL_VERDICTS.filter((k) => k !== "NOT_APPLICABLE").map((k) => `${VERDICTS[k].label.toUpperCase()} ${counts[k] ?? 0}`).join("  ·  ")}  ·  TOTAL {total}
           </div>
         </div>
 

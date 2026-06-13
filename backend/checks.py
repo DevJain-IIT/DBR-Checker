@@ -548,8 +548,11 @@ def D19_location_basis(d: DBRData, c: Corpus) -> Finding:
 # --------------------------------------------------------------------------- #
 #  Registry & assembler
 # --------------------------------------------------------------------------- #
+# D1 (title-block / revision consistency) was intentionally removed from the
+# run set — it's a document-hygiene check with no engineering value here. The
+# function is kept above for reference but is no longer registered.
 ALL_CHECKS = [
-    D1_title_block, D2_code_currency, D3_exposure_cover, D4_concrete_grade,
+    D2_code_currency, D3_exposure_cover, D4_concrete_grade,
     D5_rebar_ductility, D6_cement_spec, D7_seismic_params, D8_period_cap,
     D9_stiffness_modifiers, D10_seismic_weight_LL, D11_drift, D12_diaphragm,
     D13_wind_parameters, D14_load_combinations, D15_foundation, D16_p_delta,

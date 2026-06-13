@@ -31,15 +31,7 @@ export interface CheckInput {
 }
 
 export const CHECK_INPUTS: Record<string, CheckInput> = {
-  D1: {
-    hint: "Provide the title-block fields (project, document no., revision, date).",
-    controls: [
-      { kind: "text", path: "title_block.project", label: "Project" },
-      { kind: "text", path: "title_block.document_no", label: "Document no." },
-      { kind: "text", path: "title_block.revision", label: "Revision" },
-      { kind: "text", path: "title_block.date", label: "Date" },
-    ],
-  },
+  // D1 (title-block / revision) was removed from the engine — no card for it.
   D3: {
     hint: "Set the exposure class and the nominal cover for each element.",
     controls: [
@@ -131,3 +123,44 @@ export const CHECK_INPUTS: Record<string, CheckInput> = {
     controls: [{ kind: "text", path: "software_used", label: "Software" }],
   },
 };
+
+// The primary DBRData field path a check reads — used to look up the DBR page
+// from _provenance ("you stated this on p.X"). Falls back to the first control's
+// path. A few REVIEW/procedural checks not in CHECK_INPUTS get an explicit path.
+const EXTRA_FIELD_PATHS: Record<string, string> = {
+  D2: "cited_codes",
+  D9: "stability_coeff_theta",
+  D12: "analysis_method",
+  D14: "load_combinations",
+  D18: "irregularities",
+  D20: "analysis_method",
+  D23: "exposure_condition",
+  D24: "nominal_cover_mm",
+  D25: "profile.occupancy",
+};
+
+export function primaryFieldPath(checkId: string): string | null {
+  const inp = CHECK_INPUTS[checkId];
+  if (inp && inp.controls.length > 0) return inp.controls[0].path;
+  return EXTRA_FIELD_PATHS[checkId] ?? null;
+}
+
+// Look up the DBR page where this check's value was stated, from the extraction
+// _provenance map ({fieldPath: page}). Tries every control path the check reads
+// and returns the first page found. null when the extractor didn't capture one.
+export function dbrPageForCheck(
+  checkId: string,
+  provenance: Record<string, number> | null | undefined,
+): number | null {
+  if (!provenance) return null;
+  const paths: string[] = [];
+  const inp = CHECK_INPUTS[checkId];
+  if (inp) for (const c of inp.controls) paths.push(c.path);
+  const extra = EXTRA_FIELD_PATHS[checkId];
+  if (extra) paths.push(extra);
+  for (const p of paths) {
+    const page = provenance[p];
+    if (typeof page === "number" && page > 0) return page;
+  }
+  return null;
+}
