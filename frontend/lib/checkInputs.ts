@@ -122,6 +122,12 @@ export const CHECK_INPUTS: Record<string, CheckInput> = {
     hint: "State the analysis software used.",
     controls: [{ kind: "text", path: "software_used", label: "Software" }],
   },
+  D25: {
+    hint: "Set the occupancy, then pick the construction type for your DBR.",
+    controls: [
+      { kind: "dropdown", path: "profile.occupancy", label: "Occupancy", optionsKey: "occupancy" },
+    ],
+  },
 };
 
 // The primary DBRData field path a check reads — used to look up the DBR page

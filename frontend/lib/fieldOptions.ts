@@ -76,6 +76,15 @@ export const OPTIONS: Record<string, Option[]> = {
     { value: "PPC", label: "PPC (IS 1489 Part 1)" },
     { value: "PSC", label: "PSC (IS 455)" },
   ],
+  // NBC 2016 Part 4 Table 21 — construction types by fire resistance. For the
+  // generated DBR (engine validates only that the chosen type is permitted for
+  // the occupancy). Lower number = higher fire resistance.
+  construction_type: [
+    { value: "Type 1", label: "Type 1 — 4 hr fire resistance" },
+    { value: "Type 2", label: "Type 2 — 3 hr fire resistance" },
+    { value: "Type 3", label: "Type 3 — 2 hr fire resistance" },
+    { value: "Type 4", label: "Type 4 — 1 hr fire resistance" },
+  ],
 
   // ---- Seismic / wind numerics that have discrete code bands ----
   basic_wind_speed: [

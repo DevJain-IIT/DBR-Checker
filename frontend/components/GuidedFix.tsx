@@ -4,6 +4,7 @@ import React from "react";
 import type { DBRData, Finding } from "@/lib/types";
 import { Icon, T, VERDICTS } from "@/lib/design";
 import { FlawCard } from "@/components/FlawCard";
+import type { useDbrExtras } from "@/lib/useDbrExtras";
 
 /**
  * Primary guided-fix view. Two streams of actionable cards:
@@ -12,15 +13,17 @@ import { FlawCard } from "@/components/FlawCard";
  * Progress + a Generate-DBR button gated until every FLAW/MISSING is fixed or
  * acknowledged. REVIEW/PASS/N/A do not appear here (they live in Full report).
  */
-export function GuidedFix({ findings, working, onChange, rechecking, isIgnored, onToggleIgnore, onShowMore, onGenerate }: {
+export function GuidedFix({ findings, working, onChange, rechecking, rechckingId, isIgnored, onToggleIgnore, onShowMore, onGenerate, extras }: {
   findings: Finding[];
   working: DBRData;
-  onChange: (next: DBRData) => void;
+  onChange: (next: DBRData, checkId?: string) => void;
   rechecking: boolean;
+  rechckingId: string | null;
   isIgnored: (checkId: string) => boolean;
   onToggleIgnore: (checkId: string) => void;
   onShowMore: (f: Finding) => void;
   onGenerate: () => void;
+  extras: ReturnType<typeof useDbrExtras>;
 }) {
   // The set of checks that were FLAW/MISSING at first load is captured once and
   // becomes the fixed roster of cards. We keep rendering those same checks even
@@ -44,9 +47,14 @@ export function GuidedFix({ findings, working, onChange, rechecking, isIgnored, 
   const flaws = rosterRef.current.flaws.map((id) => byId.get(id)).filter((f): f is Finding => !!f);
   const missing = rosterRef.current.missing.map((id) => byId.get(id)).filter((f): f is Finding => !!f);
 
-  // A roster item still counts as "unresolved" only while it's actually FLAW/MISSING
-  // and not acknowledged. Once it's fixed (PASS/N/A/REVIEW) or ignored, it's resolved.
-  const isResolved = (f: Finding) => isIgnored(f.check_id) || (f.verdict !== "FLAW" && f.verdict !== "MISSING");
+  // A roster item is resolved when it's fixed (PASS/N/A/REVIEW), ignored,
+  // kept-and-flagged (acknowledged as a flaw for the DBR), or — for D14 — the
+  // standard combinations have been queued for the generated DBR.
+  const isResolved = (f: Finding) =>
+    isIgnored(f.check_id) ||
+    extras.isFlagged(f.check_id) ||
+    (f.check_id === "D14" && extras.extras.addCombos) ||
+    (f.verdict !== "FLAW" && f.verdict !== "MISSING");
   const roster = [...flaws, ...missing];
   const total = roster.length;
   const resolvedCount = roster.filter(isResolved).length;
@@ -101,7 +109,8 @@ export function GuidedFix({ findings, working, onChange, rechecking, isIgnored, 
           {flaws.map((f) => {
             n += 1;
             return <FlawCard key={f.check_id} finding={f} index={n} working={working} onChange={onChange}
-              ignored={isIgnored(f.check_id)} onToggleIgnore={() => onToggleIgnore(f.check_id)} onShowMore={() => onShowMore(f)} />;
+              ignored={isIgnored(f.check_id)} onToggleIgnore={() => onToggleIgnore(f.check_id)} onShowMore={() => onShowMore(f)}
+              rechecking={rechecking && rechckingId === f.check_id} extras={extras} />;
           })}
         </Section>
       )}
@@ -112,7 +121,8 @@ export function GuidedFix({ findings, working, onChange, rechecking, isIgnored, 
           {missing.map((f) => {
             n += 1;
             return <FlawCard key={f.check_id} finding={f} index={n} working={working} onChange={onChange}
-              ignored={isIgnored(f.check_id)} onToggleIgnore={() => onToggleIgnore(f.check_id)} onShowMore={() => onShowMore(f)} />;
+              ignored={isIgnored(f.check_id)} onToggleIgnore={() => onToggleIgnore(f.check_id)} onShowMore={() => onShowMore(f)}
+              rechecking={rechecking && rechckingId === f.check_id} extras={extras} />;
           })}
         </Section>
       )}

@@ -15,6 +15,7 @@ import { SlideOverPanel } from "@/components/SlideOverPanel";
 import { useAutoRecheck } from "@/lib/useAutoRecheck";
 import { useIgnored } from "@/lib/useIgnored";
 import { useReviewDecisions } from "@/lib/useReviewDecisions";
+import { useDbrExtras } from "@/lib/useDbrExtras";
 
 const ALL_VERDICTS: Verdict[] = ["FLAW", "MISSING", "REVIEW", "PASS", "NOT_APPLICABLE"];
 
@@ -62,9 +63,15 @@ export default function ReportPage() {
   });
   const { isIgnored, toggle: toggleIgnore } = useIgnored(id);
   const { decisionOf, decide } = useReviewDecisions(id, data?.review_decisions as Record<string, "accepted" | "revise" | "ignored"> | undefined);
+  const dbrExtras = useDbrExtras(id);
+
+  // Which check's Update was last clicked — drives the per-card "Re-running…"
+  // spinner. Cleared when the in-flight recheck settles.
+  const [rechckingId, setRechckingId] = React.useState<string | null>(null);
+  React.useEffect(() => { if (!rechecking) setRechckingId(null); }, [rechecking]);
 
   // A fix from a guided control: update working immediately, then debounce a recheck.
-  const onGuidedChange = (next: DBRData) => { setEdited(next); setDirty(true); scheduleRecheck(next); };
+  const onGuidedChange = (next: DBRData, checkId?: string) => { setEdited(next); setDirty(true); if (checkId) setRechckingId(checkId); scheduleRecheck(next); };
 
   const onGenerate = () => {
     alert("Generate DBR — branded document generation is coming soon (Phase 1).");
@@ -180,8 +187,8 @@ export default function ReportPage() {
         </div>
 
         {view === "guided" ? (
-          <GuidedFix findings={findings} working={working} onChange={onGuidedChange} rechecking={rechecking}
-            isIgnored={isIgnored} onToggleIgnore={toggleIgnore} onShowMore={setDetailFinding} onGenerate={onGenerate} />
+          <GuidedFix findings={findings} working={working} onChange={onGuidedChange} rechecking={rechecking} rechckingId={rechckingId}
+            isIgnored={isIgnored} onToggleIgnore={toggleIgnore} onShowMore={setDetailFinding} onGenerate={onGenerate} extras={dbrExtras} />
         ) : view === "review" ? (
           <ReviewPanel findings={findings} working={working} decisionOf={decisionOf} onDecide={decide} onShowMore={setDetailFinding} />
         ) : (
