@@ -12,7 +12,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-        <RouteTransition>{children}</RouteTransition>
+        {/* Page content renders as a direct child of body so it hydrates normally.
+            The transition curtain is an independent sibling overlay — it can't
+            affect the pages' hydration or intercept their clicks. */}
+        {children}
+        <RouteTransition />
       </body>
     </html>
   );
