@@ -3,7 +3,7 @@
 import React from "react";
 import type { Citation, Finding } from "@/lib/types";
 import { explainFinding } from "@/lib/api";
-import { fmtValue, sevTag } from "@/lib/format";
+import { fmtValue } from "@/lib/format";
 import { CATEGORIES, Icon, T, VERDICTS, VerdictBadge } from "@/lib/design";
 
 export function FindingCard({ check, index }: { check: Finding; index: number }) {
@@ -31,7 +31,6 @@ export function FindingCard({ check, index }: { check: Finding; index: number })
           <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
             <span style={{ fontFamily: T.mono, fontSize: 12, color: v.fg, fontWeight: 600 }}>{check.check_id}</span>
             <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>{check.title}</span>
-            <SevTag sev={sevTag(check.severity, check.verdict)} />
           </div>
           <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5, maxWidth: 760 }}>{check.summary}</div>
           {(check.expected != null || check.found != null) && (
@@ -66,19 +65,6 @@ function EvfCell({ label, value, tone }: { label: string; value: string; tone: "
       <span style={{ fontFamily: T.mono, fontSize: 9.5, color: T.subtle, letterSpacing: "0.1em", flexShrink: 0 }}>{label}</span>
       <span style={{ fontFamily: T.mono, fontSize: 13, fontWeight: 600, color: map.c, fontVariantNumeric: "tabular-nums", overflow: "hidden", textOverflow: "ellipsis" }}>{value}</span>
     </div>
-  );
-}
-
-function SevTag({ sev }: { sev: "critical" | "major" | "minor" | "info" }) {
-  const map = {
-    critical: { t: "CRITICAL", c: VERDICTS.FLAW.fg, b: VERDICTS.FLAW.line, bg: VERDICTS.FLAW.bg },
-    major: { t: "MAJOR", c: VERDICTS.REVIEW.fg, b: VERDICTS.REVIEW.line, bg: VERDICTS.REVIEW.bg },
-    minor: { t: "MINOR", c: T.muted, b: T.border, bg: T.sand },
-    info: { t: "INFO", c: T.subtle, b: T.border, bg: "transparent" },
-  }[sev];
-  if (sev === "info") return null;
-  return (
-    <span style={{ fontFamily: T.mono, fontSize: 9.5, fontWeight: 600, letterSpacing: "0.1em", color: map.c, background: map.bg, border: `1px solid ${map.b}`, borderRadius: 5, padding: "2px 6px" }}>{map.t}</span>
   );
 }
 

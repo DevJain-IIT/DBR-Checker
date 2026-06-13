@@ -22,20 +22,35 @@ export function GuidedFix({ findings, working, onChange, rechecking, isIgnored, 
   onShowMore: (f: Finding) => void;
   onGenerate: () => void;
 }) {
-  // Denominator captured once (count of FLAW+MISSING at first load) so progress
-  // doesn't shrink as items go green.
-  const totalRef = React.useRef<number | null>(null);
-  if (totalRef.current === null) {
-    totalRef.current = findings.filter((f) => f.verdict === "FLAW" || f.verdict === "MISSING").length;
+  // The set of checks that were FLAW/MISSING at first load is captured once and
+  // becomes the fixed roster of cards. We keep rendering those same checks even
+  // after a fix flips their verdict to PASS — the card stays put and turns green
+  // ("FIXED") rather than vanishing, so progress is visible. New flaws that only
+  // surface on a later re-check are folded in too (union), so nothing is hidden.
+  const rosterRef = React.useRef<{ flaws: string[]; missing: string[] } | null>(null);
+  if (rosterRef.current === null) {
+    rosterRef.current = {
+      flaws: findings.filter((f) => f.verdict === "FLAW").map((f) => f.check_id),
+      missing: findings.filter((f) => f.verdict === "MISSING").map((f) => f.check_id),
+    };
+  }
+  // Fold in any newly-surfaced FLAW/MISSING from later re-checks.
+  for (const f of findings) {
+    if (f.verdict === "FLAW" && !rosterRef.current.flaws.includes(f.check_id) && !rosterRef.current.missing.includes(f.check_id)) rosterRef.current.flaws.push(f.check_id);
+    if (f.verdict === "MISSING" && !rosterRef.current.missing.includes(f.check_id) && !rosterRef.current.flaws.includes(f.check_id)) rosterRef.current.missing.push(f.check_id);
   }
 
-  const flaws = findings.filter((f) => f.verdict === "FLAW");
-  const missing = findings.filter((f) => f.verdict === "MISSING");
-  const blocking = [...flaws, ...missing];
-  const unresolved = blocking.filter((f) => !isIgnored(f.check_id));
-  const total = totalRef.current || 0;
-  const resolvedCount = Math.max(0, total - unresolved.length);
-  const allClear = unresolved.length === 0;
+  const byId = new Map(findings.map((f) => [f.check_id, f]));
+  const flaws = rosterRef.current.flaws.map((id) => byId.get(id)).filter((f): f is Finding => !!f);
+  const missing = rosterRef.current.missing.map((id) => byId.get(id)).filter((f): f is Finding => !!f);
+
+  // A roster item still counts as "unresolved" only while it's actually FLAW/MISSING
+  // and not acknowledged. Once it's fixed (PASS/N/A/REVIEW) or ignored, it's resolved.
+  const isResolved = (f: Finding) => isIgnored(f.check_id) || (f.verdict !== "FLAW" && f.verdict !== "MISSING");
+  const roster = [...flaws, ...missing];
+  const total = roster.length;
+  const resolvedCount = roster.filter(isResolved).length;
+  const allClear = total > 0 && resolvedCount === total;
   const pct = total ? Math.round((resolvedCount / total) * 100) : 100;
 
   // stable numbering across both streams
