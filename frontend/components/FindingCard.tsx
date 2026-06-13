@@ -83,6 +83,11 @@ function SevTag({ sev }: { sev: "critical" | "major" | "minor" | "info" }) {
 }
 
 function CitationDrawer({ check }: { check: Finding }) {
+  return <CitationBody check={check} />;
+}
+
+// The drawer body, exported so SlideOverPanel can reuse it for a single check.
+export function CitationBody({ check }: { check: Finding }) {
   // Prefer the enriched citations the API attached; the first with real text
   // anchors the "paper" sheet. Notes are shown beneath.
   const cites = check.citations || [];

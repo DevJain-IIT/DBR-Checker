@@ -40,15 +40,21 @@ const FIELDS: FieldDef[] = [
   { path: "software_used", label: "Software", type: "string" },
 ];
 
-function getPath(obj: DBRData, path: string): unknown {
+// Exported so the guided-fix controls (FixControl/FlawCard) reuse the exact
+// same immutable path get/set logic.
+export function getPath(obj: DBRData, path: string): unknown {
   return path.split(".").reduce<unknown>((acc, key) => (acc == null ? acc : (acc as Record<string, unknown>)[key]), obj);
 }
 
-function setPath(obj: DBRData, path: string, value: unknown): DBRData {
+export function setPath(obj: DBRData, path: string, value: unknown): DBRData {
   const next = structuredClone(obj);
   const keys = path.split(".");
   let cur: Record<string, unknown> = next as unknown as Record<string, unknown>;
-  for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]] as Record<string, unknown>;
+  for (let i = 0; i < keys.length - 1; i++) {
+    // create intermediate objects if missing (e.g. title_block.* when title_block is {})
+    if (cur[keys[i]] == null || typeof cur[keys[i]] !== "object") cur[keys[i]] = {};
+    cur = cur[keys[i]] as Record<string, unknown>;
+  }
   cur[keys[keys.length - 1]] = value;
   return next;
 }

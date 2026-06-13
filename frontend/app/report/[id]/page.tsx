@@ -4,11 +4,15 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 import { getReport, recheck, zoneByCoords, type ZoneByCoords } from "@/lib/api";
-import type { AnalyzeResponse, DBRData, Finding, LocationStatus, Verdict } from "@/lib/types";
+import type { AnalyzeResponse, CheckResponse, DBRData, Finding, LocationStatus, Verdict } from "@/lib/types";
 import { CATEGORY_ORDER, CHECK_CATEGORY, Icon, T, VERDICTS, VIcon, Wordmark } from "@/lib/design";
 import { SummaryBar } from "@/components/SummaryBar";
 import { ExtractedPanel } from "@/components/ExtractedPanel";
 import { CategorySection } from "@/components/FindingCard";
+import { GuidedFix } from "@/components/GuidedFix";
+import { SlideOverPanel } from "@/components/SlideOverPanel";
+import { useAutoRecheck } from "@/lib/useAutoRecheck";
+import { useIgnored } from "@/lib/useIgnored";
 
 const ALL_VERDICTS: Verdict[] = ["FLAW", "MISSING", "REVIEW", "PASS", "NOT_APPLICABLE"];
 
@@ -32,17 +36,44 @@ export default function ReportPage() {
     getReport(id).then(setData).catch((e) => setLoadError(e instanceof Error ? e.message : "Could not load report."));
   }, [id]);
 
+  const [view, setView] = React.useState<"guided" | "full">("guided");
+  const [detailFinding, setDetailFinding] = React.useState<Finding | null>(null);
+
   const working = edited ?? data?.extracted ?? null;
+  const hasServerExtract = !!data?.extracted;
+  const userEmail = data?.user_email ?? null;
 
   const onChange = (d: DBRData) => { setEdited(d); setDirty(true); };
 
+  // Apply a fresh /api/check result (shared by manual re-run + auto-recheck).
+  const applyResult = React.useCallback((res: CheckResponse) => {
+    setData((prev) => prev ? { ...prev, extracted: res.extracted, findings: res.findings, summary: res.summary, overall_status: res.overall_status, location: res.location ?? prev.location } : prev);
+    // sync working to the engine's normalised echo so further edits build on it
+    setEdited(res.extracted);
+    setDirty(false);
+  }, []);
+
+  // Guided view: auto re-run, debounced, on each fix.
+  const { scheduleRecheck, rechecking } = useAutoRecheck({
+    reportId: id, userEmail, hasServerExtract, onResult: applyResult,
+    onError: (e) => setLoadError(e instanceof Error ? e.message : "Re-check failed."),
+  });
+  const { isIgnored, toggle: toggleIgnore } = useIgnored(id);
+
+  // A fix from a guided control: update working immediately, then debounce a recheck.
+  const onGuidedChange = (next: DBRData) => { setEdited(next); setDirty(true); scheduleRecheck(next); };
+
+  const onGenerate = () => {
+    alert("Generate DBR — branded document generation is coming soon (Phase 1).");
+  };
+
+  // Manual re-run (ExtractedPanel button, full view).
   const onRerun = async () => {
     if (!working) return;
     setRerunning(true);
     try {
-      const res = await recheck(working, id, data?.extracted ? undefined : null, data?.user_email ?? null);
-      setData((prev) => prev ? { ...prev, extracted: res.extracted, findings: res.findings, summary: res.summary, overall_status: res.overall_status, location: res.location ?? prev.location } : prev);
-      setEdited(null); setDirty(false);
+      const res = await recheck(working, id, hasServerExtract ? undefined : null, userEmail);
+      applyResult(res);
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : "Re-run failed.");
     } finally {
@@ -120,29 +151,49 @@ export default function ReportPage() {
 
         {data.location && <LocationBanner loc={data.location} />}
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "28px 2px 16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <h2 style={{ fontFamily: T.serif, fontSize: 24, margin: 0, fontWeight: 400 }}>Findings</h2>
-            <span style={{ fontFamily: T.mono, fontSize: 12, color: T.subtle }}>{allOn ? `all ${total} checks` : `${visible.length} shown`}</span>
-          </div>
-          {!allOn && (
-            <button onClick={resetFilter} className="no-print" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.panel, cursor: "pointer", fontSize: 12.5, color: T.muted, fontFamily: T.sans }}>
-              <Icon.Close size={13} color={T.muted} /> Clear filter
-            </button>
-          )}
+        {/* View switcher: Guided fix (default) vs. Full report */}
+        <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 6, margin: "28px 0 18px", background: T.sand, border: `1px solid ${T.border}`, borderRadius: 11, padding: 4, width: "fit-content" }}>
+          {([["guided", "Fix the flaws"], ["full", "Full report"]] as const).map(([k, lbl]) => (
+            <button key={k} onClick={() => setView(k)} style={{
+              padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: 13.5, fontWeight: 600,
+              background: view === k ? T.panel : "transparent", color: view === k ? T.ink : T.muted,
+              boxShadow: view === k ? "0 1px 4px -2px rgba(10,22,40,0.3)" : "none",
+            }}>{lbl}</button>
+          ))}
         </div>
 
-        {groups.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: T.muted }}>No checks match this filter.</div>
-        ) : groups.map((g) => {
-          const start = runningIndex; runningIndex += g.items.length;
-          return <CategorySection key={g.cat} cat={g.cat} checks={g.items} startIndex={start} />;
-        })}
+        {view === "guided" ? (
+          <GuidedFix findings={findings} working={working} onChange={onGuidedChange} rechecking={rechecking}
+            isIgnored={isIgnored} onToggleIgnore={toggleIgnore} onShowMore={setDetailFinding} onGenerate={onGenerate} />
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 2px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <h2 style={{ fontFamily: T.serif, fontSize: 24, margin: 0, fontWeight: 400 }}>Findings</h2>
+                <span style={{ fontFamily: T.mono, fontSize: 12, color: T.subtle }}>{allOn ? `all ${total} checks` : `${visible.length} shown`}</span>
+              </div>
+              {!allOn && (
+                <button onClick={resetFilter} className="no-print" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: `1px solid ${T.border}`, background: T.panel, cursor: "pointer", fontSize: 12.5, color: T.muted, fontFamily: T.sans }}>
+                  <Icon.Close size={13} color={T.muted} /> Clear filter
+                </button>
+              )}
+            </div>
+
+            {groups.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 0", color: T.muted }}>No checks match this filter.</div>
+            ) : groups.map((g) => {
+              const start = runningIndex; runningIndex += g.items.length;
+              return <CategorySection key={g.cat} cat={g.cat} checks={g.items} startIndex={start} />;
+            })}
+          </>
+        )}
 
         <div style={{ textAlign: "center", fontFamily: T.mono, fontSize: 11, color: T.subtle, marginTop: 40, paddingTop: 24, borderTop: `1px solid ${T.border}` }}>
           DBR CHECK · {String(filename).toUpperCase()} · CODE CHECKS · 8 IS CODES{data.extraction_model ? ` · ${data.extraction_model}` : ""}
         </div>
       </main>
+
+      <SlideOverPanel finding={detailFinding} onClose={() => setDetailFinding(null)} />
     </div>
   );
 }
