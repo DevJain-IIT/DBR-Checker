@@ -10,9 +10,11 @@ import { SummaryBar } from "@/components/SummaryBar";
 import { ExtractedPanel } from "@/components/ExtractedPanel";
 import { CategorySection } from "@/components/FindingCard";
 import { GuidedFix } from "@/components/GuidedFix";
+import { ReviewPanel } from "@/components/ReviewPanel";
 import { SlideOverPanel } from "@/components/SlideOverPanel";
 import { useAutoRecheck } from "@/lib/useAutoRecheck";
 import { useIgnored } from "@/lib/useIgnored";
+import { useReviewDecisions } from "@/lib/useReviewDecisions";
 
 const ALL_VERDICTS: Verdict[] = ["FLAW", "MISSING", "REVIEW", "PASS", "NOT_APPLICABLE"];
 
@@ -36,7 +38,7 @@ export default function ReportPage() {
     getReport(id).then(setData).catch((e) => setLoadError(e instanceof Error ? e.message : "Could not load report."));
   }, [id]);
 
-  const [view, setView] = React.useState<"guided" | "full">("guided");
+  const [view, setView] = React.useState<"guided" | "review" | "full">("guided");
   const [detailFinding, setDetailFinding] = React.useState<Finding | null>(null);
 
   const working = edited ?? data?.extracted ?? null;
@@ -59,6 +61,7 @@ export default function ReportPage() {
     onError: (e) => setLoadError(e instanceof Error ? e.message : "Re-check failed."),
   });
   const { isIgnored, toggle: toggleIgnore } = useIgnored(id);
+  const { decisionOf, decide } = useReviewDecisions(id);
 
   // A fix from a guided control: update working immediately, then debounce a recheck.
   const onGuidedChange = (next: DBRData) => { setEdited(next); setDirty(true); scheduleRecheck(next); };
@@ -156,20 +159,31 @@ export default function ReportPage() {
 
         {data.location && <LocationBanner loc={data.location} />}
 
-        {/* View switcher: Guided fix (default) vs. Full report */}
+        {/* View switcher: Fix the flaws (default) · Review · Full report */}
         <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 6, margin: "28px 0 18px", background: T.sand, border: `1px solid ${T.border}`, borderRadius: 11, padding: 4, width: "fit-content" }}>
-          {([["guided", "Fix the flaws"], ["full", "Full report"]] as const).map(([k, lbl]) => (
-            <button key={k} onClick={() => setView(k)} style={{
-              padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: 13.5, fontWeight: 600,
-              background: view === k ? T.panel : "transparent", color: view === k ? T.ink : T.muted,
-              boxShadow: view === k ? "0 1px 4px -2px rgba(10,22,40,0.3)" : "none",
-            }}>{lbl}</button>
-          ))}
+          {([["guided", "Fix the flaws"], ["review", "Review"], ["full", "Full report"]] as const).map(([k, lbl]) => {
+            const reviewCount = k === "review" ? findings.filter((f) => f.verdict === "REVIEW").length : 0;
+            return (
+              <button key={k} onClick={() => setView(k)} style={{
+                display: "inline-flex", alignItems: "center", gap: 7,
+                padding: "8px 16px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: T.sans, fontSize: 13.5, fontWeight: 600,
+                background: view === k ? T.panel : "transparent", color: view === k ? T.ink : T.muted,
+                boxShadow: view === k ? "0 1px 4px -2px rgba(10,22,40,0.3)" : "none",
+              }}>
+                {lbl}
+                {k === "review" && reviewCount > 0 && (
+                  <span style={{ fontFamily: T.mono, fontSize: 10, fontWeight: 700, color: VERDICTS.REVIEW.fg, background: VERDICTS.REVIEW.bg, border: `1px solid ${VERDICTS.REVIEW.line}`, borderRadius: 999, padding: "1px 7px" }}>{reviewCount}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {view === "guided" ? (
           <GuidedFix findings={findings} working={working} onChange={onGuidedChange} rechecking={rechecking}
             isIgnored={isIgnored} onToggleIgnore={toggleIgnore} onShowMore={setDetailFinding} onGenerate={onGenerate} />
+        ) : view === "review" ? (
+          <ReviewPanel findings={findings} working={working} decisionOf={decisionOf} onDecide={decide} onShowMore={setDetailFinding} />
         ) : (
           <>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 2px 16px" }}>
