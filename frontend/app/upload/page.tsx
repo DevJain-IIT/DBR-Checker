@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { analyzePdf, warmup } from "@/lib/api";
 import { GridBg, Icon, T, VERDICTS, VIcon, Wordmark } from "@/lib/design";
+import { useTilt } from "@/lib/use3d";
 
 type Stage = "idle" | "drag" | "ready" | "processing" | "error";
 
@@ -140,8 +141,16 @@ function UploadZone({ stage, setStage, file, onBrowse, onDropFile, onClear }: {
 }) {
   const dragging = stage === "drag";
   const ready = stage === "ready" && !!file;
+  const tilt = useTilt({ max: 5, lift: 8 });
+  // Compose the tilt with the existing drag scale. Under reduced-motion the hook
+  // yields no transform, so fall back to exactly the original scale(1.012).
+  const scaleStr = dragging ? "scale(1.012)" : "";
   return (
+    <div style={{ perspective: 900 }}>
     <div
+      ref={tilt.ref}
+      onMouseMove={tilt.handlers.onMouseMove}
+      onMouseLeave={tilt.handlers.onMouseLeave}
       onDragOver={(e) => { e.preventDefault(); if (!ready) setStage("drag"); }}
       onDragLeave={(e) => { e.preventDefault(); if (!ready) setStage("idle"); }}
       onDrop={(e) => { e.preventDefault(); onDropFile(e.dataTransfer.files?.[0] ?? null); }}
@@ -151,7 +160,12 @@ function UploadZone({ stage, setStage, file, onBrowse, onDropFile, onClear }: {
         padding: "54px 32px", textAlign: "center",
         background: dragging ? `${T.cyan}10` : T.panel,
         border: `2px dashed ${dragging ? T.cyan : ready ? `${T.cyan}66` : "#D8D2C6"}`,
-        transition: `all .22s ${T.spring}`, transform: dragging ? "scale(1.012)" : "none",
+        transformStyle: "preserve-3d",
+        transition: tilt.style.transition ?? `all .22s ${T.spring}`,
+        transform: tilt.reduced
+          ? (dragging ? "scale(1.012)" : "none")
+          : `${tilt.style.transform ?? ""} ${scaleStr}`.trim(),
+        willChange: "transform",
         boxShadow: dragging ? `0 24px 50px -28px ${T.cyan}` : "0 10px 30px -24px rgba(10,22,40,0.4)",
       }}>
       {!ready ? (
@@ -165,7 +179,7 @@ function UploadZone({ stage, setStage, file, onBrowse, onDropFile, onClear }: {
           </div>
         </>
       ) : (
-        <div style={{ animation: "dbr-pop-in .4s both", display: "flex", alignItems: "center", gap: 16, justifyContent: "center" }}>
+        <div style={{ animation: "dbr-pop-in .4s both", display: "flex", alignItems: "center", gap: 16, justifyContent: "center", transform: tilt.reduced ? "none" : "translateZ(18px) rotateX(2deg)", transformStyle: "preserve-3d" }}>
           <div style={{ width: 52, height: 60, borderRadius: 8, background: "#fff", border: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", flexShrink: 0, boxShadow: "0 8px 20px -12px rgba(10,22,40,0.4)" }}>
             <Icon.File size={26} color={T.cyanDeep} />
             <span style={{ position: "absolute", bottom: 6, fontFamily: T.mono, fontSize: 7, color: T.cyanDeep, fontWeight: 700, letterSpacing: "0.06em" }}>PDF</span>
@@ -179,6 +193,7 @@ function UploadZone({ stage, setStage, file, onBrowse, onDropFile, onClear }: {
           </button>
         </div>
       )}
+    </div>
     </div>
   );
 }
@@ -319,23 +334,62 @@ function ProcessingFrame({ done }: { done: boolean }) {
     return () => clearInterval(id);
   }, [done]);
   const litFloors = done ? floors : filled;
+
+  // A true CSS-3D extruded tower: a preserve-3d stage that slowly auto-rotates
+  // (.dbr-tower), with `floors` stacked extruded boxes that light up bottom-up as
+  // `litFloors` grows — same staggered cadence the old flat SVG used. The 150px
+  // footprint is preserved so the processing layout doesn't jump.
+  const W = 52;   // floor width/depth (px)
+  const H = 16;   // floor height (px)
+  const GAP = 4;  // vertical gap between floors
+  const step = H + GAP;
   return (
-    <div style={{ width: 150, height: 150, margin: "0 auto", position: "relative" }}>
-      <svg width="150" height="150" viewBox="0 0 150 150">
-        {Array.from({ length: floors + 1 }).map((_, f) => {
-          const y = 130 - f * 18;
-          return <line key={"h" + f} x1="35" y1={y} x2="115" y2={y} stroke={T.border} strokeWidth="1" />;
-        })}
-        {[35, 75, 115].map((x, i) => <line key={"v" + i} x1={x} y1="22" x2={x} y2="130" stroke={T.border} strokeWidth="1" />)}
-        {Array.from({ length: floors }).map((_, f) => {
-          const y = 130 - (f + 1) * 18;
-          const lit = f < litFloors;
-          return <rect key={"r" + f} x="36" y={y + 1} width="78" height="16" rx="1.5" fill={lit ? `${T.cyan}22` : "transparent"} stroke={lit ? T.cyan : "transparent"} strokeWidth="1" style={{ transition: `all .4s ${T.spring} ${f * 0.04}s` }} />;
-        })}
-        {[35, 75, 115].map((x) => Array.from({ length: floors + 1 }).map((_, f) => (
-          <circle key={x + "-" + f} cx={x} cy={130 - f * 18} r="2" fill={T.cyanDeep} opacity="0.7" />
-        )))}
-      </svg>
+    <div style={{ width: 150, height: 150, margin: "0 auto", position: "relative", perspective: 520, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="dbr-tower" style={{ position: "relative", width: W, height: H, transformStyle: "preserve-3d" }}>
+        {Array.from({ length: floors }).map((_, f) => (
+          <Floor key={f} index={f} lit={f < litFloors} w={W} h={H} y={-(f * step)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// One extruded floor of the tower: four side faces + a top cap, positioned up
+// the Y axis and lit (cyan) once the floor is reached.
+function Floor({ index, lit, w, h, y }: { index: number; lit: boolean; w: number; h: number; y: number }) {
+  const half = w / 2;
+  const litFill = `${T.cyan}22`;
+  const face: React.CSSProperties = {
+    position: "absolute", left: 0, top: 0, width: w, height: h,
+    background: lit ? litFill : "transparent",
+    border: `1px solid ${lit ? T.cyan : T.border}`,
+    boxShadow: lit ? `0 0 14px -4px ${T.cyan}` : "none",
+    backfaceVisibility: "hidden",
+    transition: `all .4s ${T.spring} ${index * 0.04}s`,
+  };
+  return (
+    <div style={{
+      position: "absolute", left: 0, top: 0, width: w, height: h,
+      transformStyle: "preserve-3d",
+      transform: `translateY(${y}px) translateY(${lit ? 0 : 3}px)`,
+      opacity: lit ? 1 : 0.55,
+      transition: `all .4s ${T.spring} ${index * 0.04}s`,
+    }}>
+      {/* front / back */}
+      <div style={{ ...face, transform: `translateZ(${half}px)` }} />
+      <div style={{ ...face, transform: `translateZ(${-half}px) rotateY(180deg)` }} />
+      {/* left / right */}
+      <div style={{ ...face, transform: `translateX(${-half}px) rotateY(-90deg)` }} />
+      <div style={{ ...face, transform: `translateX(${half}px) rotateY(90deg)` }} />
+      {/* top cap */}
+      <div style={{
+        position: "absolute", left: 0, top: 0, width: w, height: w,
+        background: lit ? `${T.cyan}33` : "transparent",
+        border: `1px solid ${lit ? T.cyan : T.border}`,
+        backfaceVisibility: "hidden",
+        transform: `rotateX(90deg) translateZ(${h / 2}px) translateY(${-(w - h) / 2}px)`,
+        transition: `all .4s ${T.spring} ${index * 0.04}s`,
+      }} />
     </div>
   );
 }

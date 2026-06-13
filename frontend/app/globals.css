@@ -55,3 +55,18 @@ body {
   * { animation: none !important; box-shadow: none !important; }
 }
 .print-only { display: none; }
+
+/* ---- CSS-3D for the landing + upload pages only (additive; not used by the
+   report page). Distinct names so they never collide with the keyframes above. */
+@keyframes dbr-spin3d {
+  from { transform: rotateX(-18deg) rotateY(0deg); }
+  to   { transform: rotateX(-18deg) rotateY(360deg); }
+}
+.dbr-tower {
+  transform-style: preserve-3d;
+  animation: dbr-spin3d 16s linear infinite;
+}
+/* Reduced motion: stop the spin, hold a pleasant static 3/4 angle. */
+@media (prefers-reduced-motion: reduce) {
+  .dbr-tower { animation: none !important; transform: rotateX(-18deg) rotateY(-24deg); }
+}

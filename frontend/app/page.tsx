@@ -7,6 +7,7 @@ import {
   GridBg, Icon, StatusDot, T, VERDICTS, VERDICT_ORDER, VIcon, VerdictBadge,
   Wordmark, useCountUp,
 } from "@/lib/design";
+import { useTilt } from "@/lib/use3d";
 
 const CODES = [
   { code: "IS 456", year: "2000", title: "Plain & Reinforced Concrete" },
@@ -22,11 +23,14 @@ const CODES = [
 export default function LandingPage() {
   const router = useRouter();
   const onStart = () => router.push("/upload");
+  // The hero card reports the pointer fraction; we drift the corner glow off it
+  // for a subtle parallax. Resets to center when the pointer leaves the card.
+  const [glow, setGlow] = React.useState({ x: 0, y: 0 });
 
   return (
     <div className="dbr-scroll" style={{ minHeight: "100vh", background: T.navy, color: T.textD, fontFamily: T.sans, position: "relative" }}>
       <GridBg color="rgba(255,255,255,0.022)" step={38} />
-      <div style={{ position: "absolute", top: -160, right: -120, width: 560, height: 560, background: `radial-gradient(circle, ${T.cyan}1f, transparent 62%)`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: -160, right: -120, width: 560, height: 560, background: `radial-gradient(circle, ${T.cyan}1f, transparent 62%)`, pointerEvents: "none", transform: `translate(${glow.x * 26}px, ${glow.y * 26}px)`, transition: "transform .4s ease" }} />
 
       <div style={{ position: "relative", maxWidth: 1180, margin: "0 auto", padding: "0 40px" }}>
         {/* Nav */}
@@ -60,7 +64,7 @@ export default function LandingPage() {
               <span style={{ fontFamily: T.mono, fontSize: 12, color: T.mutedD }}>PDF · ~few&nbsp;s · private</span>
             </div>
           </div>
-          <HeroPreview />
+          <HeroPreview onPointer={(x, y) => setGlow({ x, y })} />
         </section>
 
         {/* How it works */}
@@ -136,9 +140,13 @@ function SectionLabel({ n, title, id }: { n: string; title: string; id?: string 
 function HiwCard({ n, t, d, ic, delay }: { n: string; t: string; d: string; ic: keyof typeof Icon; delay: number }) {
   const [h, setH] = React.useState(false);
   const IconC = Icon[ic];
+  const tilt = useTilt({ max: 8, lift: 14, scale: 1.02 });
   return (
-    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-      style={{ background: T.surface, border: `1px solid ${h ? `${T.cyan}55` : T.borderD}`, borderRadius: 16, padding: 26, position: "relative", transform: h ? "translateY(-5px)" : "none", boxShadow: h ? "0 24px 44px -22px rgba(0,0,0,0.6)" : "none", transition: `all .25s ${T.spring}`, animation: `dbr-fade-up .5s ${delay}s both` }}>
+    <div ref={tilt.ref}
+      onMouseMove={tilt.handlers.onMouseMove}
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => { setH(false); tilt.handlers.onMouseLeave(); }}
+      style={{ background: T.surface, border: `1px solid ${h ? `${T.cyan}55` : T.borderD}`, borderRadius: 16, padding: 26, position: "relative", boxShadow: h ? "0 24px 44px -22px rgba(0,0,0,0.6)" : "none", animation: `dbr-fade-up .5s ${delay}s both`, ...tilt.style }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ width: 42, height: 42, borderRadius: 11, background: `${T.cyan}14`, border: `1px solid ${T.cyan}3a`, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <IconC size={20} color={T.cyan} />
@@ -153,9 +161,13 @@ function HiwCard({ n, t, d, ic, delay }: { n: string; t: string; d: string; ic: 
 
 function CodeChip({ c, i }: { c: { code: string; year: string; title: string }; i: number }) {
   const [h, setH] = React.useState(false);
+  const tilt = useTilt({ max: 10, lift: 8 });
   return (
-    <div onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-      style={{ background: T.surface, border: `1px solid ${h ? `${T.cyan}55` : T.borderD}`, borderRadius: 12, padding: "16px 16px", cursor: "default", transform: h ? "translateY(-3px) rotate(-0.5deg)" : "none", transition: `all .22s ${T.spring}`, animation: `dbr-fade-up .45s ${i * 0.04}s both` }}>
+    <div ref={tilt.ref}
+      onMouseMove={tilt.handlers.onMouseMove}
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => { setH(false); tilt.handlers.onMouseLeave(); }}
+      style={{ background: T.surface, border: `1px solid ${h ? `${T.cyan}55` : T.borderD}`, borderRadius: 12, padding: "16px 16px", cursor: "default", animation: `dbr-fade-up .45s ${i * 0.04}s both`, ...tilt.style }}>
       <div style={{ fontFamily: T.mono, fontSize: 12, color: T.cyan, letterSpacing: "0.06em" }}>
         {c.code} <span style={{ color: T.mutedD }}>: {c.year}</span>
       </div>
@@ -164,14 +176,17 @@ function CodeChip({ c, i }: { c: { code: string; year: string; title: string }; 
   );
 }
 
-function HeroPreview() {
+function HeroPreview({ onPointer }: { onPointer?: (x: number, y: number) => void }) {
   const counts = { FLAW: 3, MISSING: 4, REVIEW: 5, PASS: 11, NOT_APPLICABLE: 2 } as const;
   const [show, setShow] = React.useState(false);
   React.useEffect(() => { const t = setTimeout(() => setShow(true), 300); return () => clearTimeout(t); }, []);
   const total = useCountUp(25, { start: show, duration: 1100 });
+  const tilt = useTilt({ max: 7, lift: 10 });
+  // forward the pointer fraction to the parent for the glow parallax
+  React.useEffect(() => { onPointer?.(tilt.px, tilt.py); }, [tilt.px, tilt.py, onPointer]);
   return (
-    <div style={{ position: "relative", animation: "dbr-fade-up .6s .1s both" }}>
-      <div style={{ background: T.surface, border: `1px solid ${T.borderD}`, borderRadius: 18, boxShadow: "0 40px 90px -40px rgba(0,0,0,0.8)", overflow: "hidden" }}>
+    <div style={{ position: "relative", perspective: 1000, animation: "dbr-fade-up .6s .1s both" }}>
+      <div ref={tilt.ref} {...tilt.handlers} style={{ background: T.surface, border: `1px solid ${T.borderD}`, borderRadius: 18, boxShadow: "0 40px 90px -40px rgba(0,0,0,0.8)", overflow: "hidden", ...tilt.style }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 16px", borderBottom: `1px solid ${T.borderD}`, fontFamily: T.mono, fontSize: 11, color: T.mutedD }}>
           <span style={{ width: 8, height: 8, borderRadius: 9, background: "#E11D48", opacity: 0.6 }} />
           <span style={{ width: 8, height: 8, borderRadius: 9, background: "#E08A00", opacity: 0.6 }} />
@@ -207,8 +222,12 @@ function HeroPreview() {
           </div>
         </div>
       </div>
-      <div style={{ position: "absolute", bottom: 16, right: -14, padding: "6px 12px", background: T.cyan, color: T.navy, borderRadius: 999, fontFamily: T.mono, fontSize: 11, fontWeight: 600, boxShadow: `0 10px 26px -10px ${T.cyan}`, animation: "float 4s ease-in-out infinite" }}>
-        IS 456 · Table 16
+      {/* badge floats above the card on the Z axis (outer = depth, inner = bob,
+          so the float animation's translateY doesn't clobber translateZ) */}
+      <div style={{ position: "absolute", bottom: 16, right: -14, transform: "translateZ(60px)", transformStyle: "preserve-3d", pointerEvents: "none" }}>
+        <div style={{ padding: "6px 12px", background: T.cyan, color: T.navy, borderRadius: 999, fontFamily: T.mono, fontSize: 11, fontWeight: 600, boxShadow: `0 10px 26px -10px ${T.cyan}`, animation: "float 4s ease-in-out infinite" }}>
+          IS 456 · Table 16
+        </div>
       </div>
     </div>
   );
