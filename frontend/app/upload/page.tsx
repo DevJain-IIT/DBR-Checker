@@ -253,9 +253,9 @@ function Processing({ fileName, done }: { fileName: string; done: boolean }) {
 
   return (
     <div style={{ textAlign: "center", paddingTop: 8, animation: "dbr-fade-in .4s both" }}>
-      <div style={{ fontFamily: T.mono, fontSize: 11, color: T.cyanDeep, letterSpacing: "0.18em", marginBottom: 20 }}>STEP 2 · ANALYZING</div>
+      <div style={{ fontFamily: T.mono, fontSize: 11, color: T.cyanDeep, letterSpacing: "0.18em", marginBottom: 8 }}>STEP 2 · ANALYZING</div>
       <ProcessingFrame done={allDone} />
-      <h1 style={{ fontFamily: T.serif, fontSize: 36, margin: "26px 0 6px", fontWeight: 400 }}>
+      <h1 style={{ fontFamily: T.serif, fontSize: 36, margin: "18px 0 6px", fontWeight: 400 }}>
         {allDone ? "Report ready" : `Checking ${fileName}`}
       </h1>
       <p style={{ fontSize: 14.5, color: T.muted, margin: 0 }}>
@@ -324,72 +324,45 @@ function PhaseDot({ state }: { state: "done" | "active" | "wait" }) {
 }
 
 function ProcessingFrame({ done }: { done: boolean }) {
-  const floors = 6;
-  // Fill the building gradually over the expected extraction window (~18s) so
-  // the long wait reads as steady progress; snap to full when actually done.
+  const FLOORS = 8;
+  // Light the building bottom-up over the expected extraction window so the long
+  // wait reads as steady progress; snap to full when actually done.
   const [filled, setFilled] = React.useState(1);
   React.useEffect(() => {
-    if (done) { setFilled(floors); return; }
-    const id = setInterval(() => setFilled((n) => (n < floors ? n + 1 : n)), 3000);
+    if (done) { setFilled(FLOORS); return; }
+    const id = setInterval(() => setFilled((n) => (n < FLOORS ? n + 1 : n)), 2200);
     return () => clearInterval(id);
   }, [done]);
-  const litFloors = done ? floors : filled;
+  const litFloors = done ? FLOORS : filled;
 
-  // A true CSS-3D extruded tower: a preserve-3d stage that slowly auto-rotates
-  // (.dbr-tower), with `floors` stacked extruded boxes that light up bottom-up as
-  // `litFloors` grows — same staggered cadence the old flat SVG used. The 150px
-  // footprint is preserved so the processing layout doesn't jump.
-  const W = 52;   // floor width/depth (px)
-  const H = 16;   // floor height (px)
-  const GAP = 4;  // vertical gap between floors
-  const step = H + GAP;
+  // Isometric "blueprint tower": a perspective stage with a preserve-3d inner that
+  // slowly auto-rotates (.dbr-scene). Stacked horizontal floor plates rise on the
+  // Z axis; a cyan ground grid + glowing core spines + a rising scan plane sweep
+  // through. Plates light up bottom-up (floor 0 is the lowest) as litFloors grows.
+  const floors = Array.from({ length: FLOORS }, (_, i) => ({
+    z: 100 - i * 25,                       // higher index = higher up the tower
+    delay: ((FLOORS - 1 - i) * 0.09).toFixed(2),
+    lit: (FLOORS - i) <= litFloors,        // light from the ground floor upward
+  }));
   return (
-    <div style={{ width: 150, height: 150, margin: "0 auto", position: "relative", perspective: 520, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div className="dbr-tower" style={{ position: "relative", width: W, height: H, transformStyle: "preserve-3d" }}>
-        {Array.from({ length: floors }).map((_, f) => (
-          <Floor key={f} index={f} lit={f < litFloors} w={W} h={H} y={-(f * step)} />
+    <div style={{ perspective: 1100, perspectiveOrigin: "50% 36%", width: 340, height: 300, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="dbr-scene" style={{ position: "relative", width: 160, height: 200, transformStyle: "preserve-3d" }}>
+        {/* ground blueprint plane */}
+        <div style={{ position: "absolute", left: "50%", top: "50%", width: 152, height: 152, marginLeft: -76, marginTop: -76, transform: "rotateX(90deg) translateZ(118px)", backgroundImage: `linear-gradient(${T.cyan}29 1px,transparent 1px),linear-gradient(90deg,${T.cyan}29 1px,transparent 1px)`, backgroundSize: "19px 19px", border: `1px solid ${T.cyan}52`, boxShadow: `0 0 40px 4px ${T.cyan}2e` }} />
+        {/* glowing core spines */}
+        <div style={{ position: "absolute", left: "50%", top: "50%", width: 2, height: 210, marginLeft: -1, marginTop: -105, background: `linear-gradient(${T.cyan}00,${T.cyan}80,${T.cyan}00)`, animation: "dbr-corepulse 2.4s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", left: "50%", top: "50%", width: 2, height: 210, marginLeft: -1, marginTop: -105, transform: "rotateY(90deg)", background: `linear-gradient(${T.cyan}00,${T.cyan}73,${T.cyan}00)`, animation: "dbr-corepulse 2.4s ease-in-out infinite" }} />
+        {/* floor plates */}
+        {floors.map((f, i) => (
+          <div key={i} style={{ position: "absolute", left: "50%", top: "50%", width: 120, height: 120, marginLeft: -60, marginTop: -60, transform: `rotateX(90deg) translateZ(${f.z}px)`, transformStyle: "preserve-3d" }}>
+            <div style={{ position: "absolute", inset: 0, border: `1.4px solid ${f.lit ? T.cyan : T.cyan + "33"}`, background: f.lit ? `${T.cyan}10` : `${T.cyan}03`, boxShadow: f.lit ? `0 0 14px -2px ${T.cyan}8c,inset 0 0 16px -6px ${T.cyan}99` : "none", animation: `dbr-floorpop .6s ${f.delay}s both`, transition: `all .5s ${T.spring}` }} />
+          </div>
         ))}
+        {/* rising scan plane */}
+        <div style={{ position: "absolute", left: "50%", top: "50%", width: 134, height: 134, marginLeft: -67, marginTop: -67, transform: "rotateX(90deg)", transformStyle: "preserve-3d" }}>
+          <div style={{ position: "absolute", inset: 0, border: "2px solid #67E8F9", background: "rgba(103,232,249,0.14)", boxShadow: `0 0 30px 3px ${T.cyan}b3`, animation: "dbr-scanrise 3.2s ease-in-out infinite" }} />
+        </div>
       </div>
-    </div>
-  );
-}
-
-// One extruded floor of the tower: four side faces + a top cap, positioned up
-// the Y axis and lit (cyan) once the floor is reached.
-function Floor({ index, lit, w, h, y }: { index: number; lit: boolean; w: number; h: number; y: number }) {
-  const half = w / 2;
-  const litFill = `${T.cyan}22`;
-  const face: React.CSSProperties = {
-    position: "absolute", left: 0, top: 0, width: w, height: h,
-    background: lit ? litFill : "transparent",
-    border: `1px solid ${lit ? T.cyan : T.border}`,
-    boxShadow: lit ? `0 0 14px -4px ${T.cyan}` : "none",
-    backfaceVisibility: "hidden",
-    transition: `all .4s ${T.spring} ${index * 0.04}s`,
-  };
-  return (
-    <div style={{
-      position: "absolute", left: 0, top: 0, width: w, height: h,
-      transformStyle: "preserve-3d",
-      transform: `translateY(${y}px) translateY(${lit ? 0 : 3}px)`,
-      opacity: lit ? 1 : 0.55,
-      transition: `all .4s ${T.spring} ${index * 0.04}s`,
-    }}>
-      {/* front / back */}
-      <div style={{ ...face, transform: `translateZ(${half}px)` }} />
-      <div style={{ ...face, transform: `translateZ(${-half}px) rotateY(180deg)` }} />
-      {/* left / right */}
-      <div style={{ ...face, transform: `translateX(${-half}px) rotateY(-90deg)` }} />
-      <div style={{ ...face, transform: `translateX(${half}px) rotateY(90deg)` }} />
-      {/* top cap */}
-      <div style={{
-        position: "absolute", left: 0, top: 0, width: w, height: w,
-        background: lit ? `${T.cyan}33` : "transparent",
-        border: `1px solid ${lit ? T.cyan : T.border}`,
-        backfaceVisibility: "hidden",
-        transform: `rotateX(90deg) translateZ(${h / 2}px) translateY(${-(w - h) / 2}px)`,
-        transition: `all .4s ${T.spring} ${index * 0.04}s`,
-      }} />
     </div>
   );
 }

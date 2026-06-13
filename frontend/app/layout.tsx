@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { RouteTransition } from "@/components/RouteTransition";
 
 export const metadata: Metadata = {
   title: "DBR Check — Validate a Design Basis Report against IS codes",
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ fontFamily: "Inter, system-ui, sans-serif" }}>{children}</body>
+      <body style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+        <RouteTransition>{children}</RouteTransition>
+      </body>
     </html>
   );
 }

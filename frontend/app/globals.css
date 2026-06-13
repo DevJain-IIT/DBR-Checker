@@ -58,15 +58,18 @@ body {
 
 /* ---- CSS-3D for the landing + upload pages only (additive; not used by the
    report page). Distinct names so they never collide with the keyframes above. */
-@keyframes dbr-spin3d {
-  from { transform: rotateX(-18deg) rotateY(0deg); }
-  to   { transform: rotateX(-18deg) rotateY(360deg); }
-}
-.dbr-tower {
-  transform-style: preserve-3d;
-  animation: dbr-spin3d 16s linear infinite;
-}
-/* Reduced motion: stop the spin, hold a pleasant static 3/4 angle. */
+
+/* Isometric processing scene (upload analyzing screen). */
+@keyframes dbr-scenerot { from { transform: rotateX(-18deg) rotateY(-28deg); } to { transform: rotateX(-18deg) rotateY(332deg); } }
+@keyframes dbr-floorpop { 0% { opacity: 0; transform: translateY(-22px) scale(.55); } 60% { opacity: 1; } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes dbr-scanrise { 0% { transform: translateZ(96px); opacity: 0; } 14% { opacity: 1; } 86% { opacity: .8; } 100% { transform: translateZ(-96px); opacity: 0; } }
+@keyframes dbr-corepulse { 0%, 100% { opacity: .35; } 50% { opacity: .7; } }
+.dbr-scene { transform-style: preserve-3d; animation: dbr-scenerot 30s linear infinite; }
+
+/* Route-transition wipe (cyan curtain between pages). */
+@keyframes dbr-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+
+/* Reduced motion: hold the scene at a static 3/4 angle, no spin/scan. */
 @media (prefers-reduced-motion: reduce) {
-  .dbr-tower { animation: none !important; transform: rotateX(-18deg) rotateY(-24deg); }
+  .dbr-scene { animation: none !important; transform: rotateX(-18deg) rotateY(-24deg); }
 }
