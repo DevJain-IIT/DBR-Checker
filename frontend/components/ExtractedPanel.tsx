@@ -3,42 +3,8 @@
 import React from "react";
 import type { DBRData } from "@/lib/types";
 import { Icon, T, VERDICTS } from "@/lib/design";
-
-// Editable field definition: a path into the DBRData (dot for profile.*),
-// a label, an optional unit, and how to coerce the edited string back.
-interface FieldDef {
-  path: string;
-  label: string;
-  unit?: string;
-  type: "string" | "number";
-}
-
-const FIELDS: FieldDef[] = [
-  { path: "profile.material", label: "Material", type: "string" },
-  { path: "profile.structural_system", label: "System", type: "string" },
-  { path: "profile.height_m", label: "Height", unit: "m", type: "number" },
-  { path: "profile.num_storeys", label: "Storeys", type: "number" },
-  { path: "profile.occupancy", label: "Occupancy", type: "string" },
-  { path: "profile.seismic_zone", label: "Seismic zone", type: "string" },
-  { path: "profile.basic_wind_speed", label: "Wind speed Vb", unit: "m/s", type: "number" },
-  { path: "profile.soil_type", label: "Soil type", type: "string" },
-  { path: "profile.foundation_type", label: "Foundation", type: "string" },
-  { path: "rebar_grade", label: "Rebar grade", type: "string" },
-  { path: "cement_type", label: "Cement", type: "string" },
-  { path: "exposure_condition", label: "Exposure", type: "string" },
-  { path: "zone_factor_Z", label: "Zone factor Z", type: "number" },
-  { path: "importance_factor_I", label: "Importance I", type: "number" },
-  { path: "response_reduction_R", label: "Reduction R", type: "number" },
-  { path: "fundamental_period_s", label: "Period T", unit: "s", type: "number" },
-  { path: "seismic_weight_LL_pct", label: "Seismic LL", unit: "%", type: "number" },
-  { path: "drift_ratio", label: "Drift ratio", type: "number" },
-  { path: "stability_coeff_theta", label: "Stability θ", type: "number" },
-  { path: "foundation_depth_m", label: "Foundation depth", unit: "m", type: "number" },
-  { path: "fos_overturning", label: "FoS overturn", type: "number" },
-  { path: "fos_sliding", label: "FoS sliding", type: "number" },
-  { path: "settlement_mm", label: "Settlement", unit: "mm", type: "number" },
-  { path: "software_used", label: "Software", type: "string" },
-];
+import { FIELD_CONTROLS, type FieldControl } from "@/lib/fieldControls";
+import { OPTIONS, STEPS } from "@/lib/fieldOptions";
 
 // Exported so the guided-fix controls (FixControl/FlawCard) reuse the exact
 // same immutable path get/set logic.
@@ -103,8 +69,8 @@ export function ExtractedPanel({ data, onChange, onRerun, rerunning, dirty }: {
               </div>
             </div>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-            {FIELDS.map((f) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+            {FIELD_CONTROLS.map((f) => (
               <FieldCell key={f.path} def={f} value={getPath(data, f.path)} onSet={(v) => onChange(setPath(data, f.path, v))} />
             ))}
           </div>
@@ -114,43 +80,73 @@ export function ExtractedPanel({ data, onChange, onRerun, rerunning, dirty }: {
   );
 }
 
-function FieldCell({ def, value, onSet }: { def: FieldDef; value: unknown; onSet: (v: unknown) => void }) {
-  const [editing, setEditing] = React.useState(false);
-  const [hover, setHover] = React.useState(false);
+function FieldCell({ def, value, onSet }: { def: FieldControl; value: unknown; onSet: (v: unknown) => void }) {
   const missing = value === null || value === undefined || value === "";
-  const display = missing ? "—" : String(value);
-
-  const commit = (raw: string) => {
-    if (raw.trim() === "" || raw.trim() === "—") { onSet(null); return; }
-    if (def.type === "number") {
-      const n = parseFloat(raw);
-      onSet(Number.isNaN(n) ? null : n);
-    } else {
-      onSet(raw);
-    }
-  };
+  const border = missing ? VERDICTS.MISSING.line : T.border;
 
   return (
-    <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ background: T.sand, border: `1px solid ${editing ? T.cyan : missing ? VERDICTS.MISSING.line : T.border}`, borderRadius: 10, padding: "11px 13px", position: "relative", transition: "border-color .18s" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontFamily: T.mono, fontSize: 9.5, color: T.subtle, letterSpacing: "0.06em" }}>{def.label.toUpperCase()}</span>
-        {missing && <span title="not stated" style={{ width: 6, height: 6, borderRadius: 9, background: VERDICTS.MISSING.solid }} />}
+    <div style={{ background: T.panel, border: `1px solid ${border}`, borderRadius: 11, padding: "10px 12px 11px", position: "relative", transition: "border-color .18s" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 7 }}>
+        <span style={{ fontFamily: T.mono, fontSize: 9.5, color: T.subtle, letterSpacing: "0.07em" }}>
+          {def.label.toUpperCase()}{def.unit ? ` (${def.unit})` : ""}
+        </span>
+        {missing && <span title="not stated" style={{ width: 6, height: 6, borderRadius: 9, background: VERDICTS.MISSING.solid, flexShrink: 0 }} />}
       </div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginTop: 7 }}>
-        {editing ? (
-          <input autoFocus defaultValue={missing ? "" : String(value)}
-            onBlur={(e) => { commit(e.target.value); setEditing(false); }}
-            onKeyDown={(e) => { if (e.key === "Enter") { commit((e.target as HTMLInputElement).value); setEditing(false); } if (e.key === "Escape") setEditing(false); }}
-            style={{ width: "100%", fontFamily: T.mono, fontSize: 15, fontWeight: 600, color: T.ink, background: T.panel, border: `1px solid ${T.cyan}`, borderRadius: 6, padding: "2px 6px", outline: "none" }} />
-        ) : (
-          <button onClick={() => setEditing(true)} style={{ display: "inline-flex", alignItems: "baseline", gap: 5, background: "transparent", border: "none", padding: 0, cursor: "text", fontFamily: T.mono, fontSize: 16, fontWeight: 600, color: missing ? T.subtle : T.ink, fontVariantNumeric: "tabular-nums" }}>
-            {display}
-            {def.unit && !missing && <span style={{ fontSize: 11, fontWeight: 400, color: T.muted }}>{def.unit}</span>}
-            <span style={{ marginLeft: 4, opacity: hover ? 1 : 0, transition: "opacity .15s" }}><Icon.Pencil size={12} color={T.cyanDeep} /></span>
-          </button>
-        )}
-      </div>
+
+      {def.kind === "dropdown" ? (
+        <DropdownInput def={def} value={value} onSet={onSet} missing={missing} />
+      ) : def.kind === "number" ? (
+        <NumberInput def={def} value={value} onSet={onSet} missing={missing} />
+      ) : (
+        <TextInput value={value} onSet={onSet} missing={missing} />
+      )}
     </div>
+  );
+}
+
+const fieldBase: React.CSSProperties = {
+  width: "100%", boxSizing: "border-box", border: `1px solid ${T.border}`, borderRadius: 8,
+  background: T.sand, padding: "8px 10px", fontFamily: T.mono, fontSize: 14, fontWeight: 600,
+  color: T.ink, outline: "none",
+};
+
+function DropdownInput({ def, value, onSet, missing }: { def: FieldControl; value: unknown; onSet: (v: unknown) => void; missing: boolean }) {
+  const opts = OPTIONS[def.optionsKey || ""] || [];
+  const cur = missing ? "" : String(value);
+  return (
+    <select value={cur} onChange={(e) => {
+      const o = opts.find((x) => String(x.value) === e.target.value);
+      onSet(o ? o.value : null);
+    }} style={{ ...fieldBase, fontFamily: T.sans, cursor: "pointer", color: missing ? T.subtle : T.ink }}>
+      <option value="">— not stated —</option>
+      {opts.map((o) => <option key={String(o.value)} value={String(o.value)}>{o.label}</option>)}
+    </select>
+  );
+}
+
+function NumberInput({ def, value, onSet, missing }: { def: FieldControl; value: unknown; onSet: (v: unknown) => void; missing: boolean }) {
+  const step = def.stepKey ? STEPS[def.stepKey] : undefined;
+  const commit = (raw: string) => {
+    if (raw.trim() === "") { onSet(null); return; }
+    let n = parseFloat(raw);
+    if (Number.isNaN(n)) { onSet(null); return; }
+    if (step) n = Math.min(step.max, Math.max(step.min, n));
+    onSet(n);
+  };
+  return (
+    <input type="number" inputMode="decimal" defaultValue={missing ? "" : String(value)} placeholder="—"
+      step={step?.step} min={step?.min} max={step?.max}
+      onBlur={(e) => commit(e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      style={fieldBase} />
+  );
+}
+
+function TextInput({ value, onSet, missing }: { value: unknown; onSet: (v: unknown) => void; missing: boolean }) {
+  return (
+    <input defaultValue={missing ? "" : String(value)} placeholder="—"
+      onBlur={(e) => onSet(e.target.value.trim() === "" ? null : e.target.value)}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      style={{ ...fieldBase, fontFamily: T.sans }} />
   );
 }

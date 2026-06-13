@@ -2,9 +2,9 @@
 
 import React from "react";
 import type { DBRData, Finding } from "@/lib/types";
-import { fmtValue } from "@/lib/format";
-import { Icon, T, VERDICTS, VIcon } from "@/lib/design";
+import { T, VERDICTS, VIcon } from "@/lib/design";
 import { CHECK_INPUTS } from "@/lib/checkInputs";
+import { flawMessage } from "@/lib/flawMessages";
 import { FixControl } from "@/components/FixControl";
 
 /**
@@ -57,12 +57,21 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
             <span style={{ fontSize: 14.5, fontWeight: 600, color: T.ink }}>{finding.title}</span>
             <span style={{ fontFamily: T.mono, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: green ? VERDICTS.PASS.fg : tone.fg, background: green ? VERDICTS.PASS.bg : tone.bg, border: `1px solid ${green ? VERDICTS.PASS.line : tone.line}`, borderRadius: 5, padding: "2px 7px", animation: green ? `dbr-badge-pop .42s ${T.spring} both` : "none" }}>{statusLabel}</span>
           </div>
-          <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{finding.summary}</div>
-          {(finding.expected != null || finding.found != null) && !green && (
-            <div style={{ display: "flex", gap: 14, marginTop: 8, fontFamily: T.mono, fontSize: 12 }}>
-              {finding.expected != null && <span style={{ color: T.muted }}>expected <span style={{ color: T.ink }}>{fmtValue(finding.expected)}</span></span>}
-              {finding.found != null && <span style={{ color: tone.fg }}>found <span style={{ color: tone.fg }}>{fmtValue(finding.found)}</span></span>}
+          <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{green ? finding.summary : flawMessage(finding)}</div>
+          {green ? (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12.5, fontWeight: 600, color: VERDICTS.PASS.fg }}>
+              <VIcon name="check" size={14} color={VERDICTS.PASS.solid} />
+              You&rsquo;ve entered the right value.
             </div>
+          ) : (
+            (finding.expected != null || finding.found != null) && (
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 7, marginTop: 8, fontSize: 12.5, color: T.muted }}>
+                This value needs a correction.
+                <button onClick={onShowMore} className="no-print" style={{ fontFamily: T.sans, fontSize: 12.5, fontWeight: 600, color: T.cyanDeep, background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
+                  See what the code requires →
+                </button>
+              </div>
+            )
           )}
         </div>
         <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>

@@ -36,7 +36,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ['"DM Serif Display"', "Georgia", "serif"],
+        serif: ['"Playfair Display"', "Georgia", "serif"],
         sans: ["Inter", "-apple-system", "system-ui", "sans-serif"],
         mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
       },

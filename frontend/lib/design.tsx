@@ -11,7 +11,7 @@ export const T = {
   paper: "#FAF7F2", panel: "#FFFFFF", sand: "#F4EFE4", border: "#E8E4DC",
   ink: "#0A1628", muted: "#6B6860", subtle: "#94908A",
   cyan: "#22D3EE", cyanDeep: "#0E7490", indigo: "#6366F1",
-  serif: '"DM Serif Display", Georgia, serif',
+  serif: '"Playfair Display", Georgia, serif',
   sans: "Inter, -apple-system, system-ui, sans-serif",
   mono: '"JetBrains Mono", ui-monospace, monospace',
   spring: "cubic-bezier(.34,1.56,.64,1)",
