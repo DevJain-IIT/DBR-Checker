@@ -74,7 +74,7 @@ export default function ReportPage() {
   const onGuidedChange = (next: DBRData, checkId?: string) => { setEdited(next); setDirty(true); if (checkId) setRechckingId(checkId); scheduleRecheck(next); };
 
   const onGenerate = () => {
-    alert("Generate DBR — branded document generation is coming soon (Phase 1).");
+    window.open(`/report/${id}/dbr`, "_blank");
   };
 
   // Manual re-run (ExtractedPanel button, full view).

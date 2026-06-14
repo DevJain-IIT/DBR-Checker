@@ -23,3 +23,10 @@ backend/data/*.bak
 
 # Duplicate raw geojson drop
 New folder/
+
+# Local working artifacts (sample DBRs, design mockups, backups) — never commit
+*.zip
+*.dc.html
+design 2.0/
+NRGGIE-*.pdf
+*-signed.pdf

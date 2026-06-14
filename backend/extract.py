@@ -63,8 +63,14 @@ Schema (field names are exact):
   "load_combinations": ["..."],
   "foundation_depth_m": <num>, "fos_overturning": <num>, "fos_sliding": <num>, "settlement_mm": <num>,
   "cited_codes": [ { "code":"IS 456", "year":"2000" } ],
-  "software_used": "...", "title_block": { "project","document_no","revision","date" },
-  "_provenance": { "<field.path>": { "page": <int>, "snippet": "..." } }
+  "software_used": "...", "title_block": { "project","document_no","revision","date",
+       "location": "...", "client": "...", "consultant": "...",
+       "signoff": [ { "role": "Prepared by", "name": "...", "designation": "..." } ],
+       "revisions": [ { "rev": "R0", "date": "...", "chapter": "...", "details": "..." } ] },
+  "_provenance": { "<field.path>": { "page": <int>, "snippet": "..." } },
+  "document": { "sections": [ { "heading": "...", "order": <int>, "page": <int>,
+                "prose": "...", "tables": [ { "caption": "...", "headers": ["..."], "rows": [["..."]] } ],
+                "values": { "<label>": "<value as stated>" } } ] }
 }
 
 Normalization rules:
@@ -73,7 +79,28 @@ Normalization rules:
   dual->wall_moment_frame; tube/tube-in-tube/outrigger->wall_framed_tube).
 - seismic_zone as roman numerals II/III/IV/V. material as RC/steel/composite/masonry.
 - occupancy as NBC group letter A-J. grades as plain MPa numbers (M30->30).
-- Keep cited_codes exactly as written (so currency checking can flag old/withdrawn editions)."""
+- Keep cited_codes exactly as written (so currency checking can flag old/withdrawn editions).
+
+title_block cover data (from the FIRST page / title sheet): capture `location` (site/address),
+`client` (owner/developer name), `consultant` (the design firm), the `signoff` list (each
+Prepared by / Checked by / Approved by row with name + designation), and the full `revisions`
+history table (each row: rev no., date, revised chapter/clause, details). Use null/empty if absent.
+
+"document" capture (the full DBR content, used to regenerate the DBR — separate from the structured
+fields above which drive the code checks):
+- This is a TRANSCRIPTION task, not a writing task. You are a copier, not an author.
+- List EVERY section/heading of the DBR in the order it appears, with `order` starting at 1. Put the
+  heading text EXACTLY as written in `heading`.
+- For each section, copy its body text into `prose` VERBATIM — character for character, exactly as it
+  appears in the document. Preserve line breaks between list items / numbered points (use \\n).
+- DO NOT paraphrase, summarise, condense, reword, correct, complete, or "improve" anything. Do not
+  merge or split sentences. Do not fix spelling. If you cannot reproduce a passage exactly, leave it
+  out rather than approximating it — an empty section is acceptable; an invented or reworded one is NOT.
+- Copy tables into `tables` exactly (headers + rows of strings, as written) and any stated
+  label:value pairs into `values` exactly as written.
+- `page` is the 1-based page where the section starts.
+- NEVER invent sections, prose, tables, or values that are not literally present in the document.
+  Every word you put in `document` must be copied from the source. When in doubt, omit."""
 
 
 class ExtractionError(RuntimeError):
@@ -190,9 +217,9 @@ async def extract_dbr(pdf_bytes: bytes, filename: str = "dbr.pdf") -> dict:
         # Fixed seed -> deterministic extraction: the same PDF yields the same
         # JSON every run (reproducible reports, easier debugging).
         "seed": int(os.getenv("EXTRACT_SEED", "42")),
-        # Generous output budget so large DBRs (many elements/grades) never get
-        # truncated. Override via env if needed.
-        "max_tokens": int(os.getenv("EXTRACT_MAX_TOKENS", "16000")),
+        # Generous output budget so large DBRs (many elements/grades) + the full
+        # "document" section capture never get truncated. Override via env if needed.
+        "max_tokens": int(os.getenv("EXTRACT_MAX_TOKENS", "24000")),
     }
     if use_pdf:  # scanned path: let the OCR engine read the attached PDF
         payload["plugins"] = [{"id": "file-parser", "pdf": {"engine": OCR_ENGINE}}]

@@ -50,6 +50,22 @@ export interface DBRData {
   software_used: string | null;
   title_block: Record<string, string>;
   _provenance?: Record<string, unknown>;
+  document?: DbrDocument;
+}
+
+// Full-content capture of the original DBR (every section, in document order),
+// used by the DBR generator. Populated at extraction for new uploads only.
+export interface DbrSection {
+  heading: string | null;
+  order: number;
+  page: number | null;
+  prose: string | null;
+  tables: { caption?: string | null; headers?: string[]; rows?: string[][] }[];
+  values: Record<string, string>;
+}
+
+export interface DbrDocument {
+  sections: DbrSection[];
 }
 
 export interface Citation {

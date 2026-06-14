@@ -82,6 +82,45 @@ def _normalize_provenance(prov) -> dict:
             out[str(key)] = page
     return out
 
+
+_MAX_SECTIONS = 80
+_MAX_PROSE_CHARS = 12000  # verbatim transcription can be long; don't truncate real content
+
+
+def _sanitize_document(doc) -> dict | None:
+    """Coerce the LLM's full-content "document" capture into a safe, bounded
+    {sections: [...]} shape for storage + the DBR generator. Drops junk, caps
+    section count and prose length so a huge DBR can't bloat the stored row."""
+    if not isinstance(doc, dict):
+        return None
+    raw_sections = doc.get("sections")
+    if not isinstance(raw_sections, list):
+        return None
+    sections = []
+    for i, s in enumerate(raw_sections[:_MAX_SECTIONS]):
+        if not isinstance(s, dict):
+            continue
+        heading = s.get("heading")
+        prose = s.get("prose")
+        tables = s.get("tables") if isinstance(s.get("tables"), list) else []
+        values = s.get("values") if isinstance(s.get("values"), dict) else {}
+        # keep only sections that carry something
+        if not (heading or prose or tables or values):
+            continue
+        order = s.get("order")
+        page = s.get("page")
+        sections.append({
+            "heading": (str(heading)[:200] if heading else None),
+            "order": (int(order) if isinstance(order, (int, float)) else i + 1),
+            "page": (int(page) if isinstance(page, (int, float)) and page > 0 else None),
+            "prose": (str(prose)[:_MAX_PROSE_CHARS] if prose else None),
+            "tables": tables[:20],
+            "values": values,
+        })
+    if not sections:
+        return None
+    return {"sections": sections}
+
 CORPUS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus")
 
 app = FastAPI(title="DBR Compliance Checker", version="0.4.1")
@@ -257,11 +296,14 @@ async def analyze(file: UploadFile = File(...),
     pdf_kind = raw.pop("_pdf_kind", None)
     raw.pop("_used_markdown", None)
     provenance = _normalize_provenance(raw.get("_provenance"))
+    document = _sanitize_document(raw.get("document"))
     try:
         dbr = build_dbr(raw)
         extracted = dbr_to_dict(dbr)
         if provenance:
             extracted["_provenance"] = provenance
+        if document:
+            extracted["document"] = document
         rep = _run_and_enrich(dbr)
     except Exception as e:
         raise HTTPException(422, f"Could not interpret the extracted data: {e}")
@@ -300,6 +342,11 @@ def check(req: CheckRequest, db: Session = Depends(get_session)) -> dict:
         provenance = _normalize_provenance(req.extracted.get("_provenance"))
         if provenance:
             extracted["_provenance"] = provenance
+        # carry the full-content "document" capture through a recheck too, so the
+        # DBR generator still has the original sections after edits.
+        document = _sanitize_document(req.extracted.get("document"))
+        if document:
+            extracted["document"] = document
         rep = _run_and_enrich(dbr)
     except Exception as e:
         raise HTTPException(422, f"Could not interpret the edited data: {e}")
