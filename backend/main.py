@@ -125,13 +125,16 @@ CORPUS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "corpus")
 
 app = FastAPI(title="DBR Compliance Checker", version="0.4.1")
 
-# CORS — allow the Vercel frontend (comma-separated origins) + localhost dev.
+# CORS — allow the Vercel frontend + the civilspace.ai custom domain (the app is
+# served from dbr.civilspace.ai) + any explicit CORS_ORIGINS + localhost dev.
+# The regex matches the apex and any subdomain of vercel.app / civilspace.ai over
+# https, e.g. dbr.civilspace.ai, www.civilspace.ai, *.vercel.app preview URLs.
 _origins = [o.strip() for o in os.getenv(
     "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https://([a-z0-9-]+\.)*(vercel\.app|civilspace\.ai)$",
     allow_methods=["*"],
     allow_headers=["*"],
 )
