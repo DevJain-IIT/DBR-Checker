@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import React from "react";
 import {
@@ -21,8 +20,6 @@ const CODES = [
 ];
 
 export default function LandingPage() {
-  const router = useRouter();
-  const onStart = () => router.push("/upload");
   // The hero card reports the pointer fraction; we drift the corner glow off it
   // for a subtle parallax. Resets to center when the pointer leaves the card.
   const [glow, setGlow] = React.useState({ x: 0, y: 0 });
@@ -40,7 +37,7 @@ export default function LandingPage() {
             <a href="#how" style={{ color: T.mutedD, textDecoration: "none" }}>How it works</a>
             <a href="#codes" style={{ color: T.mutedD, textDecoration: "none" }}>Codes covered</a>
             <Link href="/history" style={{ color: T.mutedD, textDecoration: "none" }}>History</Link>
-            <button onClick={onStart} style={ctaPill}>Upload a DBR</button>
+            <Link href="/upload" style={ctaPill}>Upload a DBR</Link>
           </nav>
         </header>
 
@@ -58,9 +55,9 @@ export default function LandingPage() {
               Upload a DBR. We extract the building basis, run the code checks, and return a findings report — each verdict backed by the exact IS clause, table and page.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 36 }}>
-              <button onClick={onStart} style={ctaBig}>
+              <Link href="/upload" style={ctaBig}>
                 <Icon.Upload size={18} color={T.navy} /> Upload a DBR
-              </button>
+              </Link>
               <span style={{ fontFamily: T.mono, fontSize: 12, color: T.mutedD }}>PDF · ~few&nbsp;s · private</span>
             </div>
           </div>
@@ -98,9 +95,9 @@ export default function LandingPage() {
                 A reviewer-ready report in the time it takes to make chai. Try it on a sample DBR.
               </p>
             </div>
-            <button onClick={onStart} style={ctaBig}>
+            <Link href="/upload" style={ctaBig}>
               Upload a DBR <Icon.Arrow size={17} color={T.navy} />
-            </button>
+            </Link>
           </div>
         </section>
 
@@ -117,13 +114,16 @@ export default function LandingPage() {
   );
 }
 
+// NOTE: these are used on <Link> (real <a href="/upload">) so the Upload CTAs work
+// on plain click even before/without JS hydration — never a dead <button onClick>.
 const ctaPill: React.CSSProperties = {
+  display: "inline-flex", alignItems: "center", textDecoration: "none",
   padding: "9px 18px", borderRadius: 999, background: T.cyan, color: T.navy,
   fontWeight: 600, fontSize: 13.5, border: "none", cursor: "pointer", fontFamily: T.sans,
   boxShadow: `0 0 0 1px ${T.cyan}66, 0 10px 24px -10px ${T.cyan}`,
 };
 const ctaBig: React.CSSProperties = {
-  display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 26px",
+  display: "inline-flex", alignItems: "center", gap: 10, padding: "15px 26px", textDecoration: "none",
   borderRadius: 12, background: T.cyan, color: T.navy, fontWeight: 600, fontSize: 15.5,
   border: "none", cursor: "pointer", fontFamily: T.sans, boxShadow: `0 14px 34px -14px ${T.cyan}`,
 };
