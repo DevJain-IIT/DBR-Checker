@@ -37,7 +37,7 @@ export default function LandingPage() {
             <a href="#how" style={{ color: T.mutedD, textDecoration: "none" }}>How it works</a>
             <a href="#codes" style={{ color: T.mutedD, textDecoration: "none" }}>Codes covered</a>
             <Link href="/history" style={{ color: T.mutedD, textDecoration: "none" }}>History</Link>
-            <Link href="/upload" style={ctaPill}>Upload a DBR</Link>
+            <a href="/upload" style={ctaPill}>Upload a DBR</a>
           </nav>
         </header>
 
@@ -55,9 +55,9 @@ export default function LandingPage() {
               Upload a DBR. We extract the building basis, run the code checks, and return a findings report — each verdict backed by the exact IS clause, table and page.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 36 }}>
-              <Link href="/upload" style={ctaBig}>
+              <a href="/upload" style={ctaBig}>
                 <Icon.Upload size={18} color={T.navy} /> Upload a DBR
-              </Link>
+              </a>
               <span style={{ fontFamily: T.mono, fontSize: 12, color: T.mutedD }}>PDF · ~few&nbsp;s · private</span>
             </div>
           </div>
@@ -95,9 +95,9 @@ export default function LandingPage() {
                 A reviewer-ready report in the time it takes to make chai. Try it on a sample DBR.
               </p>
             </div>
-            <Link href="/upload" style={ctaBig}>
+            <a href="/upload" style={ctaBig}>
               Upload a DBR <Icon.Arrow size={17} color={T.navy} />
-            </Link>
+            </a>
           </div>
         </section>
 
