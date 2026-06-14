@@ -59,6 +59,12 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
   React.useEffect(() => { setDraft(working); }, [working]);
   const dirty = draft !== working;
 
+  // Tracks whether the engineer has committed at least one Update for this check.
+  // If they have, and the recheck still returns FLAW/MISSING, we tell them clearly
+  // that the value they entered is still non-compliant (vs. the first-time prompt).
+  const [attempted, setAttempted] = React.useState(false);
+  const commitUpdate = () => { setAttempted(true); onChange(draft, finding.check_id); };
+
   const showControls = !green && !flagged;
   const isD14 = finding.check_id === "D14";
   const isD25 = finding.check_id === "D25";
@@ -102,6 +108,21 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12.5, fontWeight: 600, color: VERDICTS.REVIEW.fg }}>
               <VIcon name="alert" size={14} color={VERDICTS.REVIEW.solid} />
               This value is not in compliance with the IS code — it will be flagged in your DBR.
+            </div>
+          ) : attempted && !dirty && !rechecking ? (
+            // The engineer updated the value but it's STILL non-compliant — make
+            // that explicit, and point them to Update again or Ignore.
+            <div style={{ marginTop: 8, fontSize: 12.5 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 600, color: VERDICTS.FLAW.fg }}>
+                <VIcon name="alert" size={14} color={VERDICTS.FLAW.solid} />
+                The value you entered is still not in compliance with the IS code.
+              </div>
+              <div style={{ color: T.muted, marginTop: 3 }}>
+                Update it to a compliant value below, or use Ignore to keep it (it will be flagged in your DBR).{" "}
+                <button onClick={onShowMore} className="no-print" style={{ fontFamily: T.sans, fontSize: 12.5, fontWeight: 600, color: T.cyanDeep, background: "transparent", border: "none", padding: 0, cursor: "pointer" }}>
+                  See what the code requires →
+                </button>
+              </div>
             </div>
           ) : (
             (finding.expected != null || finding.found != null) && (
@@ -148,7 +169,7 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
             ))}
             <ConstructionTypePicker value={extras.extras.constructionType} onSet={extras.setConstructionType} />
           </div>
-          <UpdateRow dirty={dirty} rechecking={rechecking} onUpdate={() => onChange(draft, finding.check_id)} />
+          <UpdateRow dirty={dirty} rechecking={rechecking} onUpdate={commitUpdate} />
         </div>
       )}
 
@@ -161,7 +182,7 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
               <FixControl key={def.path} def={def} working={draft} onChange={setDraft} />
             ))}
           </div>
-          <UpdateRow dirty={dirty} rechecking={rechecking} onUpdate={() => onChange(draft, finding.check_id)} />
+          <UpdateRow dirty={dirty} rechecking={rechecking} onUpdate={commitUpdate} />
         </div>
       )}
 
