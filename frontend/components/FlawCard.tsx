@@ -96,7 +96,7 @@ export function FlawCard({ finding, index, working, onChange, ignored, onToggleI
           {green ? (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12.5, fontWeight: 600, color: VERDICTS.PASS.fg }}>
               <VIcon name="check" size={14} color={VERDICTS.PASS.solid} />
-              {combosAdded ? "The standard combinations will be added to your DBR." : "You’ve entered the right value."}
+              {combosAdded ? "The standard combinations will be added to your DBR." : "The value is code compliant."}
             </div>
           ) : flagged ? (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8, fontSize: 12.5, fontWeight: 600, color: VERDICTS.REVIEW.fg }}>
